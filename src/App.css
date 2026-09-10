@@ -196,6 +196,28 @@ h3 { font-size: clamp(20px, 2.2vw, 30px); letter-spacing: -0.01em; margin: 6px 0
   pointer-events: none;
   border-radius: 50%;
 }
+.ripple-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  border: 1px solid rgba(160, 200, 255, 0.7);
+  animation: ripple-out 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+@keyframes ripple-out {
+  from { opacity: 0.8; scale: 0.4; }
+  to { opacity: 0; scale: 5; }
+}
 .cursor-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #fff; }
 .cursor-ring {
   width: 34px;
@@ -216,6 +238,16 @@ h3 { font-size: clamp(20px, 2.2vw, 30px); letter-spacing: -0.01em; margin: 6px 0
 @media (max-width: 900px) {
   .xvn-nav nav { display: none; }
   .pats { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 520px) {
+  .xvn-nav { padding: 12px 14px; }
+  .xvn-logo { letter-spacing: 0.22em; font-size: 14px; }
+  .sys { font-size: 9px; letter-spacing: 0.12em; }
+  h1 { font-size: 42px; }
+  .cta-row { flex-direction: column; align-items: stretch; }
+  .cta-row .btn { justify-content: center; }
+  .xvn-hero { padding-top: 16vh; }
+  .pats { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sys i { animation: none; }

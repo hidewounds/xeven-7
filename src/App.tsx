@@ -56,6 +56,9 @@ function Cursor() {  const dot = useRef<HTMLDivElement>(null!)
     let rx = -100
     let ry = -100
     let raf = 0
+    const layer = document.createElement('div')
+    layer.className = 'ripple-layer'
+    document.body.appendChild(layer)
     const move = (e: PointerEvent) => {
       x = e.clientX
       y = e.clientY
@@ -71,11 +74,22 @@ function Cursor() {  const dot = useRef<HTMLDivElement>(null!)
       if (ring.current) ring.current.style.transform = `translate(${rx}px,${ry}px)`
       raf = requestAnimationFrame(loop)
     }
+    const down = (e: PointerEvent) => {
+      const s = document.createElement('span')
+      s.className = 'ripple'
+      s.style.transform = `translate(${e.clientX}px,${e.clientY}px)`
+      layer.appendChild(s)
+      s.addEventListener('animationend', () => s.remove(), { once: true })
+      setTimeout(() => s.remove(), 900)
+    }
     window.addEventListener('pointermove', move)
+    window.addEventListener('pointerdown', down)
     raf = requestAnimationFrame(loop)
     return () => {
       window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerdown', down)
       cancelAnimationFrame(raf)
+      layer.remove()
     }
   }, [])
   return (
