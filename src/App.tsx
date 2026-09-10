@@ -139,12 +139,14 @@ export default function App() {
       gsap.utils.toArray<HTMLElement>('.fade').forEach((el) => {
         gsap.fromTo(
           el,
-          { opacity: 0, y: 70 },
+          { opacity: 0, y: 90, filter: 'blur(12px)', clipPath: 'inset(0 0 100% 0)' },
           {
             opacity: 1,
             y: 0,
+            filter: 'blur(0px)',
+            clipPath: 'inset(0 0 0% 0)',
             ease: 'none',
-            scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 45%', scrub: 1 },
+            scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 40%', scrub: 1 },
           },
         )
       })

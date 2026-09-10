@@ -3,6 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ScreenDriver } from './screen'
+import { createScreenMaterial } from './screenShader'
+import { spring } from './director'
 
 export type Ctl = {
   open: { current: number }
@@ -74,7 +76,11 @@ export default function ConsoleModel({
   onB: () => void
 }) {
   const front = useRef<THREE.Group>(null!)
+  const shellBack = useRef<THREE.Group>(null!)
+  const glass = useRef<THREE.Mesh>(null!)
   const pcb = useRef<THREE.Group>(null!)
+  const memMeshL = useRef<THREE.Mesh>(null!)
+  const memMeshR = useRef<THREE.Mesh>(null!)
   const memL = useRef<THREE.MeshStandardMaterial>(null!)
   const memR = useRef<THREE.MeshStandardMaterial>(null!)
   const core = useRef<THREE.Mesh>(null!)
@@ -82,98 +88,126 @@ export default function ConsoleModel({
   const btnA = useRef<THREE.Group>(null!)
   const btnB = useRef<THREE.Group>(null!)
   const ledMats = useRef<THREE.MeshStandardMaterial[]>([])
-  const dispMat = useRef<THREE.MeshStandardMaterial>(null!)
+  const shader = useMemo(() => createScreenMaterial(screen.tex), [screen])
   const press = useRef({ a: 0, b: 0, va: 0, vb: 0 })
+  // staggered mechanical state: each layer chases with its own spring
+  const mech = useRef({ shell: 0, vs: 0, glass: 0, vg: 0, pcb: 0, vp: 0, lock: 0 })
+  const wasExploded = useRef(false)
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime()
     const dt = Math.min(0.05, clock.getDelta() || 0.016)
     const o = ctl.open.current
     const e = ctl.explode.current
-    front.current.position.set(0, o * 0.35 + e * 0.6, o * 1.7 + e * 2.0)
-    front.current.rotation.x = -o * 0.12
-    pcb.current.position.z = -e * 0.7
-    pcb.current.visible = o > 0.02 || e > 0.02
-    const mg = 0.25 + ctl.mem.current * 2.2 + Math.sin(t * 3) * 0.08 * ctl.mem.current
-    memL.current.emissiveIntensity = mg
-    memR.current.emissiveIntensity = mg * 0.9
+    const closing = e < 0.06 && wasExploded.current
+    // reassembly: snappier springs + lock flash, never a plain reverse
+    const stiff = closing ? 95 : 34
+    const damp = closing ? 11 : 8
+    if (closing && e < 0.02) {
+      wasExploded.current = false
+      mech.current.lock = 1
+      screen.pulse()
+    }
+    if (e > 0.4) wasExploded.current = true
+    mech.current.lock = Math.max(0, mech.current.lock - dt * 2)
+    // staggered chase: shell → glass → pcb settle
+    const s1 = spring(mech.current.shell, mech.current.vs, o + e, stiff, damp, dt)
+    const s2 = spring(mech.current.glass, mech.current.vg, o + e, stiff * 0.7, damp * 0.9, dt)
+    const s3 = spring(mech.current.pcb, mech.current.vp, o + e, stiff * 1.5, damp * 1.2, dt)
+    mech.current.shell = s1.x
+    mech.current.vs = s1.v
+    mech.current.glass = s2.x
+    mech.current.vg = s2.v
+    mech.current.pcb = s3.x
+    mech.current.vp = s3.v
+    const ms = mech.current.shell
+    const mg2 = mech.current.glass
+    const mp = mech.current.pcb
+    front.current.position.set(0, ms * 0.35 + e * 0.5, ms * 1.7 + e * 1.4)
+    front.current.rotation.x = -ms * 0.12
+    shellBack.current.position.set(0, -e * 0.9, -e * 1.1)
+    glass.current.position.z = 0.585 + mg2 * 0.5 + e * 0.9
+    pcb.current.position.z = -e * 0.7 + (1 - mp) * -0.3
+    pcb.current.visible = mp > 0.02
+    memMeshL.current.position.x = -0.55 - e * 0.9
+    memMeshR.current.position.x = 0.55 + e * 0.9
+    const glow = 0.25 + ctl.mem.current * 2.2 + Math.sin(t * 3) * 0.08 * ctl.mem.current
+    memL.current.emissiveIntensity = glow
+    memR.current.emissiveIntensity = glow * 0.9
     core.current.rotation.y = t * 0.6
     core.current.rotation.x = t * 0.23
     core.current.scale.setScalar(0.6 + ctl.core.current * 0.9)
-    core.current.position.y = 0.1 - e * 1.3
-    coreMat.current.emissiveIntensity = 1.1 + Math.sin(t * 2.2) * 0.25 + ctl.core.current
-    // button springs: overshoot + settle, never a flat lerp
+    core.current.position.y = 0.1 - e * 1.6
+    coreMat.current.emissiveIntensity =
+      1.1 + Math.sin(t * 2.2) * 0.25 + ctl.core.current + mech.current.lock * 2
     for (const k of ['a', 'b'] as const) {
       const target = k === 'a' ? ctl.pressA.current : ctl.pressB.current
       const vk = k === 'a' ? 'va' : 'vb'
-      const st = 220
-      const dp = 14
-      press.current[vk] += ((target - press.current[k]) * st - press.current[vk] * dp) * dt
-      press.current[k] += press.current[vk] * dt
+      const r = spring(press.current[k], press.current[vk], target, 220, 14, dt)
+      press.current[k] = r.x
+      press.current[vk] = r.v
     }
     ctl.pressA.current *= 0.88
     ctl.pressB.current *= 0.88
     btnA.current.position.z = 0.62 - Math.max(0, press.current.a) * 0.1
     btnB.current.position.z = 0.62 - Math.max(0, press.current.b) * 0.1
     const beat = 0.6 + 0.4 * Math.sin(t * 2.4)
-    const fl = Math.random() < 0.02 ? 0.5 : 0 // occasional electronic flicker
+    const fl = Math.random() < 0.02 ? 0.5 : 0
     ledMats.current.forEach((m, i) => {
-      m.emissiveIntensity = beat * (0.7 + i * 0.3) + screen.glow * 2 + fl
+      m.emissiveIntensity = beat * (0.7 + i * 0.3) + screen.glow * 2 + fl + mech.current.lock * 2
     })
-    if (dispMat.current) dispMat.current.emissiveIntensity = 1.5 + screen.glow * 1.6
+    shader.uniforms.uTime.value = t
+    shader.uniforms.uGlow.value = screen.glow + mech.current.lock * 0.5
+    shader.uniforms.uWipe.value = screen.wipe
+    shader.uniforms.uFlick.value = Math.random() < 0.05 ? 0.3 : 0
   })
 
   return (
     <group>
-      {/* back shell: coated graphite polymer */}
-      <RoundedBox args={[3.4, 6.0, 0.55]} radius={0.2} smoothness={4} position={[0, 0, -0.28]}>
-        <meshStandardMaterial color="#161a28" roughness={0.52} metalness={0.4} />
-      </RoundedBox>
-      {/* shell seams between pieces */}
-      <mesh position={[0, 1.9, -0.02]}>
-        <boxGeometry args={[3.42, 0.025, 0.5]} />
-        <meshStandardMaterial color="#07090f" roughness={0.85} />
-      </mesh>
-      <mesh position={[0, -1.9, -0.02]}>
-        <boxGeometry args={[3.42, 0.025, 0.5]} />
-        <meshStandardMaterial color="#07090f" roughness={0.85} />
-      </mesh>
-      {/* cartridge slot + cart ridge */}
-      <mesh position={[0, 2.55, -0.3]}>
-        <boxGeometry args={[1.7, 0.32, 0.2]} />
-        <meshStandardMaterial color="#05070c" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 2.55, -0.22]}>
-        <boxGeometry args={[1.5, 0.12, 0.22]} />
-        <meshStandardMaterial color="#232838" roughness={0.5} metalness={0.5} />
-      </mesh>
-      {/* top vents */}
-      {[-1.1, -0.85, -0.6, 0.6, 0.85, 1.1].map((x, i) => (
-        <mesh key={i} position={[x, 2.96, -0.28]}>
-          <boxGeometry args={[0.14, 0.06, 0.4]} />
-          <meshStandardMaterial color="#05070c" roughness={0.9} />
+      <group ref={shellBack}>
+        <RoundedBox args={[3.4, 6.0, 0.55]} radius={0.2} smoothness={4} position={[0, 0, -0.28]}>
+          <meshStandardMaterial color="#161a28" roughness={0.52} metalness={0.4} />
+        </RoundedBox>
+        <mesh position={[0, 1.9, -0.02]}>
+          <boxGeometry args={[3.42, 0.025, 0.5]} />
+          <meshStandardMaterial color="#07090f" roughness={0.85} />
         </mesh>
-      ))}
-      {/* USB-C port + rim */}
-      <mesh position={[0.7, -3.0, -0.28]}>
-        <boxGeometry args={[0.5, 0.14, 0.3]} />
-        <meshStandardMaterial color="#02040a" roughness={0.7} />
-      </mesh>
-      <mesh position={[0.7, -3.0, -0.2]}>
-        <boxGeometry args={[0.56, 0.2, 0.06]} />
-        <meshStandardMaterial color="#7a8195" roughness={0.3} metalness={1} />
-      </mesh>
-      {/* volume rocker + power (left edge) */}
-      <mesh position={[-1.74, 1.6, -0.1]}>
-        <boxGeometry args={[0.1, 0.7, 0.3]} />
-        <meshStandardMaterial color="#232838" roughness={0.45} metalness={0.6} />
-      </mesh>
-      <mesh position={[-1.74, 0.7, -0.1]}>
-        <boxGeometry args={[0.1, 0.34, 0.3]} />
-        <meshStandardMaterial color="#2a3040" roughness={0.45} metalness={0.6} />
-      </mesh>
+        <mesh position={[0, -1.9, -0.02]}>
+          <boxGeometry args={[3.42, 0.025, 0.5]} />
+          <meshStandardMaterial color="#07090f" roughness={0.85} />
+        </mesh>
+        <mesh position={[0, 2.55, -0.3]}>
+          <boxGeometry args={[1.7, 0.32, 0.2]} />
+          <meshStandardMaterial color="#05070c" roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 2.55, -0.22]}>
+          <boxGeometry args={[1.5, 0.12, 0.22]} />
+          <meshStandardMaterial color="#232838" roughness={0.5} metalness={0.5} />
+        </mesh>
+        {[-1.1, -0.85, -0.6, 0.6, 0.85, 1.1].map((x, i) => (
+          <mesh key={i} position={[x, 2.96, -0.28]}>
+            <boxGeometry args={[0.14, 0.06, 0.4]} />
+            <meshStandardMaterial color="#05070c" roughness={0.9} />
+          </mesh>
+        ))}
+        <mesh position={[0.7, -3.0, -0.28]}>
+          <boxGeometry args={[0.5, 0.14, 0.3]} />
+          <meshStandardMaterial color="#02040a" roughness={0.7} />
+        </mesh>
+        <mesh position={[0.7, -3.0, -0.2]}>
+          <boxGeometry args={[0.56, 0.2, 0.06]} />
+          <meshStandardMaterial color="#7a8195" roughness={0.3} metalness={1} />
+        </mesh>
+        <mesh position={[-1.74, 1.6, -0.1]}>
+          <boxGeometry args={[0.1, 0.7, 0.3]} />
+          <meshStandardMaterial color="#232838" roughness={0.45} metalness={0.6} />
+        </mesh>
+        <mesh position={[-1.74, 0.7, -0.1]}>
+          <boxGeometry args={[0.1, 0.34, 0.3]} />
+          <meshStandardMaterial color="#2a3040" roughness={0.45} metalness={0.6} />
+        </mesh>
+      </group>
 
-      {/* PCB interior */}
       <group ref={pcb} visible={false}>
         <mesh position={[0, 0, 0.12]}>
           <boxGeometry args={[2.9, 5.3, 0.07]} />
@@ -192,18 +226,17 @@ export default function ConsoleModel({
             <meshStandardMaterial color="#101418" roughness={0.35} metalness={0.65} emissive="#0e2a3a" emissiveIntensity={0.4} />
           </mesh>
         ))}
-        {/* micro-components */}
         {Array.from({ length: 14 }, (_, i) => (
           <mesh key={`mc${i}`} position={[-1.2 + (i % 7) * 0.4, 2.0 - Math.floor(i / 7) * 0.35, 0.18]}>
             <boxGeometry args={[0.16, 0.1, 0.1]} />
             <meshStandardMaterial color="#1c2028" roughness={0.4} metalness={0.7} />
           </mesh>
         ))}
-        <mesh position={[-0.55, -2.1, 0.28]}>
+        <mesh ref={memMeshL} position={[-0.55, -2.1, 0.28]}>
           <boxGeometry args={[0.95, 0.55, 0.24]} />
           <meshStandardMaterial ref={memL} color="#1a1206" roughness={0.5} emissive="#ffb84d" emissiveIntensity={0.25} />
         </mesh>
-        <mesh position={[0.55, -2.1, 0.28]}>
+        <mesh ref={memMeshR} position={[0.55, -2.1, 0.28]}>
           <boxGeometry args={[0.95, 0.55, 0.24]} />
           <meshStandardMaterial ref={memR} color="#1a1206" roughness={0.5} emissive="#ffb84d" emissiveIntensity={0.25} />
         </mesh>
@@ -222,7 +255,6 @@ export default function ConsoleModel({
         </mesh>
       </group>
 
-      {/* front assembly */}
       <group ref={front}>
         <RoundedBox args={[3.4, 6.0, 0.42]} radius={0.2} smoothness={4} position={[0, 0, 0.28]}>
           <meshPhysicalMaterial color="#9fb4dd" transparent opacity={0.16} roughness={0.12} metalness={0} clearcoat={1} clearcoatRoughness={0.1} depthWrite={false} />
@@ -233,9 +265,9 @@ export default function ConsoleModel({
         </mesh>
         <mesh position={[0, 1.35, 0.57]}>
           <planeGeometry args={[2.62, 2.42]} />
-          <meshStandardMaterial ref={dispMat} color="#000000" emissive="#ffffff" emissiveMap={screen.tex} emissiveIntensity={1.5} roughness={0.4} />
+          <primitive object={shader.material} attach="material" />
         </mesh>
-        <mesh position={[0, 1.35, 0.585]}>
+        <mesh ref={glass} position={[0, 1.35, 0.585]}>
           <planeGeometry args={[2.62, 2.42]} />
           <meshPhysicalMaterial color="#ffffff" transparent opacity={0.07} roughness={0.05} metalness={0} depthWrite={false} />
         </mesh>

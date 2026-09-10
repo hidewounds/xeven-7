@@ -35,7 +35,7 @@ export class ScreenDriver {
   private webStep = 0
   private webT = 0
   private pattern = 0
-  private wipe = 0
+  wipe = 0
   private frame = 0
   private demoLines: { who: string; text: string; shown: number }[] = []
   private demoQueue: { who: string; text: string }[] = []

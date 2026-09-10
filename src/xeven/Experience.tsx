@@ -1,10 +1,11 @@
-import { Suspense, useMemo, useRef } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Grid, Lightformer } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import ConsoleModel, { type Ctl } from './ConsoleModel'
 import Particles, { type PUniforms } from './Particles'
+import Packets, { type PacketMode } from './Packets'
 import type { ScreenDriver, ScreenMode } from './screen'
 import { PHASES } from './content'
 import {
@@ -69,6 +70,10 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
   )
   const rim = useRef<THREE.DirectionalLight>(null!)
   const key = useRef<THREE.DirectionalLight>(null!)
+  const screenLight = useRef<THREE.PointLight>(null!)
+  const pktWeight = useRef(0)
+  const pmodeRef = useRef<PacketMode>('off')
+  const [pmode, setPmode] = useState<PacketMode>('off')
   const pCount = tier === 'high' ? 1400 : tier === 'medium' ? 800 : 350
 
   useFrame(({ clock }, rawDt) => {
@@ -148,6 +153,19 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
     const hit = ray.ray.intersectPlane(plane, tmp)
     if (hit) pUniforms.uCursor.value.copy(hit)
 
+    // packet system: memory run, then architecture connections
+    const memW = seg(p, 0.3, 0.35) * (1 - seg(p, 0.48, 0.54))
+    const archW = seg(p, 0.83, 0.87) * (1 - seg(p, 0.93, 0.97))
+    const nm: PacketMode = memW > archW ? (memW > 0.02 ? 'memory' : 'off') : archW > 0.02 ? 'arch' : 'off'
+    if (nm !== pmodeRef.current) {
+      pmodeRef.current = nm
+      setPmode(nm)
+    }
+    pktWeight.current += (Math.max(memW, archW) - pktWeight.current) * 0.1
+
+    // screen is a light source: shell and surroundings breathe with it
+    screenLight.current.intensity = 4 + s.screen.glow * 12 + seg(p, 0.4, 0.5) * 6
+
     s.screen.tick(dt)
   })
 
@@ -155,7 +173,7 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
     <>
       <directionalLight ref={key} position={[4, 6, 6]} intensity={0.3} color="#dfe8ff" />
       <directionalLight ref={rim} position={[-5, 3, 4]} intensity={0.5} color="#8fb4ff" />
-      <pointLight position={[0, 0.5, 4]} intensity={4} color="#4d7dff" />
+      <pointLight ref={screenLight} position={[0, 0.5, 4]} intensity={4} color="#4d7dff" />
       <ambientLight intensity={0.12} />
       {/* local reflections — no network HDR */}
       <Environment resolution={64}>
@@ -181,6 +199,14 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
         />
       </group>
       <Particles count={pCount} uniforms={pUniforms} />
+      <Packets
+        mode={pmode}
+        weight={pktWeight}
+        onMemoryHit={() => {
+          s.ctl.mem.current = Math.min(1.6, s.ctl.mem.current + 0.45)
+          s.screen.pulse()
+        }}
+      />
     </>
   )
 }
