@@ -37,13 +37,13 @@ export const CAM_POS = [
   { at: 0.0, v: [0.0, 0.8, 19.0] as V3 },
   { at: 0.1, v: [0.6, 0.6, 12.0] as V3 },
   { at: 0.22, v: [3.6, 1.2, 8.4] as V3 },
-  { at: 0.34, v: [0.9, 0.7, 4.6] as V3 }, // macro screen
+  { at: 0.34, v: [1.7, 0.9, 6.8] as V3 }, // macro screen, device stays in frame
   { at: 0.44, v: [-2.8, -0.6, 6.4] as V3 }, // low hardware angle
-  { at: 0.5, v: [0.0, 1.3, 4.4] as V3 }, // screen macro: display fills frame
+  { at: 0.5, v: [0.0, 1.3, 5.6] as V3 }, // screen macro: display fills frame
   { at: 0.56, v: [0.0, 1.0, 7.2] as V3 },
   { at: 0.68, v: [-3.0, 1.6, 9.8] as V3 },
   { at: 0.78, v: [2.0, 1.0, 8.4] as V3 },
-  { at: 0.88, v: [4.8, 0.4, 8.6] as V3 }, // layer travel
+  { at: 0.88, v: [10.5, 0.8, 2.5] as V3 }, // layer travel: true profile reads the stack
   { at: 1.0, v: [0.0, 0.5, 12.8] as V3 }, // quiet hero
 ]
 export const CAM_LOOK = [
@@ -90,11 +90,11 @@ export const consoleState = (p: number) => ({
   explode: seg(p, 0.83, 0.895) * (1 - seg(p, 0.945, 0.985)),
   mem: seg(p, 0.3, 0.37) * (1 - seg(p, 0.5, 0.58)) + seg(p, 0.84, 0.9) * 0.7,
   core: seg(p, 0.82, 0.9),
-  scale: lerp(lerp(0.55, 1.45, seg(p, 0.03, 0.18)), 1.0, seg(p, 0.72, 0.94)),
+  scale: lerp(lerp(0.55, 1.25, seg(p, 0.03, 0.18)), 1.0, seg(p, 0.72, 0.94)),
   yawBase:
     lerp(0.5, -0.35, seg(p, 0.1, 0.25)) +
-    lerp(0, 0.55, seg(p, 0.5, 0.62)) +
-    lerp(0, 0.5, seg(p, 0.66, 0.78)),
+    lerp(0, 0.9, seg(p, 0.5, 0.62)) +
+    lerp(0, 0.12, seg(p, 0.66, 0.78)),
   posX: lerp(2.5, 0, seg(p, 0.12, 0.22)),
 })
 

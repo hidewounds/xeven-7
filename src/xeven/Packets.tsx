@@ -32,7 +32,7 @@ export default function Packets({
   )
   const memLine = useMemo(() => new THREE.BufferGeometry().setFromPoints(memCurve.getPoints(60)), [memCurve])
   const archLine = useMemo(() => {
-    const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(2.2, 3.6, 0), new THREE.Vector3(2.2, -3.6, 0)])
+    const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(2.2, 3.0, 0), new THREE.Vector3(2.2, -3.0, 0)])
     return g
   }, [])
 
@@ -68,7 +68,7 @@ export default function Packets({
       )}
       {mode === 'arch' && (
         <lineSegments geometry={archLine}>
-          <lineBasicMaterial color="#3a5a9a" transparent opacity={0.5} />
+          <lineBasicMaterial color="#3a5a9a" transparent opacity={0.35} />
         </lineSegments>
       )}
       {[0, 1, 2, 3].map((i) => (
