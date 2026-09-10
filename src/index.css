@@ -1,0 +1,31 @@
+:root {
+  --bg: #05070f;
+  --ink: #eef1ff;
+  --muted: #9aa3c0;
+  --line: rgba(140, 160, 220, 0.16);
+  --glass: rgba(13, 18, 38, 0.55);
+  --blue: #38e1ff;
+  --violet: #7a5cff;
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+  font: 17px/150% var(--sans);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body { overflow-x: hidden; }
+
+a { color: inherit; }
+
+@media (pointer: fine) {
+  .xvn, .xvn a, .xvn button { cursor: none; }
+}
