@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { SplitText } from 'gsap/SplitText'
 import Lenis from 'lenis'
 import Experience, { type Shared } from './xeven/Experience'
 import Decrypt from './xeven/Decrypt'
@@ -9,7 +10,7 @@ import { freshCtl } from './xeven/ConsoleModel'
 import { BUSINESS, DEMO_QS, LAYERS, PATTERNS, PROFILE_ROWS } from './xeven/content'
 import './App.css'
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger, SplitText)
 ScrollTrigger.config({ ignoreMobileResize: true })
 
 function DemoBar({ ask }: { ask: (q: string, btn: 'a' | 'b') => void }) {
@@ -213,7 +214,42 @@ export default function App() {
   }, [shared])
 
   useLayoutEffect(() => {
+    const splits: SplitText[] = []
     const ctx = gsap.context(() => {
+      // hero headline: masked line rise after the machine wakes
+      splits.push(
+        SplitText.create('.ph.boot h1', {
+          type: 'lines',
+          mask: 'lines',
+          autoSplit: true,
+          onSplit(self) {
+            return gsap.fromTo(
+              self.lines,
+              { yPercent: 115 },
+              { yPercent: 0, duration: 1.7, ease: 'power4.out', delay: 1.5, stagger: 0.13 },
+            )
+          },
+        }),
+      )
+      // final headline: scrubbed masked rise
+      splits.push(
+        SplitText.create('.ph.final h2', {
+          type: 'lines',
+          mask: 'lines',
+          autoSplit: true,
+          onSplit(self) {
+            return gsap.fromTo(
+              self.lines,
+              { yPercent: 115 },
+              {
+                yPercent: 0,
+                ease: 'none',
+                scrollTrigger: { trigger: '.ph.final h2', start: 'top 92%', end: 'top 42%', scrub: 1 },
+              },
+            )
+          },
+        }),
+      )
       // hero typography appears only after the machine wakes
       gsap.fromTo(
         '.boot-in',
@@ -242,7 +278,29 @@ export default function App() {
           scrollTrigger: { trigger: el, start: 'top 30%', end: 'bottom top', scrub: 1 },
         })
       })
-      // architecture beat holds while camera travels the layers
+      // readout rows + arch rail: staggered entrances (anime.js stagger discipline)
+      gsap.utils.toArray<HTMLElement>('.rrow').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { x: -28, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top 94%', end: 'top 64%', scrub: 1 },
+          },
+        )
+      })
+      gsap.fromTo(
+        '.layers .mono',
+        { x: -36 },
+        {
+          x: 0,
+          ease: 'none',
+          stagger: 0.12,
+          scrollTrigger: { trigger: '#arch', start: 'top 70%', end: 'top 15%', scrub: 1 },
+        },
+      )
       ScrollTrigger.create({
         trigger: '#arch',
         start: 'top top',
@@ -251,7 +309,10 @@ export default function App() {
         scrub: 1,
       })
     }, root)
-    return () => ctx.revert()
+    return () => {
+      splits.forEach((s) => s.revert())
+      ctx.revert()
+    }
   }, [])
 
   const ask = (q: string, btn: 'a' | 'b') => {

@@ -18,6 +18,10 @@ Related repos only — nothing unrelated gets pulled in.
 | 8 | **Motion.dev** (motion.dev) | Spring semantics (stiffness/damping presets), `useSpring`/`useTrail` stagger-follow, layout animations, MotionScore perf audits | APPLIED: trail-follow staggers via GSAP. BANKED: MotionScore-style audit |
 | 9 | **react-spring** (react-spring.dev) | Spring-first API, no-re-render imperative animation, `useTrail`/`useChain`, cross-platform spring configs | APPLIED: trail staggers. No dependency added (GSAP covers it) |
 | 10 | **cursor.directory** | VERDICT: NOT APPLICABLE — this is the Cursor IDE plugin directory, not cursor-design reference. Our custom cursor system stands on its own. | RECORDED, no action |
+| 11 | **anime.js** (animejs.com) | Stagger utilities (grid/from-center), timeline positions, SVG draw/morph, draggable springs, easing discipline | APPLIED: center-out staggers on readout/layer rails via GSAP (no new dep) |
+| 12 | **GSAP docs** (gsap.com) | Canonical ScrollTrigger patterns: `ignoreMobileResize`, pins, scrubs, SplitText (free since 3.13, present in our gsap 3.15) | APPLIED: `ignoreMobileResize`, SplitText masked line reveals (hero + final) |
+| 13 | **Motion.dev** (motion.dev) | Spring semantics, `useSpring`/`useTrail` stagger-follow, layout animations, MotionScore audits | APPLIED: trail-follow staggers via GSAP. BANKED: MotionScore-style audit |
+| 14 | **react-spring** (react-spring.dev) | Spring-first API, no-re-render imperative animation, `useTrail`/`useChain`, cross-platform configs | APPLIED: trail staggers. No dependency added (GSAP covers it) |
 
 ## Repos (code reference — related only)
 
