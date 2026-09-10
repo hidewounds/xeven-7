@@ -122,7 +122,8 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
       cs.yawBase + dx * 0.28 * R + (s.reduced ? 0 : Math.sin(t * 0.23) * 0.05)
     group.current.rotation.set(-0.06 + dy * -0.16 * R + breathe, yaw, 0.05 + dx * 0.05 * R)
     group.current.scale.setScalar(Math.max(0.4, cs.scale))
-    group.current.position.y = (s.reduced ? 0 : Math.sin(t * 0.8) * 0.07) + (p > 0.28 && p < 0.42 ? -0.5 : 0)
+    group.current.position.y =
+      (s.reduced ? 0 : Math.sin(t * 0.8) * 0.07) - 0.5 * seg(p, 0.28, 0.33) * (1 - seg(p, 0.38, 0.43))
     group.current.position.x = cs.posX * (mobile ? 0.3 : 1)
 
     // camera journey with dutch tilt in architecture
@@ -182,8 +183,8 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
         <Lightformer intensity={0.7} position={[5, -1, 2]} rotation-y={-Math.PI / 2} scale={[5, 1.5, 1]} color="#4d5a80" />
       </Environment>
       {/* invisible stage: faint grid + grounding shadow */}
-      <Grid position={[0, -3.6, 0]} args={[40, 40]} cellSize={1} cellThickness={0.5} cellColor="#0a0e20" sectionSize={5} sectionThickness={1} sectionColor="#141a36" fadeDistance={22} fadeStrength={3} infiniteGrid />
-      <ContactShadows position={[0, -3.55, 0]} opacity={0.55} scale={14} blur={2.6} far={6} color="#000000" />
+      <Grid position={[0, -4.2, 0]} args={[40, 40]} cellSize={1} cellThickness={0.5} cellColor="#070b18" sectionSize={5} sectionThickness={1} sectionColor="#0e1430" fadeDistance={14} fadeStrength={3} infiniteGrid />
+      <ContactShadows position={[0, -4.15, 0]} opacity={0.55} scale={14} blur={2.6} far={6} color="#000000" />
       <group ref={group}>
         <ConsoleModel
           screen={s.screen}
@@ -203,8 +204,9 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
         mode={pmode}
         weight={pktWeight}
         onMemoryHit={() => {
+          // causal chain: stored first, system updates a beat later
           s.ctl.mem.current = Math.min(1.6, s.ctl.mem.current + 0.45)
-          s.screen.pulse()
+          setTimeout(() => s.screen.pulse(), 260)
         }}
       />
     </>

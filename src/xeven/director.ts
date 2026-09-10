@@ -93,7 +93,7 @@ export const consoleState = (p: number) => ({
     lerp(0.5, -0.35, seg(p, 0.1, 0.25)) +
     lerp(0, 0.55, seg(p, 0.5, 0.62)) +
     lerp(0, 0.5, seg(p, 0.66, 0.78)),
-  posX: lerp(lerp(0, 2.5, seg(p, 0.0, 0.05)) * 1, 0, seg(p, 0.12, 0.22)),
+  posX: lerp(2.5, 0, seg(p, 0.12, 0.22)),
 })
 
 /** lighting choreography: [key, rim, screen, internal] */
