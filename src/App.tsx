@@ -3,15 +3,52 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import Experience, { type Shared } from './xeven/Experience'
+import Decrypt from './xeven/Decrypt'
 import { ScreenDriver } from './xeven/screen'
 import { freshCtl } from './xeven/ConsoleModel'
 import { BUSINESS, DEMO_QS, LAYERS, PATTERNS, PROFILE_ROWS } from './xeven/content'
 import './App.css'
 
 gsap.registerPlugin(ScrollTrigger)
+ScrollTrigger.config({ ignoreMobileResize: true })
 
-function Cursor() {
-  const dot = useRef<HTMLDivElement>(null!)
+function DemoBar({ ask }: { ask: (q: string, btn: 'a' | 'b') => void }) {
+  const [val, setVal] = useState('')
+  const submit = (q: string) => {
+    const text = q.trim()
+    if (!text) return
+    ask(text, text.length % 2 === 0 ? 'a' : 'b')
+    setVal('')
+  }
+  return (
+    <div className="demo-bar">
+      <div className="demo-input">
+        <span className="demo-x">X</span>
+        <input
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') submit(val)
+          }}
+          placeholder="What can I do for you?"
+          aria-label="Ask XEVEN"
+        />
+        <button className="demo-go" onClick={() => submit(val)} aria-label="Ask">
+          ↗
+        </button>
+      </div>
+      <div className="demo-chips">
+        {DEMO_QS.map((q) => (
+          <button key={q} className="demo-chip" onClick={() => submit(q)}>
+            {q}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Cursor() {  const dot = useRef<HTMLDivElement>(null!)
   const ring = useRef<HTMLDivElement>(null!)
   useEffect(() => {
     let x = -100
@@ -22,7 +59,7 @@ function Cursor() {
     const move = (e: PointerEvent) => {
       x = e.clientX
       y = e.clientY
-      const t = (e.target as HTMLElement).closest('a,button,.pat,.demo-q')
+      const t = (e.target as HTMLElement).closest('a,button,.pat,.demo-input')
       ring.current?.classList.toggle('hot', !!t)
       const cv = (e.target as HTMLElement).closest('.xvn-canvas')
       ring.current?.classList.toggle('field', !!cv && !t)
@@ -57,6 +94,7 @@ export default function App() {
       progress: { current: 0 },
       velocity: { current: 0 },
       mouse: { current: { x: 0, y: 0 } },
+      drag: { x: 0, y: 0, moved: 0, down: false },
       screen: new ScreenDriver(),
       ctl: freshCtl(),
       reduced,
@@ -64,17 +102,49 @@ export default function App() {
   }, [])
   const [pat, setPat] = useState(0)
   const [layer, setLayer] = useState(-1)
+  const [touched, setTouched] = useState(false)
   const lastTap = useRef(0)
+
+  // drag hint retires on first console grab
+  useEffect(() => {
+    const el = document.querySelector('.xvn-canvas')
+    if (!el) return
+    const go = () => setTouched(true)
+    el.addEventListener('pointerdown', go, { once: true })
+    return () => el.removeEventListener('pointerdown', go)
+  }, [])
+
+  // spotlight follows the pointer across pattern buttons
+  useEffect(() => {
+    const pats = Array.from(document.querySelectorAll<HTMLElement>('.pat'))
+    const cleanups = pats.map((p) => {
+      const mv = (e: PointerEvent) => {
+        const r = p.getBoundingClientRect()
+        p.style.setProperty('--mx', `${e.clientX - r.left}px`)
+        p.style.setProperty('--my', `${e.clientY - r.top}px`)
+      }
+      p.addEventListener('pointermove', mv)
+      return () => p.removeEventListener('pointermove', mv)
+    })
+    return () => cleanups.forEach((c) => c())
+  }, [])
 
   // progress + velocity + mouse/touch feeds
   useEffect(() => {
     let raf = 0
     let lastTop = window.scrollY
     let vel = 0
+    // TEMP-PROOF probe (?p=0..1, WebGL only, no scroll writes). REMOVED before ship.
+    const probe = (() => {
+      const v = new URLSearchParams(window.location.search).get('p')
+      const f = v === null ? NaN : parseFloat(v)
+      return Number.isFinite(f) ? Math.min(1, Math.max(0, f)) : NaN
+    })()
     const update = () => {
       const h = document.documentElement
       const max = h.scrollHeight - h.clientHeight
-      shared.progress.current = max > 0 ? Math.min(1, Math.max(0, h.scrollTop / max)) : 0
+      if (!Number.isNaN(probe)) shared.progress.current = probe
+      else shared.progress.current = max > 0 ? Math.min(1, Math.max(0, h.scrollTop / max)) : 0
       vel = vel * 0.9 + (h.scrollTop - lastTop) * 0.1
       lastTop = h.scrollTop
       shared.velocity.current = vel
@@ -239,7 +309,7 @@ export default function App() {
       <main>
         <section className="ph boot">
           <div className="boot-in">
-            <p className="mono dim">XEVEN // SYSTEM BOOT</p>
+            <p className="mono dim"><Decrypt text="XEVEN // SYSTEM BOOT" /></p>
             <h1>
               THE WEB,
               <br />
@@ -250,19 +320,20 @@ export default function App() {
               <a className="btn solid" href="#final">BUILD WITH XEVEN →</a>
               <a className="btn" href="#understand">EXPLORE SYSTEM ↓</a>
             </div>
+            <p className={`drag-hint mono dim${touched ? ' gone' : ''}`}>DRAG TO INSPECT — SCROLL TO TRAVEL</p>
           </div>
         </section>
 
         <section id="understand" className="ph understand">
           <div className="fade mono-block">
-            <p className="mono">USER DETECTED</p>
-            <p className="mono dim">CONTEXT FOUND — PROCESSING</p>
+            <p className="mono"><Decrypt text="USER DETECTED" /></p>
+            <p className="mono dim"><Decrypt text="CONTEXT FOUND — PROCESSING" /></p>
           </div>
         </section>
 
         <section id="memory" className="ph memory">
           <div className="fade readout">
-            <p className="mono dim">XEVEN // MEMORY</p>
+            <p className="mono dim"><Decrypt text="XEVEN // MEMORY" /></p>
             {PROFILE_ROWS.map(([k, v]) => (
               <div className="rrow" key={k}>
                 <span>{k}</span>
@@ -274,7 +345,7 @@ export default function App() {
 
         <section id="personal" className="ph personal">
           <div className="fade">
-            <p className="mono dim">XEVEN // PERSONALIZATION</p>
+            <p className="mono dim"><Decrypt text="XEVEN // PERSONALIZATION" /></p>
             <h2>
               It changes
               <br />
@@ -295,7 +366,7 @@ export default function App() {
 
         <section id="patterns" className="ph patterns">
           <div className="fade">
-            <p className="mono dim">XEVEN // MODES</p>
+            <p className="mono dim"><Decrypt text="XEVEN // MODES" /></p>
             <h2>
               ONE BRAIN.
               <br />
@@ -332,7 +403,7 @@ export default function App() {
               REMEMBER.
             </h2>
             <p className="xvn-big">XEVEN</p>
-            <p className="mono dim">PERSONALIZATION AS INFRASTRUCTURE.</p>
+            <p className="mono dim"><Decrypt text="PERSONALIZATION AS INFRASTRUCTURE." /></p>
             <div className="cta-row">
               <a className="btn solid" href="#demo">BUILD WITH XEVEN →</a>
               <a className="btn" href="#understand">SEE HOW IT WORKS</a>
@@ -342,14 +413,8 @@ export default function App() {
 
         <section id="demo" className="ph demo">
           <div className="fade">
-            <p className="mono dim">XEVEN // LIVE DEMO — frontend only</p>
-            <div className="demo-qs">
-              {DEMO_QS.map((q, i) => (
-                <button key={q} className="demo-q" onClick={() => ask(q, i % 2 === 0 ? 'a' : 'b')}>
-                  {q}
-                </button>
-              ))}
-            </div>
+            <p className="mono dim"><Decrypt text="XEVEN // LIVE DEMO" /></p>
+            <DemoBar ask={ask} />
             <p className="sub dim">Watch the console — buttons depress, screen answers.</p>
           </div>
         </section>

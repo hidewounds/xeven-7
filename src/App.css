@@ -116,6 +116,70 @@ h3 { font-size: clamp(20px, 2.2vw, 30px); letter-spacing: -0.01em; margin: 6px 0
 }
 .demo-q:hover { border-color: #7fd8ff; }
 
+/* Manus-style prompt bar + chips */
+.demo-bar { max-width: 640px; margin: 20px 0; }
+.demo-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(150, 170, 230, 0.3);
+  background: rgba(8, 12, 26, 0.7);
+  backdrop-filter: blur(10px);
+}
+.demo-input:focus-within { border-color: #7fd8ff; box-shadow: 0 0 28px rgba(127, 216, 255, 0.18); }
+.demo-x { font-weight: 700; letter-spacing: 0.2em; font-size: 13px; color: #fff; }
+.demo-input input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #eef2ff;
+  font-size: 15px;
+  font-family: inherit;
+}
+.demo-input input::placeholder { color: #5a6584; }
+.demo-go {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(127, 216, 255, 0.5);
+  background: rgba(127, 216, 255, 0.12);
+  color: #bfe6ff;
+  font-size: 17px;
+  cursor: pointer;
+}
+.demo-go:hover { background: rgba(127, 216, 255, 0.25); }
+.demo-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.demo-chip {
+  padding: 8px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(150, 170, 230, 0.22);
+  background: transparent;
+  color: #9aa5c8;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.demo-chip:hover { color: #fff; border-color: #7fd8ff; }
+
+.drag-hint { margin-top: 5vh; transition: opacity 1s ease; }
+.drag-hint.gone { opacity: 0 !important; }
+
+/* spotlight sweep on pattern buttons */
+.pat { position: relative; overflow: hidden; }
+.pat::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(127, 216, 255, 0.16), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.pat:hover::after { opacity: 1; }
+
 .xvn-foot {
   display: flex;
   justify-content: space-between;

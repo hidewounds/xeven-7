@@ -36,8 +36,9 @@ void main() {
     sin(uTime * spd * 0.7 + ph * 1.7) * orbitR * 0.6,
     sin(uTime * spd + ph) * orbitR * 0.8 - 1.0
   );
-  // stream: travel from far field into weighted target
-  vec3 tgt = vec3(0.0, 0.4, 1.6) * uW.x + vec3(-0.4, -2.0, 1.2) * uW.y + vec3(0.0, 1.3, 2.2) * uW.z;
+  // stream: travel from far field into weighted target (targets sit ON surfaces,
+  // so particles dive into the machine instead of hovering in front of it)
+  vec3 tgt = vec3(0.0, 0.4, 0.9) * uW.x + vec3(-0.4, -2.0, 0.6) * uW.y + vec3(0.0, 1.3, 0.7) * uW.z;
   float cyc = fract(uTime * (0.12 + spd * 0.25) + ph * 0.159);
   vec3 startPos = vec3(sin(ph * 12.9) * 9.0, cos(ph * 7.7) * 5.0, -6.0 - spd * 4.0);
   vec3 flowPos = mix(startPos, tgt, cyc * cyc);

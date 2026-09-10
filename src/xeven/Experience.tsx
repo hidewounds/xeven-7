@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Grid, Lightformer } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
@@ -28,6 +28,7 @@ export type Shared = {
   progress: { current: number }
   velocity: { current: number }
   mouse: { current: { x: number; y: number } }
+  drag: { x: number; y: number; moved: number; down: boolean }
   screen: ScreenDriver
   ctl: Ctl
   reduced: boolean
@@ -72,10 +73,44 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
   const rim = useRef<THREE.DirectionalLight>(null!)
   const key = useRef<THREE.DirectionalLight>(null!)
   const screenLight = useRef<THREE.PointLight>(null!)
+  const edgeL = useRef<THREE.DirectionalLight>(null!)
+  const edgeR = useRef<THREE.DirectionalLight>(null!)
   const pktWeight = useRef(0)
   const pmodeRef = useRef<PacketMode>('off')
   const [pmode, setPmode] = useState<PacketMode>('off')
   const pCount = tier === 'high' ? 1400 : tier === 'medium' ? 800 : 350
+
+  // drag-to-turn: body follows the pointer, decays to dead-front.
+  // tap (≤7px travel) is a press; a drag is never a press.
+  useEffect(() => {
+    const el = gl.domElement
+    const down = (e: PointerEvent) => {
+      s.drag.down = true
+      s.drag.moved = 0
+      ;(el as HTMLElement).setPointerCapture?.(e.pointerId)
+    }
+    const move = (e: PointerEvent) => {
+      if (!s.drag.down) return
+      const dx = e.movementX ?? 0
+      const dy = e.movementY ?? 0
+      s.drag.moved += Math.abs(dx) + Math.abs(dy)
+      s.drag.x = Math.max(-0.6, Math.min(0.6, s.drag.x + dx * 0.0042))
+      s.drag.y = Math.max(-0.35, Math.min(0.35, s.drag.y + dy * 0.0032))
+    }
+    const up = () => {
+      s.drag.down = false
+    }
+    el.addEventListener('pointerdown', down)
+    el.addEventListener('pointermove', move)
+    el.addEventListener('pointerup', up)
+    el.addEventListener('pointercancel', up)
+    return () => {
+      el.removeEventListener('pointerdown', down)
+      el.removeEventListener('pointermove', move)
+      el.removeEventListener('pointerup', up)
+      el.removeEventListener('pointercancel', up)
+    }
+  }, [gl, s])
 
   useFrame(({ clock }, rawDt) => {
     const dt = Math.min(0.05, rawDt)
@@ -118,10 +153,18 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
     s.ctl.core.current += (cs.core - s.ctl.core.current) * 0.07
 
     // alive motion: breathing + drift, never a plain turntable
+    // drag decays exponentially to dead-front — a resting tilt is forbidden
+    if (!s.drag.down) {
+      const k = Math.pow(0.05, dt)
+      s.drag.x *= k
+      s.drag.y *= k
+      if (Math.abs(s.drag.x) < 1e-4) s.drag.x = 0
+      if (Math.abs(s.drag.y) < 1e-4) s.drag.y = 0
+    }
     const breathe = s.reduced ? 0 : Math.sin(t * 0.7) * 0.02
     const yaw =
-      cs.yawBase + dx * 0.28 * R + (s.reduced ? 0 : Math.sin(t * 0.23) * 0.05)
-    group.current.rotation.set(-0.06 + dy * -0.16 * R + breathe, yaw, 0.05 + dx * 0.05 * R)
+      cs.yawBase + s.drag.x + dx * 0.28 * R + (s.reduced ? 0 : Math.sin(t * 0.23) * 0.05)
+    group.current.rotation.set(-0.06 + s.drag.y + dy * -0.16 * R + breathe, yaw, 0.05 + dx * 0.05 * R)
     group.current.scale.setScalar(Math.max(0.4, cs.scale))
     group.current.position.y =
       (s.reduced ? 0 : Math.sin(t * 0.8) * 0.07) - 0.5 * seg(p, 0.28, 0.33) * (1 - seg(p, 0.38, 0.43))
@@ -137,10 +180,14 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
     camera.rotation.z += pathS(p, DUTCH) * R
 
     // lighting choreography + cursor-traveling reflections
+    // grazing edge lights separate black shell from black page (nomad lesson)
     const lights = lightState(p)
     rim.current.position.set(-5 + dx * 4 * R, 3 + dy * 2 * R, 4)
     rim.current.intensity = lights[1] + s.screen.glow * 1.2
     key.current.intensity = lights[0]
+    const edgeBase = seg(p, 0.0, 0.09) * 1.6 + seg(p, 0.8, 0.88) * 0.8
+    edgeL.current.intensity = edgeBase
+    edgeR.current.intensity = edgeBase * 0.85
 
     // particles: phase weights + scroll-velocity energy
     const [flow, ring, boost] = particleState(p, vel)
@@ -175,6 +222,8 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
     <>
       <directionalLight ref={key} position={[4, 6, 6]} intensity={0.3} color="#dfe8ff" />
       <directionalLight ref={rim} position={[-5, 3, 4]} intensity={0.5} color="#8fb4ff" />
+      <directionalLight ref={edgeL} position={[-11, 3, -5]} intensity={0} color="#ffffff" />
+      <directionalLight ref={edgeR} position={[11, 4, -6]} intensity={0} color="#ffffff" />
       <pointLight ref={screenLight} position={[0, 0.5, 4]} intensity={4} color="#4d7dff" />
       <ambientLight intensity={0.12} />
       {/* local reflections — no network HDR */}
@@ -191,10 +240,12 @@ function Rig({ s, mobile, tier, onSlow }: { s: Shared; mobile: boolean; tier: Pe
           screen={s.screen}
           ctl={s.ctl}
           onA={() => {
+            if (s.drag.moved > 7) return // that was a turn, not a press
             s.ctl.pressA.current = 1
             s.screen.ask('Recommend something.')
           }}
           onB={() => {
+            if (s.drag.moved > 7) return
             s.ctl.pressB.current = 1
             s.screen.ask("What's my size?")
           }}
