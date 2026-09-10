@@ -123,21 +123,23 @@ export default function ConsoleModel({
     const ms = mech.current.shell
     const mg2 = mech.current.glass
     const mp = mech.current.pcb
-    front.current.position.set(0, ms * 0.35 + e * 0.5, ms * 1.7 + e * 1.4)
+    front.current.position.set(e * 0.55, ms * 0.35 + e * 0.5, ms * 1.7 + e * 1.4)
     front.current.rotation.x = -ms * 0.12
-    shellBack.current.position.set(0, -e * 0.9, -e * 1.1)
+    front.current.rotation.z = e * 0.06
+    shellBack.current.position.set(-e * 0.4, -e * 0.9, -e * 1.1)
+    shellBack.current.rotation.z = -e * 0.05
     glass.current.position.z = 0.585 + mg2 * 0.5 + e * 0.9
     pcb.current.position.z = -e * 0.7 + (1 - mp) * -0.3
     pcb.current.visible = mp > 0.02
-    memMeshL.current.position.x = -0.55 - e * 0.9
-    memMeshR.current.position.x = 0.55 + e * 0.9
+    memMeshL.current.position.x = -0.55 - e * 1.0
+    memMeshR.current.position.x = 0.55 + e * 0.55
     const glow = 0.25 + ctl.mem.current * 2.2 + Math.sin(t * 3) * 0.08 * ctl.mem.current
     memL.current.emissiveIntensity = glow
     memR.current.emissiveIntensity = glow * 0.9
-    core.current.rotation.y = t * 0.6
+    core.current.rotation.y = t * (0.6 + e * 2.2)
     core.current.rotation.x = t * 0.23
     core.current.scale.setScalar(0.6 + ctl.core.current * 0.9)
-    core.current.position.y = 0.1 - e * 1.6
+    core.current.position.y = 0.1 - e * 2.0
     coreMat.current.emissiveIntensity =
       1.1 + Math.sin(t * 2.2) * 0.25 + ctl.core.current + mech.current.lock * 2
     for (const k of ['a', 'b'] as const) {

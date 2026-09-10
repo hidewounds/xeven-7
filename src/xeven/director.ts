@@ -39,6 +39,7 @@ export const CAM_POS = [
   { at: 0.22, v: [3.6, 1.2, 8.4] as V3 },
   { at: 0.34, v: [0.9, 0.7, 4.6] as V3 }, // macro screen
   { at: 0.44, v: [-2.8, -0.6, 6.4] as V3 }, // low hardware angle
+  { at: 0.5, v: [0.0, 1.3, 4.4] as V3 }, // screen macro: display fills frame
   { at: 0.56, v: [0.0, 1.0, 7.2] as V3 },
   { at: 0.68, v: [-3.0, 1.6, 9.8] as V3 },
   { at: 0.78, v: [2.0, 1.0, 8.4] as V3 },
@@ -50,6 +51,7 @@ export const CAM_LOOK = [
   { at: 0.22, v: [0, 0.2, 0] as V3 },
   { at: 0.34, v: [0, 1.25, 0.5] as V3 },
   { at: 0.44, v: [0, -0.7, 0.4] as V3 },
+  { at: 0.5, v: [0, 1.32, 0.5] as V3 },
   { at: 0.56, v: [0, 0.6, 0.4] as V3 },
   { at: 0.68, v: [-0.4, 0.3, 0] as V3 },
   { at: 0.78, v: [0, 0.6, 0] as V3 },

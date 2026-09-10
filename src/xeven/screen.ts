@@ -5,6 +5,7 @@ export type ScreenMode =
   | 'terminal'
   | 'memory'
   | 'web'
+  | 'action'
   | 'pattern'
   | 'layers'
   | 'final'
@@ -200,6 +201,7 @@ export class ScreenDriver {
           t > 3.0 && 'MEMORY ............ ONLINE',
           t > 3.8 && 'PERSONALIZATION ... ONLINE',
           t > 4.6 && 'XEVEN',
+          t > 5.4 && 'SYSTEM ONLINE',
         ].filter(Boolean) as string[]
         this.mono(lines, 30, 130, '#c6d2ef', 42)
         if (t > 5.2) {
@@ -207,6 +209,22 @@ export class ScreenDriver {
           d.font = 'bold 24px ui-monospace, monospace'
           d.fillText('▮', 30, 130 + lines.length * 42)
         }
+        break
+      }
+      case 'action': {
+        this.head('XEVEN // OPERATIONS')
+        const ops = ['BOOK', 'RECOVER', 'RECOMMEND', 'QUALIFY']
+        d.font = 'bold 34px ui-monospace, monospace'
+        ops.forEach((op, i) => {
+          const y = 150 + i * 72
+          const active = Math.floor(this.time * 1.4) % 4 === i
+          d.fillStyle = active ? '#7fd8ff' : '#3d4a6e'
+          d.fillText((active ? '▸ ' : '·· ') + op, 30, y)
+          if (active) {
+            d.fillStyle = 'rgba(127,216,255,0.12)'
+            d.fillRect(20, y - 30, W - 40, 48)
+          }
+        })
         break
       }
       case 'terminal': {
