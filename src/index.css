@@ -26,6 +26,12 @@ body { overflow-x: hidden; }
 
 a { color: inherit; }
 
+/* Lenis recommended CSS (lenis skill: keep the transport invisible) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
 @media (pointer: fine) {
   .xvn, .xvn a, .xvn button { cursor: none; }
 }
