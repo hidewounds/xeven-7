@@ -40,6 +40,32 @@ function useScramble() {
   }, [])
 }
 
+/* decode-once when giant wordmarks scroll into view */
+function useDecodeOnView() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const els = Array.from(document.querySelectorAll<HTMLElement>('.decode-view'))
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return
+          const el = e.target as HTMLElement
+          gsap.to(el, {
+            duration: 1,
+            ease: 'none',
+            overwrite: true,
+            scrambleText: { text: el.dataset.text ?? '', chars: '/_<>*+_' },
+          })
+          io.unobserve(el)
+        })
+      },
+      { threshold: 0.4 },
+    )
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+}
+
 export default function App() {
   const bg = useRef<BgState>({ progress: 0, velocity: 0, active: 0, pulse: 0, hero: 0 }).current
   const [reduced] = useState(
@@ -48,6 +74,7 @@ export default function App() {
   const [menu, setMenu] = useState(false)
   const lenis = useRef<Lenis | null>(null)
   useScramble()
+  useDecodeOnView()
 
   useEffect(() => {
     const l = new Lenis({ lerp: reduced ? 1 : 0.09, anchors: true })

@@ -146,6 +146,21 @@
 .chr-menu-x { position: absolute; top: 14px; right: 18px; background: none; border: 0; color: #fff; font-size: 34px; line-height: 1; }
 .chr-menu-social { margin-top: auto; display: flex; gap: 18px; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.2em; color: #8a8f9e; }
 
+/* SlotButton rollover (Alche pattern): label slides up, duplicate takes its place */
+.slot { position: relative; display: inline-block; overflow: hidden; }
+.slot > span { display: block; transition: transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.slot > span:last-child { position: absolute; inset: 0; transform: translateY(100%); }
+.slot:hover > span:first-child { transform: translateY(-100%); }
+.slot:hover > span:last-child { transform: translateY(0); }
+.chr-btn.slot { padding: 0; }
+.chr-btn.slot > span { padding: 14px 26px; }
+
+/* press physics (apple-design: instant press-down confirmation) */
+@media (prefers-reduced-motion: no-preference) {
+  .chr-nav a, .chr-foot-links a, .chr-menu-panel a { transition: transform 0.16s ease-out, color 0.18s ease; }
+  .chr-nav a:active, .chr-foot-links a:active, .chr-menu-panel a:active { transform: scale(0.97); }
+}
+
 /* L8 — outro */
 .chr-outro {
   position: relative;

@@ -129,8 +129,9 @@ export function Menu({ open, onClose }: { open: boolean; onClose: () => void }) 
           ['Vision', '#vision'],
           ['Service', '#service'],
         ].map(([label, href]) => (
-          <a key={href} href={href} onClick={onClose} data-scramble>
-            {label}
+          <a key={href} href={href} onClick={onClose} className="slot">
+            <span>{label}</span>
+            <span aria-hidden="true">{label}</span>
           </a>
         ))}
         <div className="chr-menu-social">
@@ -155,11 +156,12 @@ export function Outro({ onTop }: { onTop: () => void }) {
         <br />
         REMEMBER.
       </h2>
-      <p className="chr-outro-big" aria-hidden="true">
+      <p className="chr-outro-big decode-view" data-text="XEVEN" aria-hidden="true">
         XEVEN
       </p>
-      <button ref={mag} className="chr-btn" onClick={onTop}>
-        BACK TO TOP ↑
+      <button ref={mag} className="chr-btn slot" onClick={onTop}>
+        <span>BACK TO TOP ↑</span>
+        <span aria-hidden="true">BACK TO TOP ↑</span>
       </button>
     </section>
   )
@@ -177,7 +179,7 @@ export function Footer() {
         </div>
         <span className="chr-foot-copy">© 2026 XEVEN</span>
       </div>
-      <div className="chr-foot-logo" aria-hidden="true">
+      <div className="chr-foot-logo decode-view" data-text="XEVEN" aria-hidden="true">
         XEVEN
       </div>
     </footer>
