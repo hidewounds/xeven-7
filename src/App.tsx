@@ -1,83 +1,45 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin'
 import Lenis from 'lenis'
-import Works from './Works'
 import type { BgState } from './scroll-state'
-import { Hero } from './Hero'
-import { Mission, Platform, Service, Vision } from './Sections'
-import { Footer, Header, Loader, Menu, Outro, Rail } from './Chrome'
-import './Works.css'
-import './sections.css'
-import './chrome.css'
+import { freshBg } from './scroll-state'
+import { useDecodeOnView, useMagnetic, useScramble } from './fx'
+import { Ticker } from './effects'
+import { Cursor, Footer, Header, Loader, Menu, type Route } from './chrome'
+import { Hud } from './hud'
+import { Home } from './Home'
+import { Features } from './Features'
+import { Pricing } from './Pricing'
+import './styles.css'
 
-gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin)
+gsap.registerPlugin(ScrollTrigger)
 ScrollTrigger.config({ ignoreMobileResize: true })
 
 // three.js rides in its own chunk — first paint never waits for WebGL
-const WorksBackground = lazy(() => import('./WorksBackground'))
+const Background = lazy(() => import('./Background'))
 
-/* decode-on-hover for [data-scramble] links (react-bits ScrambledText pattern, gsap-core only) */
-function useScramble() {
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-scramble]'))
-    const cleanups = els.map((el) => {
-      const orig = el.textContent ?? ''
-      const enter = () => {
-        gsap.to(el, {
-          duration: 0.45,
-          ease: 'none',
-          overwrite: true,
-          scrambleText: { text: orig, chars: '.:/<>*+_' },
-        })
-      }
-      el.addEventListener('pointerenter', enter)
-      return () => el.removeEventListener('pointerenter', enter)
-    })
-    return () => cleanups.forEach((fn) => fn())
-  }, [])
-}
-
-/* decode-once when giant wordmarks scroll into view */
-function useDecodeOnView() {
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const els = Array.from(document.querySelectorAll<HTMLElement>('.decode-view'))
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return
-          const el = e.target as HTMLElement
-          gsap.to(el, {
-            duration: 1,
-            ease: 'none',
-            overwrite: true,
-            scrambleText: { text: el.dataset.text ?? '', chars: '/_<>*+_' },
-          })
-          io.unobserve(el)
-        })
-      },
-      { threshold: 0.4 },
-    )
-    els.forEach((el) => io.observe(el))
-    return () => io.disconnect()
-  }, [])
+function parseHash(): Route {
+  const h = window.location.hash.replace(/^#\/?/, '')
+  return h === 'features' || h === 'pricing' ? h : 'home'
 }
 
 export default function App() {
-  const bg = useRef<BgState>({ progress: 0, velocity: 0, active: 0, pulse: 0, hero: 0 }).current
+  const bg = useRef<BgState>(freshBg()).current
   const [reduced] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
   const [menu, setMenu] = useState(false)
+  const [route, setRoute] = useState<Route>(() => parseHash())
   const lenis = useRef<Lenis | null>(null)
-  useScramble()
-  useDecodeOnView()
+  const page = useRef<HTMLDivElement>(null!)
+
+  useScramble(route)
+  useDecodeOnView(route)
+  useMagnetic(route)
 
   useEffect(() => {
-    const l = new Lenis({ lerp: reduced ? 1 : 0.09, anchors: true })
+    const l = new Lenis({ lerp: reduced ? 1 : 0.09, anchors: false })
     lenis.current = l
     l.on('scroll', ScrollTrigger.update)
     const tick = (time: number) => l.raf(time * 1000)
@@ -90,13 +52,70 @@ export default function App() {
     }
   }, [reduced])
 
+  // global scroll progress feeds the tube drift (no pin on these pages)
+  useEffect(() => {
+    let raf = 0
+    let last = window.scrollY
+    let vel = 0
+    const loop = () => {
+      const y = window.scrollY
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+      bg.progress = Math.min(1, Math.max(0, y / max))
+      vel = vel * 0.9 + (y - last) * 0.1
+      last = y
+      bg.velocity = vel / 16
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [bg])
+
+  // hash routing: swap page, top up, re-measure, pulse the wall
+  useEffect(() => {
+    const onHash = () => {
+      const r = parseHash()
+      bg.mode = r === 'home' ? 'home' : 'inner'
+      bg.pulse += 1
+      setRoute(r)
+      setMenu(false)
+    }
+    window.addEventListener('hashchange', onHash)
+    bg.mode = parseHash() === 'home' ? 'home' : 'inner'
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [bg])
+
+  useEffect(() => {
+    lenis.current?.scrollTo(0, { immediate: true })
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => ScrollTrigger.refresh()),
+    )
+    return () => cancelAnimationFrame(id)
+  }, [route])
+
+  // route-link delegation (keeps Lenis anchor handling out of the way)
+  useEffect(() => {
+    const click = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest?.('a[href^="#/"]') as HTMLAnchorElement | null
+      if (!a) return
+      e.preventDefault()
+      const href = a.getAttribute('href')!
+      if (window.location.hash === href) {
+        lenis.current?.scrollTo(0)
+        return
+      }
+      window.location.hash = href
+    }
+    document.addEventListener('click', click)
+    return () => document.removeEventListener('click', click)
+  }, [])
+
   // lenis skill: freeze the transport while a fullscreen overlay owns the screen
   useEffect(() => {
     if (menu) lenis.current?.stop()
     else lenis.current?.start()
   }, [menu])
 
-  // gsap skill: re-measure pins after anything that shifts layout
+  // re-measure after anything that shifts layout
   useEffect(() => {
     const refresh = () => ScrollTrigger.refresh()
     window.addEventListener('load', refresh)
@@ -106,27 +125,38 @@ export default function App() {
     return () => window.removeEventListener('load', refresh)
   }, [])
 
+  // swup-like enter transition per route
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '.page-enter',
+        { clipPath: 'inset(0 0 100% 0)' },
+        { clipPath: 'inset(0 0 0% 0)', duration: 0.9, ease: 'power4.inOut' },
+      )
+    }, page)
+    return () => ctx.revert()
+  }, [route])
+
   return (
-    <div className="xvn-works" id="top">
+    <div className="xvn" id="top">
+      <Cursor />
+      <div className="grain" aria-hidden="true" />
       <Loader />
       <div className="gl-fixed" aria-hidden="true">
         <Suspense fallback={null}>
-          <WorksBackground bg={bg} reduced={reduced} />
+          <Background bg={bg} reduced={reduced} />
         </Suspense>
       </div>
       <Header onMenu={() => setMenu(true)} />
-      <Rail />
       <Menu open={menu} onClose={() => setMenu(false)} />
-      <div className="xvn-works-body">
+      <Hud route={route} />
+      <div key={route} ref={page} className="page page-enter">
         <main>
-          <Hero bg={bg} reduced={reduced} />
-          <Works bg={bg} />
-          <Mission />
-          <Vision />
-          <Service />
-          <Platform />
+          {route === 'home' && <Home bg={bg} reduced={reduced} />}
+          {route === 'features' && <Features />}
+          {route === 'pricing' && <Pricing />}
         </main>
-        <Outro onTop={() => lenis.current?.scrollTo(0, { duration: 2 })} />
+        <Ticker items={['THE WEB SHOULD REMEMBER', 'XEVEN', 'AI EMPLOYEE', 'GROUNDED']} />
         <Footer />
       </div>
     </div>

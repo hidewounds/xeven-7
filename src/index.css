@@ -26,7 +26,7 @@ body { overflow-x: hidden; }
 
 a { color: inherit; }
 
-/* Lenis recommended CSS (lenis skill: keep the transport invisible) */
+/* Lenis recommended CSS — keep the transport invisible */
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
@@ -35,3 +35,6 @@ html.lenis, html.lenis body { height: auto; }
 @media (pointer: fine) {
   .xvn, .xvn a, .xvn button { cursor: none; }
 }
+
+::selection { background: rgba(56, 225, 255, 0.28); color: #fff; }
+button:focus-visible, a:focus-visible { outline: 1px solid var(--blue); outline-offset: 4px; }

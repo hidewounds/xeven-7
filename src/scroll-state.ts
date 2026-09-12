@@ -6,8 +6,9 @@ export type BgState = {
   active: number
   pulse: number
   hero: number
+  mode: 'home' | 'inner'
 }
 
 export function freshBg(): BgState {
-  return { progress: 0, velocity: 0, active: 0, pulse: 0, hero: 0 }
+  return { progress: 0, velocity: 0, active: 0, pulse: 0, hero: 0, mode: 'home' }
 }
