@@ -102,6 +102,25 @@
 }
 .intro-stage { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .intro-white { position: absolute; inset: 0; background: var(--bone); opacity: 1; }
+
+/* ---------- boot loader (non-enter refreshes): a lone revolving X ---------- */
+.xload {
+  position: fixed; inset: 0; z-index: var(--z-loader);
+  background: var(--void); color: var(--mint);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 1; transition: opacity 300ms ease;
+}
+.xload-done { opacity: 0; pointer-events: none; }
+.xload-x {
+  width: 46px; height: 46px;
+  transform-box: fill-box; transform-origin: center;
+  animation: xspin 1.1s linear infinite;
+}
+@keyframes xspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .xload { transition: none; }
+  .xload-x { animation: none; }
+}
 .intro-mini {
   position: absolute; top: 0; left: 0; right: 0;
   display: flex; justify-content: space-between; align-items: center;

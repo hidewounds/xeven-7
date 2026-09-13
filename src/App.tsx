@@ -5,6 +5,7 @@ import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import CursorTrail from './components/CursorTrail'
 import GraphBg from './components/GraphBg'
+import XLoader from './components/XLoader'
 import { Curtain, curtainBus } from './components/Curtain'
 import { navBus, routeFromHash, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
@@ -23,9 +24,11 @@ gsap.registerPlugin(ScrollTrigger)
 ScrollTrigger.config({ ignoreMobileResize: true })
 
 export default function App() {
-  // fresh loads play the intro over the index — one page, no gate
+  // the cinematic intro plays only over a fresh index load — every other
+  // route boots behind a revolving X instead
   const [route, setRoute] = useState<Route>(() => routeFromHash())
-  const [intro, setIntro] = useState(true)
+  const [intro, setIntro] = useState(() => routeFromHash() === 'enter')
+  const [booted, setBooted] = useState(() => routeFromHash() === 'enter')
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const lenis = useRef<Lenis | null>(null)
 
@@ -94,6 +97,11 @@ export default function App() {
     setIntro(false)
   }, [])
 
+  const finishBoot = useCallback(() => {
+    xs.entered = true
+    setBooted(true)
+  }, [])
+
   useEffect(() => {
     if (!lenis.current) return
     if (intro) lenis.current.stop()
@@ -120,6 +128,7 @@ export default function App() {
         </Suspense>
       </main>
       {intro && <Gate onEnter={finishIntro} />}
+      {!booted && <XLoader onDone={finishBoot} />}
     </div>
   )
 }
