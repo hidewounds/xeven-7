@@ -1,0 +1,17 @@
+{
+  "errors": [],
+  "indexFps": {
+    "fps": 58.4,
+    "long": 0
+  },
+  "worldsFps": {
+    "fps": 59.8,
+    "long": 0
+  },
+  "mFps": {
+    "fps": 60.2,
+    "long": 0
+  },
+  "mOver": 0,
+  "rOver": 0
+}

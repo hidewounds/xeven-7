@@ -21,9 +21,16 @@ export default function GraphBg() {
     if (!ctx) return
     const reduced =
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    // mobile pixel cap 1.25, desktop 1.5 (was 1.75 — over budget)
-    const dprCap = () =>
-      window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768 ? 1.25 : 1.5
+    // mobile pixel cap 1.25, desktop 1.5 (was 1.75 — over budget).
+    // Index gets the showcase treatment: denser, sharper, further links.
+    const indexBoost = () => xs.route === 'enter'
+    const dprCap = () => {
+      const coarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
+      if (indexBoost()) return coarse ? 1.5 : 1.65
+      return coarse ? 1.25 : 1.5
+    }
+    // link reach is a quality tier too — longer lines on the index
+    let linkDist = 140
     let dpr = Math.min(window.devicePixelRatio || 1, dprCap())
     let w = 0
     let h = 0
@@ -42,6 +49,9 @@ export default function GraphBg() {
     let heat = new Float32Array(0)
     let heat2 = new Float32Array(0)
     let curveAmp = 0
+    // route the field was built for — rebuild on change so the index
+    // keeps showcase density and subpages keep the cheap tier
+    let builtRoute = ''
     // eased live value — the curve morphs instead of popping on route change
     let curveLive = 0
     let buckets = new Map<string, number[]>()
@@ -50,8 +60,13 @@ export default function GraphBg() {
       dpr = Math.min(window.devicePixelRatio || 1, dprCap())
       w = window.innerWidth
       h = window.innerHeight
-      // adaptive density: same lattice feel, bounded per-frame cost
-      gap = w * h > 2500000 ? 44 : w * h > 1400000 ? 38 : 32
+      const enter = indexBoost()
+      // adaptive density: same lattice feel, bounded per-frame cost.
+      // Index runs one tier denser (its curve + glow carry the show).
+      const area = w * h
+      gap = enter ? (area > 2500000 ? 40 : area > 1400000 ? 36 : 30) : area > 2500000 ? 44 : area > 1400000 ? 38 : 32
+      linkDist = enter ? 150 : 140
+      builtRoute = xs.route
       canvas.width = Math.floor(w * dpr)
       canvas.height = Math.floor(h * dpr)
       canvas.style.width = `${w}px`
@@ -62,8 +77,9 @@ export default function GraphBg() {
       heat = new Float32Array(gw * gh)
       heat2 = new Float32Array(gw * gh)
       buckets = new Map<string, number[]>()
-      // gentle cylindrical curve — edges droop a touch, like glass
-      curveAmp = Math.min(30, h * 0.035)
+      // index curve: deep glass droop (was ≤30px — reads flat at 1440p+);
+      // everywhere else stays calm so subpage copy owns the frame
+      curveAmp = indexBoost() ? Math.min(72, h * 0.08) : Math.min(30, h * 0.035)
       dots = []
       for (let y = gap / 2; y < h; y += gap) {
         for (let x = gap / 2; x < w; x += gap) {
@@ -92,8 +108,17 @@ export default function GraphBg() {
         build()
         drawStatic()
       }
+      // hash route swaps tiers too — static frame follows without a loop
+      const onHash = () => {
+        build()
+        drawStatic()
+      }
       window.addEventListener('resize', onResize)
-      return () => window.removeEventListener('resize', onResize)
+      window.addEventListener('hashchange', onHash)
+      return () => {
+        window.removeEventListener('resize', onResize)
+        window.removeEventListener('hashchange', onHash)
+      }
     }
     window.addEventListener('resize', build)
 
@@ -152,6 +177,9 @@ export default function GraphBg() {
     const loop = () => {
       raf = requestAnimationFrame(loop)
       if (!running) return
+      // route-tier swap: rebuild once when crossing to/from the index so
+      // density, reach and stride always match the current tier
+      if (xs.route !== builtRoute) build()
       // idle sleep: 4s with no input, empty trail and settled scroll
       // velocity — the heat sim has decayed below visibility by then
       if (trail.length === 0 && xs.vel < 0.005 && performance.now() - lastInput > 4000) {
@@ -215,7 +243,7 @@ export default function GraphBg() {
       for (let i = 0; i < dots.length; i++) {
         let dx = ((dots[i].x + off) % w + w) % w
         let dy = ((dots[i].y + off * 0.6) % h + h) % h
-        // gentle curve: the field droops at the edges like glass
+        // deep glass droop on the index — edges fall away, center holds
         const nc = (dx - w / 2) / (w / 2)
         dy += curveLive * nc * nc
         // spatial warp: the lattice yields around the pointer like fabric,
@@ -262,11 +290,11 @@ export default function GraphBg() {
                 ddx = Math.min(ddx, w - ddx)
                 ddy = Math.min(ddy, h - ddy)
                 const d = Math.hypot(ddx, ddy)
-              if (d < 140 && d > 4) {
+              if (d < linkDist && d > 4) {
                 const oxh = Math.max(0, Math.min(gw - 1, Math.floor(ox / CELL)))
                 const oyh = Math.max(0, Math.min(gh - 1, Math.floor(oy / CELL)))
                 const have = (hh + Math.min(1, heat[oyh * gw + oxh])) / 2
-                const la = Math.min(0.85, (1 - d / 140) * 0.16 * (0.5 + near + boost * 0.5) * (1 + have * 3))
+                const la = Math.min(0.85, (1 - d / linkDist) * 0.16 * (0.5 + near + boost * 0.5) * (1 + have * 3))
                 ctx.strokeStyle =
                   have > 0.15
                     ? `rgba(255,214,170,${la.toFixed(3)})`
