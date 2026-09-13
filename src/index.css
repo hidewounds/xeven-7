@@ -1,0 +1,64 @@
+/* XEVEN tokens. Palette: void/fog-teal/bone/ember/mint/moon. No purple-blue gradients. */
+
+:root {
+  --void: #06090f;
+  --fog: #0e1a20;
+  --bone: #e8edee;
+  --ember: #ff4d2e;
+  --mint: #9cf5d3;
+  --moon: #fff8e6;
+  --muted: #93a3a8;
+  --faint: #5c6e74;
+  --line: rgba(232, 237, 238, 0.14);
+  --line-strong: rgba(232, 237, 238, 0.3);
+  --glass: rgba(8, 13, 18, 0.6);
+
+  --s4: 4px; --s8: 8px; --s12: 12px; --s16: 16px; --s24: 24px;
+  --s32: 32px; --s48: 48px; --s64: 64px; --s96: 96px;
+  --s128: 128px; --s192: 192px;
+
+  --disp: 'Anton', 'Arial Narrow', sans-serif;
+  --cond: 'Space Grotesk', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --disp-xl: clamp(80px, 18vw, 220px);
+  --disp-l: clamp(48px, 9vw, 130px);
+  --disp-m: clamp(32px, 5vw, 64px);
+
+  --d-fast: 140ms; --d-med: 320ms; --d-slow: 700ms;
+
+  --z-bg: 0; --z-canvas: 1; --z-graph: 2; --z-type: 10;
+  --z-trail: 30; --z-ui: 40; --z-menu: 60; --z-curtain: 80;
+  --z-loader: 90; --z-a11y: 10000;
+
+  color-scheme: dark;
+  font: 16px/150% var(--cond);
+  color: var(--bone);
+  background: var(--void);
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+  background: var(--void);
+}
+
+body { overflow-x: hidden; }
+
+a { color: inherit; }
+
+button { font: inherit; color: inherit; background: none; border: none; padding: 0; }
+
+::selection { background: var(--mint); color: #06231b; }
+
+:focus-visible { outline: 1px solid var(--mint); outline-offset: 3px; }
+
+/* the custom trail replaces the native cursor — hide it only where the
+   replacement actually mounts (fine pointer, full motion); reduced motion
+   keeps the native pointer or there would be no cursor at all */
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .xp, .xp a, .xp button { cursor: none; }
+}
