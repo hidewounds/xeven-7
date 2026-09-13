@@ -77,11 +77,11 @@ export default function GraphBg() {
       heat = new Float32Array(gw * gh)
       heat2 = new Float32Array(gw * gh)
       buckets = new Map<string, number[]>()
-      // index curve: level-camera cylinder — the camera sits at 0°
-      // elevation inside the curve, so the flanks compress toward center
-      // in x and the horizon never bends up or down. Subpages stay flat
-      // so copy owns the frame.
-      curveAmp = indexBoost() ? Math.min(140, h * 0.12) : Math.min(30, h * 0.035)
+      // index curve: centered inside-cylinder — viewer at the middle of
+      // the diameter AND the height. Flanks squeeze, crown lifts, floor
+      // drops, all terms zero at viewport center: unmistakable wrap with
+      // zero tilt. Subpages stay flat so copy owns the frame.
+      curveAmp = indexBoost() ? Math.min(150, h * 0.13) : Math.min(30, h * 0.035)
       dots = []
       for (let y = gap / 2; y < h; y += gap) {
         for (let x = gap / 2; x < w; x += gap) {
@@ -99,9 +99,11 @@ export default function GraphBg() {
       // the curve lives on the index only — everywhere else the field is flat
       const ca = xs.route === 'enter' ? curveAmp : 0
       for (const d of dots) {
-        // level camera: flanks compress toward center, horizon never bends
+        // centered inside-cylinder: flanks squeeze, crown lifts, floor
+        // drops — all zero at viewport middle, so no tilt in any direction
         const nx = (d.x - hw) / hw
-        ctx.fillRect(d.x - ca * nx * Math.abs(nx) - 1, d.y - 1, 2, 2)
+        const ny = (d.y - h / 2) / (h / 2)
+        ctx.fillRect(d.x - ca * nx * Math.abs(nx) - 1, d.y + ca * ny * Math.abs(ny) - 1, 2, 2)
       }
     }
     build()
@@ -251,6 +253,9 @@ export default function GraphBg() {
         // level cylinder: flanks squeeze toward center, horizon untouched
         const nc = (dx - w / 2) / (w / 2)
         dx -= curveLive * nc * Math.abs(nc)
+        // centered wrap: crown lifts, floor drops, equator never moves
+        const nl = (dy - h / 2) / (h / 2)
+        dy += curveLive * nl * Math.abs(nl)
         // spatial warp: the lattice yields around the pointer like fabric,
         // lines stretch with it since they join the displaced dots
         let mdx = dx - sm.x
@@ -269,9 +274,9 @@ export default function GraphBg() {
         const hx = Math.max(0, Math.min(gw - 1, Math.floor(dx / CELL)))
         const hy = Math.max(0, Math.min(gh - 1, Math.floor(dy / CELL)))
         const hh = Math.min(1, heat[hy * gw + hx])
-        // cylinder shading (index only): flanks fall into shadow so the
-        // wrap reads even in a still — pure alpha, horizon untouched
-        const shade = xs.route === 'enter' ? 1 - 0.55 * nc * nc : 1
+        // cylinder shading (index only): rims fall into shadow so the
+        // wrap reads even in a still — pure alpha, symmetric, zero tilt
+        const shade = xs.route === 'enter' ? 1 - 0.4 * (nc * nc + nl * nl) : 1
         const a = Math.min(1, (0.1 + near * 0.5 + boost * 0.2 + hh * 0.9) * shade)
         const hr = Math.round(156 + 99 * hh)
         const hg2 = Math.round(245 - 31 * hh)
@@ -294,14 +299,16 @@ export default function GraphBg() {
                 const npc = (ox - w / 2) / (w / 2)
                 const oy = dots[j].y
                 const oxc = ox - curveLive * npc * Math.abs(npc)
+                const nyc = (oy - h / 2) / (h / 2)
+                const oyc = oy + curveLive * nyc * Math.abs(nyc)
                 let ddx = Math.abs(oxc - dx)
-                let ddy = Math.abs(oy - dy)
+                let ddy = Math.abs(oyc - dy)
                 ddx = Math.min(ddx, w - ddx)
                 ddy = Math.min(ddy, h - ddy)
                 const d = Math.hypot(ddx, ddy)
               if (d < linkDist && d > 4) {
                 const oxh = Math.max(0, Math.min(gw - 1, Math.floor(oxc / CELL)))
-                const oyh = Math.max(0, Math.min(gh - 1, Math.floor(oy / CELL)))
+                const oyh = Math.max(0, Math.min(gh - 1, Math.floor(oyc / CELL)))
                 const have = (hh + Math.min(1, heat[oyh * gw + oxh])) / 2
                 const la = Math.min(0.85, (1 - d / linkDist) * 0.16 * (0.5 + near + boost * 0.5) * (1 + have * 3) * shade)
                 ctx.strokeStyle =
@@ -310,7 +317,7 @@ export default function GraphBg() {
                     : `rgba(156,245,211,${la.toFixed(3)})`
                   ctx.beginPath()
                   ctx.moveTo(dx, dy)
-                  ctx.lineTo(oxc, oy)
+                  ctx.lineTo(oxc, oyc)
                   ctx.stroke()
                 }
               }
