@@ -202,6 +202,9 @@
 .work-cell { transition: transform 300ms ease; }
 .work-cell:hover { transform: scale(1.02); filter: saturate(1.25) brightness(1.08); }
 .rows { display: flex; flex-direction: column; }
+/* principle rows (Vision) reuse the process grid but sit in a plain stack —
+   give each row its own breathing room so display titles never collide */
+.rows .proc-row { padding: var(--s16) 0; }
 .row { border-top: 1px solid var(--line); }
 .row:last-child { border-bottom: 1px solid var(--line); }
 .row-head {

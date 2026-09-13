@@ -41,6 +41,8 @@ export default function GraphBg() {
     let gh = 0
     let heat = new Float32Array(0)
     let heat2 = new Float32Array(0)
+    let curveAmp = 0
+    let buckets = new Map<string, number[]>()
 
     const build = () => {
       dpr = Math.min(window.devicePixelRatio || 1, dprCap())
@@ -57,6 +59,9 @@ export default function GraphBg() {
       gh = Math.max(1, Math.ceil(h / CELL))
       heat = new Float32Array(gw * gh)
       heat2 = new Float32Array(gw * gh)
+      buckets = new Map<string, number[]>()
+      // gentle cylindrical curve — edges droop a touch, like glass
+      curveAmp = Math.min(30, h * 0.035)
       dots = []
       for (let y = gap / 2; y < h; y += gap) {
         for (let x = gap / 2; x < w; x += gap) {
@@ -70,7 +75,11 @@ export default function GraphBg() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, w, h)
       ctx.fillStyle = 'rgba(156,245,211,0.1)'
-      for (const d of dots) ctx.fillRect(d.x - 1, d.y - 1, 2, 2)
+      const hw = w / 2
+      for (const d of dots) {
+        const nx = (d.x - hw) / hw
+        ctx.fillRect(d.x - 1, d.y + curveAmp * nx * nx - 1, 2, 2)
+      }
     }
     build()
     if (reduced) {
@@ -114,7 +123,9 @@ export default function GraphBg() {
     })
     io.observe(canvas)
 
-    // cell buckets for bounded neighbor lookups
+    // cell buckets for bounded neighbor lookups — the pool above is
+    // allocated once per resize and REUSED every frame (fresh arrays per
+    // frame promoted to old-gen and caused full-GC pauses after minutes)
     const cell = 140
     let raf = 0
     let lastInput = performance.now()
@@ -182,17 +193,24 @@ export default function GraphBg() {
       sm.x += (mouse.x - sm.x) * 0.22
       sm.y += (mouse.y - sm.y) * 0.22
       const boost = Math.min(1, xs.vel * 2)
-      const buckets = new Map<string, number[]>()
+      // reuse the pooled bucket arrays — just truncate, never reallocate
+      for (const arr of buckets.values()) arr.length = 0
       for (let i = 0; i < dots.length; i++) {
         const key = `${Math.floor(dots[i].x / cell)},${Math.floor(dots[i].y / cell)}`
-        const arr = buckets.get(key)
-        if (arr) arr.push(i)
-        else buckets.set(key, [i])
+        let arr = buckets.get(key)
+        if (!arr) {
+          arr = []
+          buckets.set(key, arr)
+        }
+        arr.push(i)
       }
       ctx.lineWidth = 1
       for (let i = 0; i < dots.length; i++) {
         let dx = ((dots[i].x + off) % w + w) % w
         let dy = ((dots[i].y + off * 0.6) % h + h) % h
+        // gentle curve: the field droops at the edges like glass
+        const nc = (dx - w / 2) / (w / 2)
+        dy += curveAmp * nc * nc
         // spatial warp: the lattice yields around the pointer like fabric,
         // lines stretch with it since they join the displaced dots
         let mdx = dx - sm.x
@@ -230,7 +248,8 @@ export default function GraphBg() {
               for (const j of arr) {
                 if (j <= i) continue
                 const ox = ((dots[j].x + off) % w + w) % w
-                const oy = ((dots[j].y + off * 0.6) % h + h) % h
+                const npc = (ox - w / 2) / (w / 2)
+                const oy = ((dots[j].y + off * 0.6) % h + h) % h + curveAmp * npc * npc
                 let ddx = Math.abs(ox - dx)
                 let ddy = Math.abs(oy - dy)
                 ddx = Math.min(ddx, w - ddx)
