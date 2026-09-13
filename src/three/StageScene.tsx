@@ -48,7 +48,7 @@ function Torus({ scroll, vel }: { scroll: { v: number }; vel: { v: number } }) {
   })
   return (
     <points ref={ref} geometry={geom} frustumCulled={false}>
-      <pointsMaterial color="#9CF5D3" size={0.035} transparent opacity={0.85} depthWrite={false} blending={THREE.AdditiveBlending} sizeAttenuation />
+      <pointsMaterial color="#9CF5D3" size={0.035} transparent opacity={0.7} depthWrite={false} blending={THREE.AdditiveBlending} sizeAttenuation />
     </points>
   )
 }
@@ -117,7 +117,7 @@ export default function StageScene({
         <Dust />
         {fx && (
           <EffectComposer multisampling={0}>
-            <Bloom mipmapBlur intensity={0.55} luminanceThreshold={0.6} luminanceSmoothing={0.2} />
+            <Bloom mipmapBlur intensity={0.35} luminanceThreshold={0.6} luminanceSmoothing={0.2} />
             <Vignette offset={0.24} darkness={0.75} />
           </EffectComposer>
         )}

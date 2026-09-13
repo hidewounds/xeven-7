@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 /* Cursor FX v2 — rebuilt from scratch, zero WebGL. The native cursor is
    hidden (see index.css) and two notice-it layers follow one smoothed head:
    1. aura: DOM glow riding the head (transform-only, no layout cost)
-   2. wake: 2D-canvas ribbon through recent head positions, width by speed
+   2. wake: 2D-canvas ribbon through recent head positions, constant taper
+   toward the head — deliberately NOT velocity-flared (founder direction:
+   no illumination-on-motion; hoverables still lift intensity).
    One rAF loop, coalesced pointer events, exponential follow — no stepping.
    Debug: open with ?cursor-debug (or #cursor-debug) for a red head dot
    plus a live coordinate readout. */
@@ -118,15 +120,15 @@ export default function CursorTrail() {
       ctx.clearRect(0, 0, w, h)
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
-      // newest-first ribbon: alpha + width grow toward the head
+      // newest-first ribbon: constant taper toward the head — speed never
+      // flares the width (no illumination-on-motion)
       for (let i = 1; i < pts.length; i++) {
         const f = i / pts.length
         const age = 1 - (now - pts[i].t) / LIFE_MS
         const a = f * f * age * glow
         if (a <= 0.004) continue
-        const spd = Math.min(1, Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y) / 24)
         ctx.strokeStyle = `rgba(228,234,235,${a.toFixed(3)})`
-        ctx.lineWidth = 1.5 + f * (8 + spd * 18)
+        ctx.lineWidth = 1.5 + f * 8
         ctx.beginPath()
         ctx.moveTo(pts[i - 1].x, pts[i - 1].y)
         ctx.lineTo(pts[i].x, pts[i].y)

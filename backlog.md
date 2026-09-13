@@ -8,6 +8,7 @@ Scope frozen: map-only phase found zero blank routes, zero dead links, zero cons
 - Phase 8 (71–80) CLOSED: 390/768/1920 verified; touch targets ≥44px (burger/logo/links/mnav/mailto/skip/inputs); 100svh hero; landscape intact; 60fps mobile rAF; type floor 11px mono system; media preload-none + 16/10.
 - Phase 9 (81–90) CLOSED: OG/Twitter + real og.jpg (103KB, 1/50) + JSON-LD Organization; fonts-blocked sane.
 - Phase 10 (91–100): keyboard/ARIA/contrast(≥6.03)/reduced-motion/final-set(12+10)/chunks-traced CLOSED; commit+push+deploy BLOCKED (no .git, no remote/auth); live smoke BLOCKED (no live URL).
+- Post-100 founder direction (cursor calm): velocity flare REMOVED from CursorTrail ribbon (constant 1.5+f*8 taper; Step-42 velocity-follow retired, Step-44 hover lift kept); StageScene dimmed to subpage calm (bloom 0.55→0.35, torus 0.85→0.7). Verified by sweep frame pair, zero errors.
 
 - [x] Step 11: `src/three/CityScene.tsx` (776 lines) has zero imports — DELETED (+ empty `audio/`, `shaders/` dirs).
 - [x] Step 11: `src/audio/sound.ts` has zero imports — DELETED.
