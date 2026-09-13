@@ -237,25 +237,6 @@
   clip-path: circle(0px at 50% calc(100% - 48px));
   opacity: 0;
 }
-/* round revolve: ring-and-disc globe that carries TOP → WORKS and
-   takes over into the reel (sole owner: the revolve timeline — nothing
-   else writes these nodes). Paints above section boxes, below the mark. */
-.revolve {
-  position: fixed; inset: 0; z-index: 32; pointer-events: none;
-  opacity: 0;
-  clip-path: circle(0px at 50% calc(100% - 48px));
-}
-.revolve-spin { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; }
-.revolve-disc {
-  position: relative; width: 120px; height: 120px; margin-bottom: 8px; border-radius: 50%;
-  background: #f2f0ea; border: 1px solid rgba(11, 13, 14, 0.35);
-  box-shadow: 0 0 0 12px rgba(242, 240, 234, 0.12), 0 0 80px rgba(242, 240, 234, 0.35);
-}
-/* notch so the counter-spin reads as a globe turning */
-.revolve-disc::after {
-  content: ''; position: absolute; top: 10px; left: 50%; width: 10px; height: 10px;
-  margin-left: -5px; border-radius: 50%; background: #0b0d0e;
-}
 .veil-white {
   position: fixed; inset: 0; z-index: 30; pointer-events: none;
   background: radial-gradient(circle at 50% 100%, rgba(242, 240, 234, 0.42), rgba(242, 240, 234, 0) 70%);
@@ -365,5 +346,5 @@
   .reel-cell { width: 100%; max-width: 860px; margin-inline: auto; }
   /* cinema layers stand down entirely — veil clip is already zero, but
      keep them out of the a11y/paint tree for certainty */
-  .veil-white, .mark-fixed, .proc-bloom, .revolve { display: none; }
+  .veil-white, .mark-fixed, .proc-bloom { display: none; }
 }
