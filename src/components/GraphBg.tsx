@@ -42,6 +42,8 @@ export default function GraphBg() {
     let heat = new Float32Array(0)
     let heat2 = new Float32Array(0)
     let curveAmp = 0
+    // eased live value — the curve morphs instead of popping on route change
+    let curveLive = 0
     let buckets = new Map<string, number[]>()
 
     const build = () => {
@@ -76,9 +78,11 @@ export default function GraphBg() {
       ctx.clearRect(0, 0, w, h)
       ctx.fillStyle = 'rgba(156,245,211,0.1)'
       const hw = w / 2
+      // the curve lives on the index only — everywhere else the field is flat
+      const ca = xs.route === 'enter' ? curveAmp : 0
       for (const d of dots) {
         const nx = (d.x - hw) / hw
-        ctx.fillRect(d.x - 1, d.y + curveAmp * nx * nx - 1, 2, 2)
+        ctx.fillRect(d.x - 1, d.y + ca * nx * nx - 1, 2, 2)
       }
     }
     build()
@@ -190,6 +194,9 @@ export default function GraphBg() {
       }
       ctx.globalCompositeOperation = 'lighter'
       xs.vel *= 0.9
+      // curve morphs with the route — flat everywhere but the index
+      const curveTarget = xs.route === 'enter' ? curveAmp : 0
+      curveLive += (curveTarget - curveLive) * 0.06
       sm.x += (mouse.x - sm.x) * 0.22
       sm.y += (mouse.y - sm.y) * 0.22
       const boost = Math.min(1, xs.vel * 2)
@@ -210,7 +217,7 @@ export default function GraphBg() {
         let dy = ((dots[i].y + off * 0.6) % h + h) % h
         // gentle curve: the field droops at the edges like glass
         const nc = (dx - w / 2) / (w / 2)
-        dy += curveAmp * nc * nc
+        dy += curveLive * nc * nc
         // spatial warp: the lattice yields around the pointer like fabric,
         // lines stretch with it since they join the displaced dots
         let mdx = dx - sm.x
@@ -249,7 +256,7 @@ export default function GraphBg() {
                 if (j <= i) continue
                 const ox = ((dots[j].x + off) % w + w) % w
                 const npc = (ox - w / 2) / (w / 2)
-                const oy = ((dots[j].y + off * 0.6) % h + h) % h + curveAmp * npc * npc
+                const oy = ((dots[j].y + off * 0.6) % h + h) % h + curveLive * npc * npc
                 let ddx = Math.abs(ox - dx)
                 let ddy = Math.abs(oy - dy)
                 ddx = Math.min(ddx, w - ddx)

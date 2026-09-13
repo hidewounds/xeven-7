@@ -67,6 +67,11 @@ export default function EnterStage() {
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
 
+  const toTop = () => {
+    navigate('enter')
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' })
+  }
+
   useLayoutEffect(() => {
     // reduced motion: no SplitText, pins, or scrubs — no ticker burn.
     // Readable final states come from CSS + initial values below.
@@ -76,6 +81,33 @@ export default function EnterStage() {
       const split = new SplitText('.st-hero-title', { type: 'lines,words,chars', mask: 'lines', autoSplit: true })
       gsap.from(split.chars, { yPercent: 120, duration: 1.1, ease: 'expo.out', stagger: 0.02, delay: 0.3 })
       gsap.to('.st-fade', { opacity: 0, y: -50, ease: 'none', scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 30%', scrub: 1.2 } })
+
+      // migrating mark: the topbar wordmark yields as a small fixed mark
+      // rises bottom-center (both directions scrub cleanly)
+      const tbLogo = document.querySelector('.tb-logo')
+      if (tbLogo) {
+        gsap.to(tbLogo, {
+          opacity: 0,
+          ease: 'none',
+          scrollTrigger: { trigger: '.st-hero', start: 'bottom 75%', end: 'bottom 30%', scrub: 1.2 },
+        })
+        // the wordmark returns for departure once the wipe has cleared
+        gsap.to(tbLogo, {
+          opacity: 1,
+          ease: 'none',
+          scrollTrigger: { trigger: '.st-stats', start: 'top 90%', end: 'top 50%', scrub: 1.2 },
+        })
+      }
+      gsap.fromTo(
+        '.mark-fixed',
+        { autoAlpha: 0, y: 16 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          ease: 'none',
+          scrollTrigger: { trigger: '.st-hero', start: 'bottom 75%', end: 'bottom 30%', scrub: 1.2 },
+        },
+      )
 
       // progress mirrors — trigger is the context root itself: selector text
       // inside gsap.context only matches descendants, so '.st-scroll'
@@ -110,40 +142,80 @@ export default function EnterStage() {
         },
       })
 
-      // showreel pinned horizontal
-      gsap.to('.reel-track', {
-        x: () => -(document.querySelector('.reel-track')!.scrollWidth - window.innerWidth),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.st-reel',
-          start: 'top top',
-          end: '+=220%',
-          pin: true,
-          scrub: 1.2,
-          anticipatePin: 1,
-          fastScrollEnd: true,
-          invalidateOnRefresh: true,
-        },
+      // showreel cells arrive left-to-right over the white field
+      gsap.utils.toArray<HTMLElement>('.reel-cell').forEach((cell) => {
+        gsap.fromTo(
+          cell,
+          { x: () => -window.innerWidth * 0.15, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            ease: 'none',
+            scrollTrigger: { trigger: cell, start: 'top 90%', end: 'top 55%', scrub: 1.2 },
+          },
+        )
       })
 
-      // stacked capability cards: settle back (scale + opacity, never
-      // filter — filter animation is a main-thread/GPU sink) as the next
-      // card covers them
-      const caps = gsap.utils.toArray<HTMLElement>('.cap-card')
-      caps.forEach((card, idx) => {
-        if (idx === caps.length - 1) return
-        gsap.to(card, {
-          scale: 0.93,
-          opacity: 0.55,
-          transformOrigin: 'center top',
-          ease: 'none',
-          scrollTrigger: {
-            trigger: caps[idx + 1],
-            start: 'top bottom',
-            end: 'top top+=15%',
-            scrub: 1.2,
+      // ink into the reel and back out — ONE timeline owns veil, ink and
+      // nav color together (two competing scrubbed tweens on one property
+      // resolve nondeterministically on discontinuous jumps; a single
+      // timeline seeks deterministically): fill → hold while cells play →
+      // drain everything back as the reel clears
+      const navEls = gsap.utils.toArray<HTMLElement>(
+        document.querySelectorAll('.tb-logo, .tb-link'),
+      )
+      const veilTl = gsap.timeline({
+        scrollTrigger: { trigger: '.st-reel', start: 'top 70%', end: 'bottom 100%', scrub: 1.2 },
+      })
+      veilTl
+        .fromTo(
+          '.mark-ink',
+          { clipPath: 'circle(0% at 50% 50%)' },
+          { clipPath: 'circle(75% at 50% 50%)', ease: 'none', duration: 1 },
+          0,
+        )
+        .fromTo(
+          '.veil-white',
+          { clipPath: 'circle(0px at 50% calc(100% - 48px))' },
+          { clipPath: 'circle(150vmax at 50% calc(100% - 48px))', ease: 'none', duration: 1 },
+          0,
+        )
+        // nav ink tracks the veil deterministically (difference-blend math
+        // proved unreliable over the white field — explicit color wins).
+        // NOTE: element refs, not selector text — the topbar lives outside
+        // this gsap context, where selector text resolves to nothing.
+        .to(navEls, { color: '#0b0d0e', ease: 'none', duration: 1 }, 0)
+        .to('.veil-white', { clipPath: 'circle(0px at 50% calc(100% - 48px))', ease: 'none', duration: 1 }, 1.6)
+        .to('.mark-ink', { clipPath: 'circle(0% at 50% 50%)', ease: 'none', duration: 1 }, 1.6)
+        .to(navEls, { color: '#ffffff', ease: 'none', duration: 1 }, 1.6)
+      // grow/flip wipe into process: the white mark swells flipping to
+      // cover the page as process arrives
+      const wipe = gsap.timeline({
+        scrollTrigger: { trigger: '.st-proc', start: 'top 130%', end: 'top 50%', scrub: 1.2 },
+      })
+      wipe
+        .fromTo(
+          '.mark-fixed',
+          { scale: 1, rotationY: 0 },
+          { scale: 30, rotationY: 180, transformOrigin: '50% 50%', ease: 'none', duration: 1.6 },
+          0,
+        )
+        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 1.3)
+
+      // capability cards rise out of the mark into alternating slots
+      // (smaller, zigzag — never filter, transform only)
+      gsap.utils.toArray<HTMLElement>('.cap-card').forEach((card) => {
+        gsap.fromTo(
+          card,
+          { y: 140, opacity: 0, scale: 0.94 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            ease: 'none',
+            scrollTrigger: { trigger: card, start: 'top 94%', end: 'top 58%', scrub: 1.2 },
           },
-        })
+        )
       })
 
       // process line draw
@@ -174,6 +246,13 @@ export default function EnterStage() {
   return (
     <div className="st-scroll" ref={root}>
       <SectionRail />
+      <div className="veil-white" aria-hidden="true" />
+      <button className="mark-fixed" onClick={toTop} data-cursor aria-label="XEVEN — back to top">
+        <span className="mark-word">XEVEN</span>
+        <span className="mark-word mark-ink" aria-hidden="true">
+          XEVEN
+        </span>
+      </button>
       <section className="st-hero">
         <p className="mono st-fade">00 — HERO VOID</p>
         <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
@@ -196,8 +275,8 @@ export default function EnterStage() {
 
       <section className="st-caps">
         <p className="mono">02 — CAPABILITIES</p>
-        {CAPS.map((c) => (
-          <Tilt key={c.t} className="cap-card">
+        {CAPS.map((c, i) => (
+          <Tilt key={c.t} className={i % 2 ? 'cap-card cap-right' : 'cap-card cap-left'}>
             <VideoCard src={c.src} title={c.t} sub={c.d} />
           </Tilt>
         ))}

@@ -35,7 +35,7 @@
   position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-ui);
   display: flex; align-items: center; gap: var(--s24);
   padding: calc(var(--s16) + env(safe-area-inset-top)) var(--s24) var(--s16);
-  mix-blend-mode: difference; color: #fff;
+  color: #fff;
 }
 .tb-logo { font-family: var(--disp); font-size: 20px; letter-spacing: 0.12em; min-height: 44px; display: inline-flex; align-items: center; }
 .tb-center { display: flex; gap: var(--s24); margin: 0 0 0 auto; }
@@ -116,7 +116,7 @@
 /* ---------- index section rail ---------- */
 .rail {
   position: fixed; left: var(--s24); top: 50%; transform: translateY(-50%);
-  z-index: var(--z-ui); display: flex; flex-direction: column; gap: var(--s4);
+  z-index: 20; display: flex; flex-direction: column; gap: var(--s4);
 }
 .rail-btn {
   display: flex; align-items: center; gap: var(--s8); padding: 0;
@@ -155,10 +155,15 @@
 .mani-word { opacity: 0.13; }
 
 .st-caps { display: flex; flex-direction: column; gap: 12vh; padding: 16vh 6vw 20vh; }
-.cap-card { position: sticky; top: 12vh; will-change: transform; }
+.cap-card { width: min(78%, 600px); will-change: transform; }
+.cap-left { align-self: flex-start; }
+.cap-right { align-self: flex-end; }
 .cap-card .vid { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
 
 .st-reel { position: relative; overflow: hidden; padding: 14vh 0; }
+/* reel cells play ABOVE the white veil (the generic section rule below
+   would otherwise bury them under it) */
+.st-scroll > section.st-reel { z-index: 31; }
 .reel-ghost {
   position: absolute; top: 4vh; left: 0; white-space: nowrap;
   font-family: var(--disp); font-size: clamp(60px, 12vw, 180px); color: transparent;
@@ -166,8 +171,8 @@
   animation: marquee 22s linear infinite;
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.reel-track { display: flex; gap: 4vw; padding: 0 6vw; width: max-content; align-items: center; }
-.reel-cell { width: min(72vw, 860px); flex-shrink: 0; }
+.reel-track { display: flex; flex-direction: column; gap: 10vh; padding: 0 6vw; }
+.reel-cell { width: 100%; }
 
 .st-proc { padding: 16vh 8vw; display: flex; flex-direction: column; gap: var(--s32); position: relative; }
 .proc-line { position: absolute; left: calc(8vw + 22px); top: 24vh; bottom: 12vh; width: 1px; background: var(--line); }
@@ -200,6 +205,25 @@
 .st-foot { padding: 22vh 6vw 16vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
 .st-foot h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; }
 .st-foot a { font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
+
+/* ---------- index scroll cinema: migrating mark + white veil ---------- */
+.mark-fixed {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  z-index: 41; font-family: var(--disp); font-size: 20px; letter-spacing: 0.12em;
+  color: var(--bone); background: none; border: none;
+  min-height: 44px; min-width: 44px; padding: 0 var(--s16);
+  display: inline-flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+}
+.mark-word { position: relative; }
+.mark-ink {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #0b0d0e; clip-path: circle(0% at 50% 50%);
+}
+.veil-white {
+  position: fixed; inset: 0; z-index: 30; background: #f2f0ea;
+  pointer-events: none; clip-path: circle(0px at 50% calc(100% - 48px));
+}
 
 /* ---------- video cards ---------- */
 .vid { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 16/10; background: #0a0f14; }
@@ -277,7 +301,7 @@
   .tb-burger { display: flex; }
   .tb-right { margin-left: auto; }
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
-  .reel-cell { width: 84vw; }
+  .reel-cell { width: 100%; }
   .proc-row { grid-template-columns: 44px 1fr; }
 }
 
