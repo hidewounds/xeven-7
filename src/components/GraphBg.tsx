@@ -77,9 +77,10 @@ export default function GraphBg() {
       heat = new Float32Array(gw * gh)
       heat2 = new Float32Array(gw * gh)
       buckets = new Map<string, number[]>()
-      // index curve: deep glass droop (was ≤30px — reads flat at 1440p+);
-      // everywhere else stays calm so subpage copy owns the frame
-      curveAmp = indexBoost() ? Math.min(72, h * 0.08) : Math.min(30, h * 0.035)
+      // index curve: outward cylindrical bulge — the camera sits inside
+      // the cylinder, so the field lifts at the flanks and the center
+      // holds closest. Subpages stay flat so copy owns the frame.
+      curveAmp = indexBoost() ? Math.min(90, h * 0.1) : Math.min(30, h * 0.035)
       dots = []
       for (let y = gap / 2; y < h; y += gap) {
         for (let x = gap / 2; x < w; x += gap) {
@@ -98,7 +99,7 @@ export default function GraphBg() {
       const ca = xs.route === 'enter' ? curveAmp : 0
       for (const d of dots) {
         const nx = (d.x - hw) / hw
-        ctx.fillRect(d.x - 1, d.y + ca * nx * nx - 1, 2, 2)
+        ctx.fillRect(d.x - 1, d.y - ca * nx * nx - 1, 2, 2)
       }
     }
     build()
@@ -243,9 +244,10 @@ export default function GraphBg() {
       for (let i = 0; i < dots.length; i++) {
         let dx = ((dots[i].x + off) % w + w) % w
         let dy = ((dots[i].y + off * 0.6) % h + h) % h
-        // deep glass droop on the index — edges fall away, center holds
+        // outward cylinder: the field lifts at the flanks, center holds
+        // closest — camera reads as sitting inside the curve
         const nc = (dx - w / 2) / (w / 2)
-        dy += curveLive * nc * nc
+        dy -= curveLive * nc * nc
         // spatial warp: the lattice yields around the pointer like fabric,
         // lines stretch with it since they join the displaced dots
         let mdx = dx - sm.x
@@ -284,7 +286,7 @@ export default function GraphBg() {
                 if (j <= i) continue
                 const ox = ((dots[j].x + off) % w + w) % w
                 const npc = (ox - w / 2) / (w / 2)
-                const oy = ((dots[j].y + off * 0.6) % h + h) % h + curveLive * npc * npc
+                const oy = ((dots[j].y + off * 0.6) % h + h) % h - curveLive * npc * npc
                 let ddx = Math.abs(ox - dx)
                 let ddy = Math.abs(oy - dy)
                 ddx = Math.min(ddx, w - ddx)
