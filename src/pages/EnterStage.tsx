@@ -183,11 +183,10 @@ export default function EnterStage() {
       })
 
       // showreel travels as ONE sequenced row — pinned horizontal, exact
-      // full travel, re-measured on resize. Cells ride the outward arc of
-      // the lattice (flanks lift toward the camera), so panels read
-      // attached to the curvy background: sequential globe entry
-      // left-to-right, exit fade as each panel has passed
-      // (containerAnimation triggers).
+      // full travel, re-measured on resize. The camera sits dead level,
+      // so panels travel flat (no vertical arc — that read as a tilted
+      // camera): sequential entry left-to-right with un-tilt, exit fade
+      // as each panel has passed (containerAnimation triggers).
       const rowTween = gsap.to('.reel-track', {
         x: () => -(document.querySelector('.reel-track')!.scrollWidth - window.innerWidth),
         ease: 'none',
@@ -202,7 +201,7 @@ export default function EnterStage() {
           invalidateOnRefresh: true,
         },
       })
-      const arcY = () => -window.innerHeight * 0.08
+      const arcY = () => 0
       gsap.utils.toArray<HTMLElement>('.reel-cell').forEach((cell, i) => {
         // entrance: rise off the curve, un-tilt, land readable
         gsap.fromTo(
