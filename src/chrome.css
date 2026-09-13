@@ -150,17 +150,17 @@
 .st-hint span { display: inline-block; animation: kvbob 2.2s ease-in-out infinite; }
 @keyframes kvbob { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(8px); opacity: 1; } }
 
-.st-mani { min-height: 120vh; display: flex; flex-direction: column; justify-content: center; gap: var(--s32); padding: 20vh 8vw; }
+.st-mani { min-height: 120vh; display: flex; flex-direction: column; justify-content: center; gap: var(--s32); padding: 26vh 8vw; }
 .mani-text { font-family: var(--disp); font-size: clamp(30px, 5.5vw, 72px); line-height: 1.15; margin: 0; max-width: 20ch; }
 .mani-word { opacity: 0.13; }
 
-.st-caps { display: flex; flex-direction: column; gap: 12vh; padding: 16vh 6vw 20vh; }
+.st-caps { display: flex; flex-direction: column; gap: 20vh; padding: 26vh 6vw 32vh; }
 .cap-card { width: min(78%, 600px); will-change: transform; }
 .cap-left { align-self: flex-start; }
 .cap-right { align-self: flex-end; }
 .cap-card .vid { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
 
-.st-reel { position: relative; overflow: hidden; padding: 14vh 0; }
+.st-reel { position: relative; overflow: hidden; padding: 22vh 0; }
 /* reel cells play ABOVE the white veil (the generic section rule below
    would otherwise bury them under it) */
 .st-scroll > section.st-reel { z-index: 31; }
@@ -172,22 +172,26 @@
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .reel-track { display: flex; gap: 4vw; padding: 0 6vw; width: max-content; align-items: center; }
-.reel-cell { width: min(72vw, 860px); flex-shrink: 0; }
+.reel-cell { width: min(72vw, 860px); flex-shrink: 0; will-change: transform, opacity; }
 
-.st-proc { padding: 16vh 8vw; display: flex; flex-direction: column; gap: var(--s32); position: relative; }
-.proc-line { position: absolute; left: calc(8vw + 22px); top: 24vh; bottom: 12vh; width: 1px; background: var(--line); }
+.st-proc { padding: 30vh 8vw 32vh; display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
+.proc-line { position: absolute; left: calc(8vw + 22px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
 .proc-line span { display: block; width: 100%; height: 100%; background: var(--mint); transform: scaleY(0); transform-origin: top; }
-.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; }
+.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; padding: 4vh 0; }
 .proc-n { font-family: var(--mono); font-size: 12px; color: var(--mint); letter-spacing: 0.2em; }
 .proc-row h3 { font-family: var(--disp); font-size: clamp(28px, 4.5vw, 56px); margin: 0; }
 .proc-row p { grid-column: 2; color: var(--muted); margin: 0; max-width: 52ch; }
+.proc-meta { grid-column: 2; font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--mint); margin: 0; }
+.proc-points { grid-column: 2; list-style: none; margin: var(--s8) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--s8); }
+.proc-points li { position: relative; padding-left: var(--s24); color: var(--muted); font-family: var(--cond); font-size: 15px; line-height: 1.5; margin: 0; max-width: 56ch; }
+.proc-points li::before { content: '→'; position: absolute; left: 0; color: inherit; }
 
-.st-stats { padding: 14vh 8vw; }
+.st-stats { padding: 22vh 8vw; }
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s32); margin-top: var(--s48); }
 .stat-num { font-family: var(--disp); font-size: clamp(48px, 8vw, 120px); color: var(--bone); line-height: 1; }
 .stat p { font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted); }
 
-.st-tier { padding: 14vh 8vw; }
+.st-tier { padding: 22vh 8vw; }
 .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s24); margin-top: var(--s48); }
 .tier {
   text-align: left; background: var(--glass); border: 1px solid var(--line);
@@ -202,7 +206,7 @@
 .tier-go { display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--s8); padding: var(--s8) 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; color: var(--mint); }
 .tier-go:hover { text-decoration: underline; text-underline-offset: 4px; }
 
-.st-foot { padding: 22vh 6vw 16vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
+.st-foot { padding: 30vh 6vw 20vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
 .st-foot h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; }
 .st-foot a { font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
 
@@ -216,6 +220,23 @@
   opacity: 0; visibility: hidden;
 }
 .mark-word { position: relative; }
+/* 3D X state of the mark: hidden until the process-exit flip crossfades
+   word → X (GSAP owns both opacities; CSS keeps X out by default) */
+.mark-x {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  opacity: 0; font-size: 1.6em; line-height: 1;
+}
+/* process bloom: white born from the mark point, integrating with the
+   field (sole owner: the proc-bloom timeline — never the reel veil).
+   Paints BELOW the section boxes (they carry z-2; this is z-0 inside the
+   same scroll context) so proc copy stays readable above the white while
+   the disc spreads over the dark field around it. */
+.proc-bloom {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: #f2f0ea;
+  clip-path: circle(0px at 50% calc(100% - 48px));
+  opacity: 0;
+}
 .veil-white {
   position: fixed; inset: 0; z-index: 30; pointer-events: none;
   background: radial-gradient(circle at 50% 100%, rgba(242, 240, 234, 0.42), rgba(242, 240, 234, 0) 70%);
@@ -325,5 +346,5 @@
   .reel-cell { width: 100%; max-width: 860px; margin-inline: auto; }
   /* cinema layers stand down entirely — veil clip is already zero, but
      keep them out of the a11y/paint tree for certainty */
-  .veil-white, .mark-fixed { display: none; }
+  .veil-white, .mark-fixed, .proc-bloom { display: none; }
 }

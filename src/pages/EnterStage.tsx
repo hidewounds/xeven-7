@@ -24,10 +24,50 @@ const REEL = [
 ]
 
 const STEPS = [
-  { n: '01', t: 'Signal', d: 'We listen first. Every world starts as a frequency.' },
-  { n: '02', t: 'Worldbuild', d: 'Geometry, light and law — the physics of the place.' },
-  { n: '03', t: 'Ignite', d: 'Motion and interaction switch on together.' },
-  { n: '04', t: 'Live', d: 'Ship it breathing. Tune it forever.' },
+  {
+    n: '01',
+    t: 'Signal',
+    d: 'We listen first. Every world starts as a frequency.',
+    meta: 'PHASE 01 · LISTEN — WEEK 1',
+    points: [
+      'Deep-dive call — goals, audience, taboos.',
+      'Signal map: what the world must feel like.',
+      'One metric that decides launch.',
+    ],
+  },
+  {
+    n: '02',
+    t: 'Worldbuild',
+    d: 'Geometry, light and law — the physics of the place.',
+    meta: 'PHASE 02 · BUILD — WEEKS 2–3',
+    points: [
+      'Scene architecture and art direction.',
+      'Light, physics and layout laws.',
+      'Playable grey-box draft in your hands.',
+    ],
+  },
+  {
+    n: '03',
+    t: 'Ignite',
+    d: 'Motion and interaction switch on together.',
+    meta: 'PHASE 03 · MOTION — WEEK 4',
+    points: [
+      'Scroll choreography pass, cut like film.',
+      'Interaction and sound hooks wired.',
+      '60fps budget enforced on real hardware.',
+    ],
+  },
+  {
+    n: '04',
+    t: 'Live',
+    d: 'Ship it breathing. Tune it forever.',
+    meta: 'PHASE 04 · SHIP — ONGOING',
+    points: [
+      'Deploy, then measure the one metric.',
+      'Weekly tuning loop with your team.',
+      'You own everything — no hostages.',
+    ],
+  },
 ]
 
 const STATS = [
@@ -143,8 +183,11 @@ export default function EnterStage() {
       })
 
       // showreel travels as ONE sequenced row — pinned horizontal, exact
-      // full travel, re-measured on resize
-      gsap.to('.reel-track', {
+      // full travel, re-measured on resize. Cells ride a shallow arc that
+      // echoes the lattice droop, so panels read attached to the curvy
+      // background: sequential globe entry left-to-right, exit fade as
+      // each panel has passed (containerAnimation triggers).
+      const rowTween = gsap.to('.reel-track', {
         x: () => -(document.querySelector('.reel-track')!.scrollWidth - window.innerWidth),
         ease: 'none',
         scrollTrigger: {
@@ -157,6 +200,47 @@ export default function EnterStage() {
           fastScrollEnd: true,
           invalidateOnRefresh: true,
         },
+      })
+      const arcY = () => window.innerHeight * 0.08
+      gsap.utils.toArray<HTMLElement>('.reel-cell').forEach((cell, i) => {
+        // entrance: rise off the curve, un-tilt, land readable
+        gsap.fromTo(
+          cell,
+          { y: arcY, rotation: i % 2 ? 2.5 : -2.5, opacity: 0 },
+          {
+            y: 0,
+            rotation: 0,
+            opacity: 1,
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: cell,
+              containerAnimation: rowTween,
+              start: 'left 100%',
+              end: 'left 45%',
+              scrub: 1.2,
+              invalidateOnRefresh: true,
+            },
+          },
+        )
+        // exit: passed panels sink back onto the curve and disappear
+        // (lazy — writes nothing until its own range starts, so the
+        // entrance tween owns opacity/y uncontested before that)
+        gsap.to(cell, {
+          opacity: 0,
+          y: arcY,
+          scale: 0.96,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: cell,
+            containerAnimation: rowTween,
+            start: 'right 55%',
+            end: 'right -10%',
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+          },
+        })
       })
 
       // white wash: a soft light that integrates with the dark field instead
@@ -174,6 +258,41 @@ export default function EnterStage() {
           0,
         )
         .to('.veil-white', { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0, ease: 'none', duration: 1 }, 2.2)
+      // process bloom: white born from the mark point, integrating with
+      // the field — ONE timeline owns bloom, mark color, proc background
+      // and proc ink end to end (sole writer of each; the reel veil never
+      // touches these). Bloom in on approach → hold through the steps →
+      // die back into the logo as process ends (mark returns to bone so
+      // the 3D X cover reads on the dark field).
+      const procBloomTl = gsap.timeline({
+        scrollTrigger: { trigger: '.st-proc', start: 'top 110%', end: 'bottom 30%', scrub: 1.2 },
+      })
+      procBloomTl
+        .fromTo(
+          '.proc-bloom',
+          { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0 },
+          { clipPath: 'circle(150vmax at 50% calc(100% - 48px))', opacity: 1, ease: 'none', duration: 1 },
+          0,
+        )
+        .fromTo('.mark-fixed', { color: '#e8edee' }, { color: '#0b0d0e', ease: 'none', duration: 1 }, 0)
+        .fromTo(
+          '.st-proc',
+          { backgroundColor: 'rgba(6,9,15,0)' },
+          { backgroundColor: '#f2f0ea', ease: 'none', duration: 1 },
+          0,
+        )
+        .to('.st-proc .mono', { color: '#5a6068', ease: 'none', duration: 1 }, 0)
+        .to('.st-proc h3', { color: '#0b0d0e', ease: 'none', duration: 1 }, 0)
+        .to('.st-proc p', { color: '#2c3138', ease: 'none', duration: 1 }, 0)
+        .to('.proc-points li', { color: '#2c3138', ease: 'none', duration: 1 }, 0)
+        .to('.proc-n, .proc-meta', { color: '#075e43', ease: 'none', duration: 1 }, 0)
+        .to('.proc-bloom', { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0, ease: 'none', duration: 1 }, 2.2)
+        .to('.mark-fixed', { color: '#e8edee', ease: 'none', duration: 1 }, 2.2)
+        .to('.st-proc', { backgroundColor: 'rgba(6,9,15,0)', ease: 'none', duration: 1 }, 2.2)
+        .to('.st-proc .mono', { color: '#93a3a8', ease: 'none', duration: 1 }, 2.2)
+        .to('.st-proc h3', { color: '#e8edee', ease: 'none', duration: 1 }, 2.2)
+        .to('.st-proc p, .proc-points li', { color: '#93a3a8', ease: 'none', duration: 1 }, 2.2)
+        .to('.proc-n, .proc-meta', { color: '#9cf5d3', ease: 'none', duration: 1 }, 2.2)
       // rise: the mark detaches from bottom-center and travels to screen
       // center while crossing process (lazy render: the hero-range tween
       // owns y until this trigger starts — two scrubbed writers on one
@@ -190,20 +309,31 @@ export default function EnterStage() {
       )
       // flip-cover into the reel: anchored to PROC exit (not the reel —
       // the reel sits directly below proc now, so a reel-anchored start
-      // fired mid-proc and swallowed the rows). As proc leaves, the mark —
-      // already risen near center — flips and swells to cover the page,
-      // then clears as the reel pins.
+      // fired mid-proc and swallowed the rows). Word → 3D X crossfade,
+      // then the X drifts sideways while spinning up to full cover as
+      // the reel pins (single timeline owns word/X opacity, mark x,
+      // scale, rotation and container fade — rise owns y, bloom owns
+      // color, nothing else writes these).
       const flipTl = gsap.timeline({
         scrollTrigger: { trigger: '.st-proc', start: 'bottom 95%', end: 'bottom 30%', scrub: 1.2 },
       })
       flipTl
+        .to('.mark-word', { opacity: 0, ease: 'none', duration: 0.15 }, 0)
+        .to('.mark-x', { opacity: 1, ease: 'none', duration: 0.15 }, 0)
         .fromTo(
           '.mark-fixed',
-          { scale: 1, rotationY: 0 },
-          { scale: 30, rotationY: 180, transformOrigin: '50% 50%', ease: 'none', duration: 1.1 },
-          0,
+          { scale: 1, rotationY: 0, x: 0, transformPerspective: 900 },
+          {
+            scale: 46,
+            rotationY: 360,
+            x: () => window.innerWidth * 0.22,
+            transformOrigin: '50% 50%',
+            ease: 'none',
+            duration: 1.1,
+          },
+          0.1,
         )
-        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 1.1)
+        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 1.2)
 
       // capability cards fan out of the mark: measured per-card deltas from
       // each slot to the live mark point (small, rotated deck → full slot),
@@ -278,8 +408,12 @@ export default function EnterStage() {
     <div className="st-scroll" ref={root}>
       <SectionRail />
       <div className="veil-white" aria-hidden="true" />
+      <div className="proc-bloom" aria-hidden="true" />
       <button className="mark-fixed" onClick={toTop} data-cursor aria-label="XEVEN — back to top">
         <span className="mark-word">XEVEN</span>
+        <span className="mark-x" aria-hidden="true">
+          X
+        </span>
       </button>
       <section className="st-hero">
         <p className="mono st-fade">00 — HERO VOID</p>
@@ -320,6 +454,12 @@ export default function EnterStage() {
             <span className="proc-n">{s.n}</span>
             <h3>{s.t}</h3>
             <p>{s.d}</p>
+            <p className="proc-meta">{s.meta}</p>
+            <ul className="proc-points">
+              {s.points.map((pt) => (
+                <li key={pt}>{pt}</li>
+              ))}
+            </ul>
           </div>
         ))}
       </section>

@@ -1,0 +1,36 @@
+{
+  "errors": [],
+  "procMid2": {
+    "bg": "rgb(242, 240, 234)",
+    "h3": "rgb(11, 13, 14)",
+    "mark": "rgb(11, 13, 14)",
+    "bloomOp": "1",
+    "h3y": 78
+  },
+  "mProc": {
+    "bg": "rgb(242, 240, 234)",
+    "mark": "rgb(11, 13, 14)",
+    "over": 0
+  },
+  "mCells": [
+    "0",
+    "0.1842",
+    "1",
+    "1",
+    "1"
+  ],
+  "mTravel": {
+    "x": -661,
+    "expect": -1357
+  },
+  "mOver": 0,
+  "reduced": {
+    "pins": 0,
+    "bloom": "none",
+    "mark": "none",
+    "points": 12,
+    "procBg": "rgba(0, 0, 0, 0)",
+    "mani": 16,
+    "over": 0
+  }
+}

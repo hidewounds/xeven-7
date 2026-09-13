@@ -1,0 +1,112 @@
+{
+  "noIntro": true,
+  "spacing": {
+    "caps": 234,
+    "proc": 270,
+    "reel": 198,
+    "stats": 198,
+    "tier": 198,
+    "foot": 270
+  },
+  "detail": {
+    "points": 12,
+    "metas": 4,
+    "xEl": true,
+    "bloomEl": true
+  },
+  "approach": {
+    "bloom": {
+      "op": "0.1654",
+      "clip": "circle(396.941px at 50% calc(100% - 48px))"
+    },
+    "markColor": "rgb(195, 200, 201)",
+    "procBg": "rgba(45, 47, 51, 0.165)",
+    "procH3": "rgb(195, 200, 201)",
+    "wordOp": "1",
+    "xOp": "0",
+    "markTf": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.00111111, -44.75, 0, 0, 1)"
+  },
+  "procMid": {
+    "bloom": {
+      "op": "1",
+      "clip": "circle(2400px at 50% calc(100% - 48px))"
+    },
+    "markColor": "rgb(11, 13, 14)",
+    "procBg": "rgb(242, 240, 234)",
+    "procH3": "rgb(11, 13, 14)",
+    "wordOp": "1",
+    "xOp": "0",
+    "markTf": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.00111111, -44.75, -166.012, 0, 1)"
+  },
+  "procExit": {
+    "bloom": {
+      "op": "0.1103",
+      "clip": "circle(264.622px at 50% calc(100% - 48px))"
+    },
+    "markColor": "rgb(208, 212, 213)",
+    "procBg": "rgba(32, 34, 39, 0.11)",
+    "procH3": "rgb(208, 212, 213)",
+    "wordOp": "0",
+    "xOp": "1",
+    "markTf": "matrix3d(46, 0, 0, 0, 0, 46, 0, 0, 0, 0, 1, -0.00111111, 307.25, -385.935, 0, 1)"
+  },
+  "wipe": {
+    "bloom": {
+      "op": "0.3528",
+      "clip": "circle(846.797px at 50% calc(100% - 48px))"
+    },
+    "markColor": "rgb(154, 158, 159)",
+    "procBg": "rgba(89, 91, 92, 0.353)",
+    "procH3": "rgb(154, 158, 159)",
+    "wordOp": "0",
+    "xOp": "1",
+    "markTf": "matrix3d(-22.5576, 0, 16.6938, -0.0185486, 0, 28.0629, 0, 0, -0.594869, 0, -0.803823, 0.00"
+  },
+  "wipeRect": {
+    "x": -4113,
+    "y": -4844,
+    "w": 5600,
+    "h": 7265
+  },
+  "markAtPin": "0",
+  "cells": [
+    {
+      "op": "0",
+      "tf": "matrix(0.96, 0, 0, 0.96, 0, 72)"
+    },
+    {
+      "op": "0.2709",
+      "tf": "matrix(0.9718, 0, 0, 0.9718, 0, 52.4992)"
+    },
+    {
+      "op": "1",
+      "tf": "matrix(1, 0, 0, 1, 0, 0)"
+    },
+    {
+      "op": "0.5284",
+      "tf": "matrix(0.999788, 0.020576, -0.020576, 0.999788, 0, 33.9556)"
+    },
+    {
+      "op": "1",
+      "tf": "none"
+    }
+  ],
+  "travel": {
+    "x": -1733,
+    "expect": -3148
+  },
+  "travelEnd": {
+    "x": -3148,
+    "expect": -3148
+  },
+  "rail": {
+    "hero": "00HERO VOID",
+    ".st-mani": "01MANIFESTO",
+    ".st-caps": "02CAPABILITIES",
+    ".st-proc": "03PROCESS",
+    ".st-stats": "05PROOF",
+    ".st-tier": "06ENGAGE",
+    ".st-foot": "07DEPARTURE"
+  },
+  "consoleErrors": []
+}
