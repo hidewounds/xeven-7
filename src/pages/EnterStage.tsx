@@ -142,78 +142,109 @@ export default function EnterStage() {
         },
       })
 
-      // showreel cells arrive left-to-right over the white field
-      gsap.utils.toArray<HTMLElement>('.reel-cell').forEach((cell) => {
-        gsap.fromTo(
-          cell,
-          { x: () => -window.innerWidth * 0.15, opacity: 0 },
-          {
-            x: 0,
-            opacity: 1,
-            ease: 'none',
-            scrollTrigger: { trigger: cell, start: 'top 90%', end: 'top 55%', scrub: 1.2 },
-          },
-        )
+      // showreel travels as ONE sequenced row — pinned horizontal, exact
+      // full travel, re-measured on resize
+      gsap.to('.reel-track', {
+        x: () => -(document.querySelector('.reel-track')!.scrollWidth - window.innerWidth),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.st-reel',
+          start: 'top top',
+          end: '+=220%',
+          pin: true,
+          scrub: 1.2,
+          anticipatePin: 1,
+          fastScrollEnd: true,
+          invalidateOnRefresh: true,
+        },
       })
 
-      // ink into the reel and back out — ONE timeline owns veil, ink and
-      // nav color together (two competing scrubbed tweens on one property
-      // resolve nondeterministically on discontinuous jumps; a single
-      // timeline seeks deterministically): fill → hold while cells play →
-      // drain everything back as the reel clears
-      const navEls = gsap.utils.toArray<HTMLElement>(
-        document.querySelectorAll('.tb-logo, .tb-link'),
-      )
+      // white wash: a soft light that integrates with the dark field instead
+      // of covering it — one timeline owns the veil end to end (two
+      // competing scrubbed tweens on one property resolve
+      // nondeterministically on discontinuous jumps)
       const veilTl = gsap.timeline({
-        scrollTrigger: { trigger: '.st-reel', start: 'top 70%', end: 'bottom 100%', scrub: 1.2 },
+        scrollTrigger: { trigger: '.st-reel', start: 'top 90%', end: 'bottom -120%', scrub: 1.2 },
       })
       veilTl
         .fromTo(
-          '.mark-ink',
-          { clipPath: 'circle(0% at 50% 50%)' },
-          { clipPath: 'circle(75% at 50% 50%)', ease: 'none', duration: 1 },
-          0,
-        )
-        .fromTo(
           '.veil-white',
-          { clipPath: 'circle(0px at 50% calc(100% - 48px))' },
-          { clipPath: 'circle(150vmax at 50% calc(100% - 48px))', ease: 'none', duration: 1 },
+          { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0 },
+          { clipPath: 'circle(150vmax at 50% calc(100% - 48px))', opacity: 1, ease: 'none', duration: 0.8 },
           0,
         )
-        // nav ink tracks the veil deterministically (difference-blend math
-        // proved unreliable over the white field — explicit color wins).
-        // NOTE: element refs, not selector text — the topbar lives outside
-        // this gsap context, where selector text resolves to nothing.
-        .to(navEls, { color: '#0b0d0e', ease: 'none', duration: 1 }, 0)
-        .to('.veil-white', { clipPath: 'circle(0px at 50% calc(100% - 48px))', ease: 'none', duration: 1 }, 1.6)
-        .to('.mark-ink', { clipPath: 'circle(0% at 50% 50%)', ease: 'none', duration: 1 }, 1.6)
-        .to(navEls, { color: '#ffffff', ease: 'none', duration: 1 }, 1.6)
-      // grow/flip wipe into process: the white mark swells flipping to
-      // cover the page as process arrives
-      const wipe = gsap.timeline({
-        scrollTrigger: { trigger: '.st-proc', start: 'top 130%', end: 'top 50%', scrub: 1.2 },
+        .to('.veil-white', { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0, ease: 'none', duration: 1 }, 2.2)
+      // rise: the mark detaches from bottom-center and travels to screen
+      // center while crossing process (lazy render: the hero-range tween
+      // owns y until this trigger starts — two scrubbed writers on one
+      // property resolve nondeterministically on jumps)
+      gsap.fromTo(
+        '.mark-fixed',
+        { y: 0 },
+        {
+          y: () => 48 - window.innerHeight / 2,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: { trigger: '.st-proc', start: 'top 70%', end: 'bottom 30%', scrub: 1.2, invalidateOnRefresh: true },
+        },
+      )
+      // flip-cover into the reel: anchored to PROC exit (not the reel —
+      // the reel sits directly below proc now, so a reel-anchored start
+      // fired mid-proc and swallowed the rows). As proc leaves, the mark —
+      // already risen near center — flips and swells to cover the page,
+      // then clears as the reel pins.
+      const flipTl = gsap.timeline({
+        scrollTrigger: { trigger: '.st-proc', start: 'bottom 95%', end: 'bottom 30%', scrub: 1.2 },
       })
-      wipe
+      flipTl
         .fromTo(
           '.mark-fixed',
           { scale: 1, rotationY: 0 },
-          { scale: 30, rotationY: 180, transformOrigin: '50% 50%', ease: 'none', duration: 1.6 },
+          { scale: 30, rotationY: 180, transformOrigin: '50% 50%', ease: 'none', duration: 1.1 },
           0,
         )
-        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 1.3)
+        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 1.1)
 
-      // capability cards rise out of the mark into alternating slots
-      // (smaller, zigzag — never filter, transform only)
-      gsap.utils.toArray<HTMLElement>('.cap-card').forEach((card) => {
+      // capability cards fan out of the mark: measured per-card deltas from
+      // each slot to the live mark point (small, rotated deck → full slot),
+      // recomputed on refresh so resize never strands them. Transform only.
+      const markEl = document.querySelector('.mark-fixed')
+      const fanRot = [-14, -5, 5, 14]
+      gsap.utils.toArray<HTMLElement>('.cap-card').forEach((card, i) => {
+        const delta = () => {
+          const m = (
+            markEl ?? { getBoundingClientRect: () => ({ left: window.innerWidth / 2, top: window.innerHeight - 48, width: 0, height: 0 }) }
+          ).getBoundingClientRect()
+          const b = card.getBoundingClientRect()
+          const gx = gsap.getProperty(card, 'x') as number
+          const gy = gsap.getProperty(card, 'y') as number
+          return {
+            dx: m.left + m.width / 2 - (b.left + b.width / 2) + gx,
+            dy: m.top + m.height / 2 - (b.top + b.height / 2) + gy,
+          }
+        }
         gsap.fromTo(
           card,
-          { y: 140, opacity: 0, scale: 0.94 },
           {
+            x: () => delta().dx,
+            y: () => delta().dy,
+            scale: 0.32,
+            rotation: fanRot[i % fanRot.length],
+            opacity: 0,
+            transformOrigin: '50% 50%',
+          },
+          {
+            x: 0,
             y: 0,
-            opacity: 1,
             scale: 1,
+            rotation: 0,
+            opacity: 1,
             ease: 'none',
-            scrollTrigger: { trigger: card, start: 'top 94%', end: 'top 58%', scrub: 1.2 },
+            // the from-state displaces cards ~1100px to the mark — if it
+            // rendered at creation, trigger positions would be measured on
+            // the displaced boxes (all starts went negative). Render lazily.
+            immediateRender: false,
+            scrollTrigger: { trigger: card, start: 'top 100%', end: 'top 62%', scrub: 1.2, invalidateOnRefresh: true },
           },
         )
       })
@@ -249,9 +280,6 @@ export default function EnterStage() {
       <div className="veil-white" aria-hidden="true" />
       <button className="mark-fixed" onClick={toTop} data-cursor aria-label="XEVEN — back to top">
         <span className="mark-word">XEVEN</span>
-        <span className="mark-word mark-ink" aria-hidden="true">
-          XEVEN
-        </span>
       </button>
       <section className="st-hero">
         <p className="mono st-fade">00 — HERO VOID</p>
@@ -282,6 +310,20 @@ export default function EnterStage() {
         ))}
       </section>
 
+      <section className="st-proc">
+        <p className="mono">03 — PROCESS</p>
+        <div className="proc-line" aria-hidden="true">
+          <span />
+        </div>
+        {STEPS.map((s) => (
+          <div key={s.n} className="proc-row">
+            <span className="proc-n">{s.n}</span>
+            <h3>{s.t}</h3>
+            <p>{s.d}</p>
+          </div>
+        ))}
+      </section>
+
       <section className="st-reel">
         <div className="reel-ghost" aria-hidden="true">
           SHOWREEL — SHOWREEL — SHOWREEL
@@ -293,20 +335,6 @@ export default function EnterStage() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="st-proc">
-        <p className="mono">04 — PROCESS</p>
-        <div className="proc-line" aria-hidden="true">
-          <span />
-        </div>
-        {STEPS.map((s) => (
-          <div key={s.n} className="proc-row">
-            <span className="proc-n">{s.n}</span>
-            <h3>{s.t}</h3>
-            <p>{s.d}</p>
-          </div>
-        ))}
       </section>
 
       <section className="st-stats">

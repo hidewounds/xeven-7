@@ -1,0 +1,98 @@
+{
+  "railSweep": {
+    ".st-hero": "01MANIFESTO",
+    ".st-mani": "01MANIFESTO",
+    ".st-caps": "02CAPABILITIES",
+    ".st-proc": "04SHOWREEL",
+    ".st-reel": "04SHOWREEL",
+    ".st-stats": "06ENGAGE",
+    ".st-tier": "07DEPARTURE",
+    ".st-foot": "07DEPARTURE"
+  },
+  "veilPinStart": {
+    "op": "0",
+    "clip": "circle(0px at 50% calc(100% - 48px))"
+  },
+  "veilPinEnd": {
+    "op": "0",
+    "clip": "circle(0px at 50% calc(100% - 48px))"
+  },
+  "pinExact": {
+    "x": -3148,
+    "expect": -3148
+  },
+  "tbLogoAtFoot": "1",
+  "soak45": {
+    "fps": 60,
+    "longtasks": 0,
+    "maxTask": 0,
+    "heapMB": [
+      8.4,
+      4.9
+    ]
+  },
+  "resize1400": {
+    "winW": 1400,
+    "scrollW": 4692,
+    "x": -3292,
+    "expect": -3292
+  },
+  "resizeDeck": {
+    "op": "0.3947",
+    "rect": {
+      "x": 384,
+      "y": 4227,
+      "w": 382
+    }
+  },
+  "reducedOverflow": 0,
+  "mReduced": {
+    "pins": 0,
+    "overflow": 0,
+    "cells": 5,
+    "errors": []
+  },
+  "chunks": [
+    {
+      "f": "index-BdAhI_Wu.js",
+      "kb": 327.19
+    },
+    {
+      "f": "EnterStage-B3KYq_z1.js",
+      "kb": 16.57
+    },
+    {
+      "f": "index-D-eg4eSI.css",
+      "kb": 15.13
+    },
+    {
+      "f": "Gate-_2XHhXrQ.js",
+      "kb": 3.68
+    },
+    {
+      "f": "Pricing-nlbeX7Sw.js",
+      "kb": 2.12
+    },
+    {
+      "f": "Contact-DU3v3YgP.js",
+      "kb": 1.51
+    },
+    {
+      "f": "VideoCard-x63ln6bA.js",
+      "kb": 1.45
+    },
+    {
+      "f": "Services-D-imuyij.js",
+      "kb": 1.4
+    },
+    {
+      "f": "Vision-e-OhEAV7.js",
+      "kb": 1.22
+    },
+    {
+      "f": "Worlds-DR_GipOE.js",
+      "kb": 1.22
+    }
+  ],
+  "consoleErrors": []
+}

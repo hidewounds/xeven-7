@@ -171,8 +171,8 @@
   animation: marquee 22s linear infinite;
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.reel-track { display: flex; flex-direction: column; gap: 10vh; padding: 0 6vw; }
-.reel-cell { width: 100%; }
+.reel-track { display: flex; gap: 4vw; padding: 0 6vw; width: max-content; align-items: center; }
+.reel-cell { width: min(72vw, 860px); flex-shrink: 0; }
 
 .st-proc { padding: 16vh 8vw; display: flex; flex-direction: column; gap: var(--s32); position: relative; }
 .proc-line { position: absolute; left: calc(8vw + 22px); top: 24vh; bottom: 12vh; width: 1px; background: var(--line); }
@@ -216,13 +216,10 @@
   opacity: 0; visibility: hidden;
 }
 .mark-word { position: relative; }
-.mark-ink {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  color: #0b0d0e; clip-path: circle(0% at 50% 50%);
-}
 .veil-white {
-  position: fixed; inset: 0; z-index: 30; background: #f2f0ea;
-  pointer-events: none; clip-path: circle(0px at 50% calc(100% - 48px));
+  position: fixed; inset: 0; z-index: 30; pointer-events: none;
+  background: radial-gradient(circle at 50% 100%, rgba(242, 240, 234, 0.42), rgba(242, 240, 234, 0) 70%);
+  clip-path: circle(0px at 50% calc(100% - 48px));
 }
 
 /* ---------- video cards ---------- */
@@ -301,7 +298,7 @@
   .tb-burger { display: flex; }
   .tb-right { margin-left: auto; }
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
-  .reel-cell { width: 100%; }
+  .reel-cell { width: 84vw; }
   .proc-row { grid-template-columns: 44px 1fr; }
 }
 
@@ -320,7 +317,13 @@
   .mani-word { opacity: 1; }
   .proc-line span { transform: scaleY(1); }
   /* pinned horizontal reel becomes a plain vertical stack — every cell
-     reachable with no animation */
-  .st-reel { overflow: visible; }
+     reachable with no animation. Keep the section clipped: the ghost
+     marquee is 2400px+ of nowrap display type and would page-overflow
+     once visible. */
+  .st-reel { overflow: hidden; }
   .reel-track { flex-direction: column; width: auto; }
+  .reel-cell { width: 100%; max-width: 860px; margin-inline: auto; }
+  /* cinema layers stand down entirely — veil clip is already zero, but
+     keep them out of the a11y/paint tree for certainty */
+  .veil-white, .mark-fixed { display: none; }
 }

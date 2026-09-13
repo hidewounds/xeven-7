@@ -1,0 +1,28 @@
+{
+  "railHeroTop": "00HERO VOID",
+  "railSweep": {
+    ".st-mani": "01MANIFESTO",
+    ".st-caps": "02CAPABILITIES",
+    ".st-proc": "03PROCESS",
+    ".st-stats": "05PROOF",
+    ".st-tier": "06ENGAGE",
+    ".st-foot": "07DEPARTURE"
+  },
+  "reelDocTop": 6444,
+  "veilTruePinStart": {
+    "op": "1",
+    "clip": "circle(2400px at 50% calc(100% - 48px))"
+  },
+  "markTruePinStart": {
+    "op": "0"
+  },
+  "veilTruePinEnd": {
+    "op": "0",
+    "clip": "circle(0px at 50% calc(100% - 48px))"
+  },
+  "clickJump03": {
+    "procTop": 0,
+    "rail": "03PROCESS"
+  },
+  "consoleErrors": []
+}

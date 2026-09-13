@@ -1,0 +1,48 @@
+{
+  "mobile": {
+    "overflowX": 0,
+    "railHidden": true,
+    "deck0": {
+      "op": "0.5265",
+      "tf": "matrix(0.673467, -0.0782718, 0.0782718, 0.673467, 17.9235, 2"
+    },
+    "travel": {
+      "scrollW": 1747,
+      "winW": 390
+    },
+    "pinOn": true,
+    "overflowEnd": 0,
+    "procMono": "03 — PROCESS",
+    "errors": []
+  },
+  "reduced": {
+    "noIntro": true,
+    "pinSpacers": 0,
+    "maniLit": "16/16",
+    "procLine": "matrix(1, 0, 0, 1, 0, 0)",
+    "veilHidden": {
+      "display": "none",
+      "clip": "circle(0px at 50% calc(100% - 48px))"
+    },
+    "markHidden": "none",
+    "reelStack": {
+      "dir": "column",
+      "width": "1600px"
+    },
+    "reelCellW": "1408px",
+    "counters": [
+      "47",
+      "12",
+      "60fps"
+    ],
+    "overflowX": 854,
+    "cellsVisible": [
+      126,
+      1070,
+      2014,
+      2958,
+      3902
+    ],
+    "errors": []
+  }
+}

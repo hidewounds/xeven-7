@@ -1,0 +1,98 @@
+{
+  "proc": {
+    "top": 5700,
+    "h": 744
+  },
+  "reel": {
+    "top": 6444,
+    "h": 790
+  },
+  "caps": {
+    "top": 3420,
+    "h": 2280
+  },
+  "markProcMid": {
+    "op": "1",
+    "tf": "matrix3d(3.00394, 0, -0.689263, 0, 0, 3.082, 0, 0, 0.223641, 0, 0.974671, 0, -44",
+    "rect": {
+      "x": 666,
+      "y": 583,
+      "w": 269,
+      "h": 136
+    }
+  },
+  "markProcExit": {
+    "op": "1",
+    "tf": "matrix3d(-11.4776, 0, -17.4354, 0, 0, 20.8741, 0, 0, 0.835264, 0, -0.54985, 0, -",
+    "rect": {
+      "x": 286,
+      "y": 89,
+      "w": 1027,
+      "h": 918
+    }
+  },
+  "landedAll": [
+    {
+      "op": "1"
+    },
+    {
+      "op": "1"
+    },
+    {
+      "op": "1"
+    },
+    {
+      "op": "1"
+    }
+  ],
+  "railAtProc": "03PROCESS",
+  "markAtPin": {
+    "op": "0",
+    "tf": "matrix3d(-30, 0, 0, 0, 0, 30, 0, 0, 0, 0, -1, 0, -44.6562, -402, 0, 1)",
+    "rect": {
+      "x": -542,
+      "y": -210,
+      "w": 2685,
+      "h": 1320
+    }
+  },
+  "railAtReel": "04SHOWREEL",
+  "washSweep": [
+    {
+      "reelTopPct": 100,
+      "op": "0",
+      "clip": "circle(0px at 50% calc(100% - 48px))"
+    },
+    {
+      "reelTopPct": 88,
+      "op": "0.0224",
+      "clip": "circle(53.7312px at 50% calc(100% - 48px))"
+    },
+    {
+      "reelTopPct": 77,
+      "op": "0.1791",
+      "clip": "circle(429.85px at 50% calc(100% - 48px))"
+    },
+    {
+      "reelTopPct": 65,
+      "op": "0.3358",
+      "clip": "circle(805.968px at 50% calc(100% - 48px))"
+    },
+    {
+      "reelTopPct": 53,
+      "op": "0.4925",
+      "clip": "circle(1182.09px at 50% calc(100% - 48px))"
+    },
+    {
+      "reelTopPct": 42,
+      "op": "0.6493",
+      "clip": "circle(1558.2px at 50% calc(100% - 48px))"
+    },
+    {
+      "reelTopPct": 30,
+      "op": "0.806",
+      "clip": "circle(1934.33px at 50% calc(100% - 48px))"
+    }
+  ],
+  "consoleErrors": []
+}
