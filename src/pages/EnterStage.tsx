@@ -307,13 +307,56 @@ export default function EnterStage() {
           scrollTrigger: { trigger: '.st-proc', start: 'top 70%', end: 'bottom 30%', scrub: 1.2, invalidateOnRefresh: true },
         },
       )
-      // flip-cover into the reel: anchored to PROC exit (not the reel —
-      // the reel sits directly below proc now, so a reel-anchored start
-      // fired mid-proc and swallowed the rows). Word → 3D X crossfade,
-      // then the X drifts sideways while spinning up to full cover as
-      // the reel pins (single timeline owns word/X opacity, mark x,
-      // scale, rotation and container fade — rise owns y, bloom owns
-      // color, nothing else writes these).
+      // round revolve (TOP end → WORKS end): ring-and-disc globe summoned
+      // from the mark point at hero exit, one full orbit across caps and
+      // proc, then the disc swells to full cover and irises back out into
+      // the mark as the reel pins. ONE timeline owns wrapper clip/opacity,
+      // orbit rotation and disc scale/counter-spin end to end — the flip
+      // below keeps only the X spin (no cover), so a single cover rules
+      // the take-over range. Cover positions are computed from live
+      // geometry (a linear 0→1 map would strand the cover mid-proc —
+      // measured: it landed ~1700px early), so the swell sits exactly on
+      // the proc-exit window the flip uses.
+      const revRange = (() => {
+        const VH = window.innerHeight
+        const docTop = (el: Element) => el.getBoundingClientRect().top + window.scrollY
+        const hero = document.querySelector('.st-hero')!
+        const proc = document.querySelector('.st-proc')!
+        const reel = document.querySelector('.st-reel')!
+        const r0 = docTop(hero) + hero.getBoundingClientRect().height - VH * 0.75
+        const r1 = docTop(reel) + 120
+        const procB = docTop(proc) + proc.getBoundingClientRect().height
+        const reelTop = docTop(reel)
+        const pos = (y: number) => Math.min(0.96, Math.max(0.04, (y - r0) / (r1 - r0)))
+        return { r0, r1, c0: pos(procB - VH * 0.95), c1: pos(procB - VH * 0.45), u0: pos(reelTop - VH * 0.5), u1: pos(reelTop + 60) }
+      })()
+      const revolveTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.st-hero',
+          start: 'bottom 75%',
+          end: () => revRange.r1,
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+        },
+      })
+      revolveTl
+        .fromTo(
+          '.revolve',
+          { opacity: 0, clipPath: 'circle(0px at 50% calc(100% - 48px))' },
+          { opacity: 1, clipPath: 'circle(150vmax at 50% calc(100% - 48px))', ease: 'none', duration: 0.05 },
+          0,
+        )
+        .fromTo('.revolve-disc', { scale: 0, rotation: 0 }, { scale: 1, rotation: 90, ease: 'none', duration: 0.05 }, 0)
+        .to('.revolve-spin', { rotation: 360, ease: 'none', duration: Math.max(0.1, revRange.c1 - 0.05) }, 0.05)
+        .to('.revolve-disc', { rotation: -180, ease: 'none', duration: Math.max(0.1, revRange.c1 - 0.05) }, 0.05)
+        .to('.revolve-disc', { scale: 30, ease: 'none', duration: Math.max(0.05, revRange.c1 - revRange.c0) }, revRange.c0)
+        .to('.revolve', { clipPath: 'circle(0px at 50% calc(100% - 48px))', ease: 'none', duration: Math.max(0.05, revRange.u1 - revRange.u0) }, revRange.u0)
+        .to('.revolve', { opacity: 0, ease: 'none', duration: 0.02 }, revRange.u1)
+      // flip into the reel: anchored to PROC exit. Word → 3D X crossfade,
+      // then the X spins in place and clears as the reel pins — the
+      // full-screen cover belongs to the revolve above (single timeline
+      // owns word/X opacity, mark x, scale, rotation and container fade
+      // — rise owns y, bloom owns color, nothing else writes these).
       const flipTl = gsap.timeline({
         scrollTrigger: { trigger: '.st-proc', start: 'bottom 95%', end: 'bottom 30%', scrub: 1.2 },
       })
@@ -324,7 +367,7 @@ export default function EnterStage() {
           '.mark-fixed',
           { scale: 1, rotationY: 0, x: 0, transformPerspective: 900 },
           {
-            scale: 46,
+            scale: 8,
             rotationY: 360,
             x: () => window.innerWidth * 0.22,
             transformOrigin: '50% 50%',
@@ -409,6 +452,11 @@ export default function EnterStage() {
       <SectionRail />
       <div className="veil-white" aria-hidden="true" />
       <div className="proc-bloom" aria-hidden="true" />
+      <div className="revolve" aria-hidden="true">
+        <div className="revolve-spin">
+          <div className="revolve-disc" />
+        </div>
+      </div>
       <button className="mark-fixed" onClick={toTop} data-cursor aria-label="XEVEN — back to top">
         <span className="mark-word">XEVEN</span>
         <span className="mark-x" aria-hidden="true">
