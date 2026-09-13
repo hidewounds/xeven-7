@@ -27,17 +27,7 @@ export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash())
   const [intro, setIntro] = useState(true)
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const [webgl, setWebgl] = useState(true)
   const lenis = useRef<Lenis | null>(null)
-
-  useEffect(() => {
-    try {
-      const c = document.createElement('canvas')
-      if (!c.getContext('webgl2') && !c.getContext('webgl')) setWebgl(false)
-    } catch {
-      setWebgl(false)
-    }
-  }, [])
 
   useEffect(() => {
     xs.reduced = reduced
@@ -121,7 +111,7 @@ export default function App() {
       <GraphBg />
       <main id="main" key={route}>
         <Suspense fallback={null}>
-          {route === 'enter' && <EnterStage webgl={webgl} />}
+          {route === 'enter' && <EnterStage />}
           {route === 'worlds' && <Worlds />}
           {route === 'vision' && <Vision />}
           {route === 'services' && <Services />}

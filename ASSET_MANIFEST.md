@@ -8,7 +8,7 @@ Does NOT count: fonts, .glsl, videos, SVG / lucide icons, procedural canvas / Th
 
 | # | Path | KB | Where used | Notes |
 |---|------|----|------------|-------|
-| 1 | `public/og.jpg` | ~103 | OG + Twitter card image only | 1200×630 hero capture (Step 87). Never imported by `src/`, served as static social card. |
+| 1 | `public/og.jpg` | ~58 | OG + Twitter card image only | 1200×630 hero capture (lattice-only background). Never imported by `src/`, served as static social card. |
 
 Favicon is an inline SVG data-URI in `index.html` (not a raster file, not counted).
 Film grain / fallback noise are inline SVG `feTurbulence` data-URIs in `chrome.css` (not counted).

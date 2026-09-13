@@ -1,23 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
-/* Cursor FX v2 — rebuilt from scratch, zero WebGL. The native cursor is
-   hidden (see index.css) and two notice-it layers follow one smoothed head:
-   1. aura: DOM glow riding the head (transform-only, no layout cost)
-   2. wake: 2D-canvas ribbon through recent head positions, constant taper
-   toward the head — deliberately NOT velocity-flared (founder direction:
-   no illumination-on-motion; hoverables still lift intensity).
+/* Cursor FX — zero WebGL. The native cursor is hidden (see index.css) and
+   a soft aura follows one smoothed head (transform-only, no layout cost).
+   There is no painted trail — zero cursor color by founder direction.
+   Pointer presence reads through the aura + the lattice answering underneath.
    One rAF loop, coalesced pointer events, exponential follow — no stepping.
    Debug: open with ?cursor-debug (or #cursor-debug) for a red head dot
    plus a live coordinate readout. */
-
-interface Pt {
-  x: number
-  y: number
-  t: number
-}
-
-const MAX_PTS = 30
-const LIFE_MS = 650
 
 export default function CursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null!)
@@ -56,10 +45,7 @@ export default function CursorTrail() {
 
     const target = { x: -100, y: -100 }
     const head = { x: -100, y: -100 }
-    const pts: Pt[] = []
     let seen = false
-    let hot = false
-    let glow = 0.55
 
     const onMove = (e: MouseEvent) => {
       const anyE = e as unknown as { getCoalescedEvents?: () => Array<MouseEvent> }
@@ -77,11 +63,7 @@ export default function CursorTrail() {
       lastAct = performance.now()
       kick()
     }
-    const onOver = (e: MouseEvent) => {
-      hot = !!(e.target as HTMLElement).closest?.('a, button, [data-cursor]')
-    }
     window.addEventListener('mousemove', onMove, { passive: true })
-    window.addEventListener('mouseover', onOver, { passive: true })
 
     let raf = 0
     let last = performance.now()
@@ -89,9 +71,9 @@ export default function CursorTrail() {
     const loop = () => {
       raf = requestAnimationFrame(loop)
       const now = performance.now()
-      // idle sleep: no input for 3s and no live residue — drop the loop
-      // until the pointer returns (kick), instead of clearRect-ing forever
-      if (pts.length === 0 && now - lastAct > 3000) {
+      // idle sleep: no input for 3s — drop the loop until the pointer
+      // returns (kick), instead of clearRect-ing forever
+      if (now - lastAct > 3000) {
         cancelAnimationFrame(raf)
         raf = 0
         return
@@ -102,38 +84,13 @@ export default function CursorTrail() {
       const k = 1 - Math.pow(0.00005, dt)
       head.x += (target.x - head.x) * k
       head.y += (target.y - head.y) * k
-      const goal = hot ? 0.9 : 0.55
-      glow += (goal - glow) * (1 - Math.pow(0.002, dt))
 
       if (aura.current) {
         aura.current.style.transform = `translate3d(${head.x.toFixed(1)}px,${head.y.toFixed(1)}px,0)`
       }
       if (!seen) return
 
-      const tail = pts[pts.length - 1]
-      if (!tail || Math.hypot(head.x - tail.x, head.y - tail.y) > 1.5) {
-        pts.push({ x: head.x, y: head.y, t: now })
-        if (pts.length > MAX_PTS) pts.splice(0, pts.length - MAX_PTS)
-      }
-      while (pts.length && now - pts[0].t > LIFE_MS) pts.shift()
-
       ctx.clearRect(0, 0, w, h)
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      // newest-first ribbon: constant taper toward the head — speed never
-      // flares the width (no illumination-on-motion)
-      for (let i = 1; i < pts.length; i++) {
-        const f = i / pts.length
-        const age = 1 - (now - pts[i].t) / LIFE_MS
-        const a = f * f * age * glow
-        if (a <= 0.004) continue
-        ctx.strokeStyle = `rgba(228,234,235,${a.toFixed(3)})`
-        ctx.lineWidth = 1.5 + f * 8
-        ctx.beginPath()
-        ctx.moveTo(pts[i - 1].x, pts[i - 1].y)
-        ctx.lineTo(pts[i].x, pts[i].y)
-        ctx.stroke()
-      }
 
       if (debug) {
         ctx.fillStyle = '#ff3b30'
@@ -142,7 +99,7 @@ export default function CursorTrail() {
         ctx.fill()
         ctx.fillStyle = '#9CF5D3'
         ctx.font = '12px monospace'
-        ctx.fillText(`${Math.round(head.x)},${Math.round(head.y)} n=${pts.length}`, head.x + 12, head.y - 12)
+        ctx.fillText(`${Math.round(head.x)},${Math.round(head.y)}`, head.x + 12, head.y - 12)
       }
     }
     const kick = () => {
@@ -162,7 +119,6 @@ export default function CursorTrail() {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseover', onOver)
       document.removeEventListener('visibilitychange', onVis)
     }
   }, [on])

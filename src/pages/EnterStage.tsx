@@ -1,4 +1,4 @@
-import { Suspense, lazy, useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
@@ -6,9 +6,6 @@ import VideoCard, { PH } from '../components/VideoCard'
 import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
-
-/* StageScene rides in its own chunk — never fetched under reduced motion. */
-const StageScene = lazy(() => import('../three/StageScene'))
 
 const CAPS = [
   { t: 'Living 3D Worlds', d: 'Real-time scenes that breathe, react and remember.', src: PH.head },
@@ -61,7 +58,7 @@ function Tilt({ children, className }: { children: React.ReactNode; className?: 
   )
 }
 
-export default function EnterStage({ webgl }: { webgl: boolean }) {
+export default function EnterStage() {
   const root = useRef<HTMLDivElement>(null!)
   const scroll = useRef({ v: 0 })
   const vel = useRef({ v: 0 })
@@ -175,12 +172,6 @@ export default function EnterStage({ webgl }: { webgl: boolean }) {
 
   return (
     <div className="st-scroll" ref={root}>
-      {webgl && !reduced && (
-        <Suspense fallback={null}>
-          <StageScene scroll={scroll.current} vel={vel.current} reduced={reduced} />
-        </Suspense>
-      )}
-
       <section className="st-hero">
         <p className="mono st-fade">00 — HERO VOID</p>
         <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
