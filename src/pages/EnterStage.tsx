@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import VideoCard, { PH } from '../components/VideoCard'
+import SectionRail from '../components/SectionRail'
 import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
@@ -172,6 +173,7 @@ export default function EnterStage() {
 
   return (
     <div className="st-scroll" ref={root}>
+      <SectionRail />
       <section className="st-hero">
         <p className="mono st-fade">00 — HERO VOID</p>
         <h1 className="st-hero-title">WHAT IS XEVEN?</h1>

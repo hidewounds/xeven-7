@@ -55,10 +55,3 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 ::selection { background: var(--mint); color: #06231b; }
 
 :focus-visible { outline: 1px solid var(--mint); outline-offset: 3px; }
-
-/* the custom trail replaces the native cursor — hide it only where the
-   replacement actually mounts (fine pointer, full motion); reduced motion
-   keeps the native pointer or there would be no cursor at all */
-@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .xp, .xp a, .xp button { cursor: none; }
-}

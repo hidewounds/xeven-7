@@ -3,10 +3,8 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
-import CursorTrail from './components/CursorTrail'
 import GraphBg from './components/GraphBg'
-import XLoader from './components/XLoader'
-import { Curtain, curtainBus } from './components/Curtain'
+import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
@@ -29,6 +27,7 @@ export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash())
   const [intro, setIntro] = useState(() => routeFromHash() === 'enter')
   const [booted, setBooted] = useState(() => routeFromHash() === 'enter')
+  const [switching, setSwitching] = useState(false)
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const lenis = useRef<Lenis | null>(null)
 
@@ -51,10 +50,9 @@ export default function App() {
   useEffect(() => {
     const settle = () => {
       // 404 fallback: unknown hash → canonical enter URL (replace, no
-      // history entry), preserving the cursor-debug flag when present
+      // history entry)
       if (unknownHash()) {
-        const keep = window.location.hash.includes('cursor-debug') ? '?cursor-debug' : ''
-        window.location.replace(`#/enter${keep}`)
+        window.location.replace(`#/enter`)
         return
       }
       // bare fragments (#main) are in-page anchors — never a route change
@@ -71,11 +69,11 @@ export default function App() {
   useEffect(() => {
     navBus.go = (to: Route) => {
       if (to === xs.route) return
-      const apply = () => {
+      // page switch runs behind the revolving X, not the ember curtain
+      setSwitching(true)
+      window.setTimeout(() => {
         window.location.hash = `#/${to}`
-      }
-      if (curtainBus.play) curtainBus.play(apply)
-      else apply()
+      }, 450)
     }
     return () => {
       navBus.go = undefined
@@ -84,6 +82,8 @@ export default function App() {
 
   useEffect(() => {
     ScrollTrigger.refresh()
+    // the switch veil lifts once the new route has rendered
+    setSwitching(false)
     // webfonts shift layout — re-measure after they land
     if (document.fonts) {
       void document.fonts.ready.then(() => ScrollTrigger.refresh())
@@ -113,8 +113,6 @@ export default function App() {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <Curtain />
-      <CursorTrail />
       <TopBar route={route} />
       <GraphBg />
       <main id="main" key={route}>
@@ -129,6 +127,11 @@ export default function App() {
       </main>
       {intro && <Gate onEnter={finishIntro} />}
       {!booted && <XLoader onDone={finishBoot} />}
+      {switching && (
+        <div className="xload xload-fast" role="status" aria-label="Loading">
+          <XMark />
+        </div>
+      )}
     </div>
   )
 }

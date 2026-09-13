@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react'
    No progress bar, no percentage — it simply revolves until the site is
    ready, then fades. Under reduced motion the X sits static. */
 
+export function XMark() {
+  return (
+    <svg viewBox="0 0 48 48" className="xload-x" aria-hidden="true">
+      <path d="M11 11 L37 37 M37 11 L11 37" stroke="currentColor" strokeWidth={6} strokeLinecap="round" fill="none" />
+    </svg>
+  )
+}
+
 export default function XLoader({ onDone }: { onDone: () => void }) {
   const [leaving, setLeaving] = useState(false)
   const [gone, setGone] = useState(false)
@@ -41,9 +49,7 @@ export default function XLoader({ onDone }: { onDone: () => void }) {
   if (gone) return null
   return (
     <div className={leaving ? 'xload xload-done' : 'xload'} role="status" aria-label="Loading site">
-      <svg viewBox="0 0 48 48" className="xload-x" aria-hidden="true">
-        <path d="M11 11 L37 37 M37 11 L11 37" stroke="currentColor" strokeWidth={6} strokeLinecap="round" fill="none" />
-      </svg>
+      <XMark />
     </div>
   )
 }
