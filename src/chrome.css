@@ -123,7 +123,11 @@
   display: flex; align-items: center; gap: 5px; padding: 0;
   font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em;
   color: var(--faint); min-height: 22px;
+  transition: color 150ms ease;
 }
+.rail-btn:hover { color: var(--bone); }
+.rail-btn:hover .rail-tick { width: 14px; background: var(--bone); }
+.rail-btn:focus-visible { outline: 1px solid var(--mint); outline-offset: 2px; color: var(--bone); }
 .rail-n { min-width: 14px; text-align: right; font-size: 8px; }
 .rail-tick { display: block; width: 8px; height: 1px; background: var(--line-strong); }
 .rail-btn.rail-on { color: var(--mint); }
@@ -172,7 +176,7 @@
   animation: marquee 22s linear infinite;
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.reel-track { display: flex; gap: 4vw; padding: 0 6vw; width: max-content; align-items: center; }
+.reel-track { display: flex; gap: 4vw; padding: 0 6vw; width: max-content; align-items: center; will-change: transform, opacity; }
 .reel-cell { width: min(72vw, 860px); flex-shrink: 0; will-change: transform, opacity; }
 
 .st-proc { padding: 30vh 8vw 32vh; display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
@@ -218,7 +222,7 @@
   color: var(--bone); background: none; border: none;
   min-height: 44px; min-width: 44px; padding: 0 var(--s16);
   display: inline-flex; align-items: center; justify-content: center;
-  opacity: 0; visibility: hidden;
+  opacity: 0; visibility: hidden; will-change: transform, opacity;
 }
 .mark-word { position: relative; }
 /* 3D X state of the mark: hidden until the process-exit flip crossfades

@@ -323,14 +323,22 @@ export default function EnterStage() {
       // slide-cover into the reel (NO flip/spin): anchored to PROC exit.
       // Beat 1 — the black X slides sideways. Beat 2 — it grows slowly
       // from center until it covers every corner perfectly. The new
-      // screen opens FROM INSIDE the X: .st-reel un-clips from a small
-      // center window to full frame across the cover, so the continuation
-      // appears inside the growing X rather than after a white end.
-      // Single timeline owns word/X opacity, mark x/scale, reel clip and
-      // container fade — rise owns y, bloom owns color, nothing else
-      // writes these. Mark stays black from the bloom timeline.
+      // screen opens FROM INSIDE the X: the reel track fades + settles
+      // from a small scale to full across the cover (transform/opacity
+      // only — compositor-friendly, no layout-property animation), so the
+      // continuation appears inside the growing X rather than after a
+      // white end. Single timeline owns word/X opacity, mark x/scale and
+      // reel-track opacity/scale — rise owns y, bloom owns color, the pin
+      // tween owns reel-track x, nothing else writes these. Mark stays
+      // black from the bloom timeline.
       const flipTl = gsap.timeline({
-        scrollTrigger: { trigger: '.st-proc', start: 'bottom 95%', end: 'bottom 10%', scrub: 1.2 },
+        scrollTrigger: {
+          trigger: '.st-proc',
+          start: 'bottom 95%',
+          end: 'bottom 10%',
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+        },
       })
       flipTl
         .to('.mark-word', { opacity: 0, ease: 'none', duration: 0.15 }, 0)
@@ -360,11 +368,13 @@ export default function EnterStage() {
           },
           0.75,
         )
-        // the continuation opens inside the X: small center window → full
+        // the continuation opens inside the X: track blooms from a small
+        // scale to full while fading in (lazy render — must not hide the
+        // reel on first paint before its range starts)
         .fromTo(
-          '.st-reel',
-          { clipPath: 'inset(38% 38% 38% 38%)', opacity: 0.25 },
-          { clipPath: 'inset(0% 0% 0% 0%)', opacity: 1, ease: 'none', duration: 1.4 },
+          '.reel-track',
+          { opacity: 0, scale: 0.92, transformOrigin: '50% 50%' },
+          { opacity: 1, scale: 1, ease: 'none', duration: 1.4, immediateRender: false },
           0.75,
         )
         .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 2.15)
