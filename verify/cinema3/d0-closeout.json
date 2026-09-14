@@ -1,0 +1,114 @@
+{
+  "sections": [
+    "st-hero",
+    "st-caps",
+    "st-proc",
+    "st-stats",
+    "st-tier"
+  ],
+  "railBtns": 8,
+  "capCards": 4,
+  "hasStub": true,
+  "card0landed": {
+    "opacity": "1",
+    "transform": "matrix(1, 0, 0, 1, 0, 0)",
+    "rect": {
+      "x": 96,
+      "y": 0,
+      "w": 600,
+      "h": 375
+    }
+  },
+  "card3rest": {
+    "opacity": "1",
+    "transform": "none",
+    "rect": {
+      "x": 904,
+      "y": 1665,
+      "w": 600,
+      "h": 375
+    }
+  },
+  "stubMid": {
+    "opacity": "1",
+    "transform": "matrix(1, 0, 0, 1, 0, 0)",
+    "rect": {
+      "x": 151,
+      "y": 806,
+      "w": 649,
+      "h": 1
+    }
+  },
+  "spineMid": {
+    "opacity": "1",
+    "transform": "matrix(1, 0, 0, 0.5062, 0, 0)",
+    "rect": {
+      "x": 150,
+      "y": 806,
+      "w": 1,
+      "h": 721
+    }
+  },
+  "markCover": {
+    "opacity": "1",
+    "transform": "matrix(1, 0, 0, 1, -303.398, -325.242)",
+    "rect": {
+      "x": 497,
+      "y": 505,
+      "w": 90,
+      "h": 44
+    }
+  },
+  "reelBloom": {
+    "opacity": "1",
+    "transform": "matrix(1, 0, 0, 1, 0, 0)",
+    "rect": {
+      "x": 0,
+      "y": 898,
+      "w": 4748,
+      "h": 538
+    }
+  },
+  "stat0": {
+    "opacity": "1",
+    "transform": "matrix(1, 0, 0, 1, 0, 0)",
+    "rect": {
+      "x": 128,
+      "y": 0,
+      "w": 427,
+      "h": 166
+    }
+  },
+  "tier0": {
+    "opacity": "1",
+    "transform": "none",
+    "rect": {
+      "x": 128,
+      "y": 0,
+      "w": 432,
+      "h": 163
+    }
+  },
+  "footH2": {
+    "opacity": "1",
+    "transform": "matrix(1, 0, 0, 1, 0, 0)",
+    "rect": {
+      "x": 521,
+      "y": 528,
+      "w": 558,
+      "h": 124
+    }
+  },
+  "tbLogoBack": {
+    "opacity": "1",
+    "transform": "none",
+    "rect": {
+      "x": 24,
+      "y": 16,
+      "w": 58,
+      "h": 44
+    }
+  },
+  "overflowX": 0,
+  "errors": []
+}
