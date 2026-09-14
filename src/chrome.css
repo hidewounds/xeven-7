@@ -273,18 +273,34 @@
 
 .st-stats { padding: 22vh 8vw; }
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s32); margin-top: var(--s48); }
-.stat-num { font-family: var(--disp); font-size: clamp(48px, 8vw, 120px); color: var(--bone); line-height: 1; }
+.stat-num { font-family: var(--disp); font-size: clamp(48px, 8vw, 120px); color: var(--bone); line-height: 1; letter-spacing: -0.02em; }
+/* stat hairline: mint rule scrub-filling under each number (sole writer:
+   the rule tween — transform-only) */
+.stat-rule { display: block; height: 1px; background: var(--mint); margin: var(--s16) 0; transform: scaleX(0); transform-origin: left center; }
 .stat p { font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted); }
 
 .st-tier { padding: 22vh 8vw; }
 .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s24); margin-top: var(--s48); }
 .tier {
+  position: relative; overflow: hidden;
   text-align: left; background: var(--glass); border: 1px solid var(--line);
   border-radius: 24px; padding: var(--s32);
   backdrop-filter: blur(14px);
-  transition: border-color 200ms ease, transform 200ms ease;
+  transition: border-color 200ms ease;
 }
-.tier:hover { border-color: var(--mint); transform: translateY(-4px); }
+.tier:hover { border-color: var(--mint); }
+/* pointer-tracked spotlight sheen (paint-on-hover only; content floats
+   above via z-index; magnetic translate lives on the button itself) */
+.tier::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(156, 245, 211, 0.14), transparent 70%);
+  opacity: 0; transition: opacity 200ms ease; pointer-events: none;
+}
+.tier:hover::before { opacity: 1; }
+.tier h3, .tier p, .tier span { position: relative; z-index: 1; }
+@media (pointer: coarse) {
+  .tier::before { display: none; }
+}
 .tier h3 { font-family: var(--disp); font-size: 32px; margin: 0 0 var(--s8); letter-spacing: -0.015em; }
 .tier p { color: var(--muted); margin: 0 0 var(--s16); }
 .tier span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; color: var(--mint); }
@@ -292,8 +308,24 @@
 .tier-go:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 .st-foot { padding: 30vh 6vw 20vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
-.st-foot h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; letter-spacing: -0.02em; }
-.st-foot a { font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
+/* finale title: bone→mint sweep on hover (background-clip text, 200ms) */
+.st-foot h2 {
+  font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, var(--mint) 50%, var(--bone) 50%);
+  background-size: 200% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  transition: background-position 300ms ease;
+}
+.st-foot h2:hover { background-position: 0 0; }
+.st-foot a { position: relative; font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
+.st-foot a::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1px;
+  background: var(--mint); transform: scaleX(0); transform-origin: right center;
+  transition: transform 240ms ease;
+}
+.st-foot a:hover::after { transform: scaleX(1); transform-origin: left center; }
+.foot-time { margin: 0; opacity: 0.8; }
 
 /* ---------- index scroll cinema: migrating mark + white veil ---------- */
 .mark-fixed {
@@ -422,6 +454,7 @@
   /* scroll-choreography stand-down: readable final states, zero motion */
   .mani-word { opacity: 1; }
   .mani-ember { color: var(--ember); }
+  .stat-rule { transform: scaleX(1); }
   .st-cue b { transform: scaleX(1); }
   .proc-line span { transform: scaleY(1); }
   .proc-stub { transform: scaleX(1); }

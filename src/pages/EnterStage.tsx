@@ -1,10 +1,11 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import VideoCard, { PH } from '../components/VideoCard'
 import SectionRail from '../components/SectionRail'
 import { navigate, xs } from '../app/store'
+import { useMagnetic } from '../useMagnetic'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
@@ -96,6 +97,46 @@ function Tilt({ children, className }: { children: React.ReactNode; className?: 
     >
       {children}
     </div>
+  )
+}
+
+/* Engage tier card: magnetic pull + pointer-tracked spotlight sheen.
+   Magnetic writes inline translate — the scrubbed fade is opacity-only,
+   so the two never contest a property. */
+function TierCard({ name, desc }: { name: string; desc: string }) {
+  const mag = useMagnetic<HTMLButtonElement>(0.22)
+  return (
+    <button
+      ref={mag}
+      className="tier"
+      onClick={() => navigate('pricing')}
+      data-cursor
+      onMouseMove={(e) => {
+        const el = e.currentTarget
+        const r = el.getBoundingClientRect()
+        el.style.setProperty('--mx', `${Math.round(e.clientX - r.left)}px`)
+        el.style.setProperty('--my', `${Math.round(e.clientY - r.top)}px`)
+      }}
+    >
+      <h3>{name}</h3>
+      <p>{desc}</p>
+      <span>See pricing →</span>
+    </button>
+  )
+}
+
+/* Departure clock: local time, per-minute tick (one interval, one text
+   node — zero scroll-path cost). */
+function FootTime() {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <p className="mono foot-time">
+      {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} — LOCAL
+    </p>
   )
 }
 
@@ -532,6 +573,21 @@ export default function EnterStage() {
             scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 68%', scrub: 1.2 },
           },
         )
+        // stat hairline scrub-fills with its own stat (own element, own
+        // property — the rise tween never touches scaleX)
+        const rule = el.querySelector('.stat-rule')
+        if (rule) {
+          gsap.fromTo(
+            rule,
+            { scaleX: 0 },
+            {
+              scaleX: 1,
+              ease: 'none',
+              immediateRender: false,
+              scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 68%', scrub: 1.2 },
+            },
+          )
+        }
       })
       gsap.utils.toArray<HTMLElement>('.tier').forEach((el) => {
         gsap.fromTo(
@@ -692,6 +748,7 @@ export default function EnterStage() {
               <div className="stat-num" data-n={s.n} data-suffix={s.suffix}>
                 {reduced ? `${s.n}${s.suffix}` : 0}
               </div>
+              <i className="stat-rule" aria-hidden="true" />
               <p>{s.label}</p>
             </div>
           ))}
@@ -703,13 +760,7 @@ export default function EnterStage() {
         <div className="tier-grid">
           {['Spark — a single living page', 'World — a full dimensional site', 'Engine — us, embedded in your team'].map((t) => {
             const [name, desc] = t.split(' — ')
-            return (
-              <button key={name} className="tier" onClick={() => navigate('pricing')} data-cursor>
-                <h3>{name}</h3>
-                <p>{desc}</p>
-                <span>See pricing →</span>
-              </button>
-            )
+            return <TierCard key={name} name={name} desc={desc} />
           })}
         </div>
       </section>
@@ -720,6 +771,7 @@ export default function EnterStage() {
         <a href="mailto:hello@xeven.world" data-cursor>
           hello@xeven.world
         </a>
+        <FootTime />
       </footer>
     </div>
   )
