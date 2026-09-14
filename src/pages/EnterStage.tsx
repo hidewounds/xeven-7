@@ -5,8 +5,6 @@ import { SplitText } from 'gsap/SplitText'
 import VideoCard, { PH } from '../components/VideoCard'
 import SectionRail from '../components/SectionRail'
 import { navigate, xs } from '../app/store'
-import { useMagnetic } from '../useMagnetic'
-
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
 const CAPS = [
@@ -71,12 +69,6 @@ const STEPS = [
   },
 ]
 
-const STATS = [
-  { n: 47, suffix: '', label: 'worlds shipped' },
-  { n: 12, suffix: '', label: 'international awards' },
-  { n: 60, suffix: 'fps', label: 'or it does not ship' },
-]
-
 function Tilt({ children, className }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null!)
   return (
@@ -97,31 +89,6 @@ function Tilt({ children, className }: { children: React.ReactNode; className?: 
     >
       {children}
     </div>
-  )
-}
-
-/* Engage tier card: magnetic pull + pointer-tracked spotlight sheen.
-   Magnetic writes inline translate — the scrubbed fade is opacity-only,
-   so the two never contest a property. */
-function TierCard({ name, desc }: { name: string; desc: string }) {
-  const mag = useMagnetic<HTMLButtonElement>(0.22)
-  return (
-    <button
-      ref={mag}
-      className="tier"
-      onClick={() => navigate('pricing')}
-      data-cursor
-      onMouseMove={(e) => {
-        const el = e.currentTarget
-        const r = el.getBoundingClientRect()
-        el.style.setProperty('--mx', `${Math.round(e.clientX - r.left)}px`)
-        el.style.setProperty('--my', `${Math.round(e.clientY - r.top)}px`)
-      }}
-    >
-      <h3>{name}</h3>
-      <p>{desc}</p>
-      <span>See pricing →</span>
-    </button>
   )
 }
 
@@ -203,7 +170,7 @@ export default function EnterStage() {
         gsap.to(tbLogo, {
           opacity: 1,
           ease: 'none',
-          scrollTrigger: { trigger: '.st-stats', start: 'top 90%', end: 'top 50%', scrub: 1.2 },
+          scrollTrigger: { trigger: '.st-foot', start: 'top 95%', end: 'top 55%', scrub: 1.2 },
         })
       }
       gsap.fromTo(
@@ -230,36 +197,6 @@ export default function EnterStage() {
           const v = Math.min(1, Math.abs(self.getVelocity()) / 3000)
           vel.current.v = v
           xs.vel = v
-        },
-      })
-
-      // manifesto pinned word scrub
-      const words = gsap.utils.toArray<HTMLElement>('.mani-word')
-      gsap.to(words, {
-        opacity: 1,
-        stagger: 0.06,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.st-mani',
-          start: 'top top',
-          end: '+=160%',
-          pin: true,
-          scrub: 1.2,
-          anticipatePin: 1,
-          fastScrollEnd: true,
-        },
-      })
-      // ember keywords ignite at full illumination (color-only writer —
-      // the word tween owns opacity, nothing else touches color)
-      gsap.to('.mani-ember', {
-        color: '#ff4d2e',
-        ease: 'none',
-        immediateRender: false,
-        scrollTrigger: {
-          trigger: '.st-mani',
-          start: 'top top',
-          end: '+=160%',
-          scrub: 1.2,
         },
       })
 
@@ -566,50 +503,8 @@ export default function EnterStage() {
         .to('.thread-node', { y: spineH, ease: 'none', duration: 0.7 }, 0.3)
         .fromTo('.proc-line > span', { scaleY: 0 }, { scaleY: 1, ease: 'none', duration: 0.7 }, 0.3)
 
-      // second-half rhythm: stats rise, tiers fade, footer title rises —
-      // all on the same scrub:1.2 heartbeat, one tempo end to end. Tiers
-      // fade opacity-only (.tier has a CSS transform transition for hover
-      // that a scrubbed y would fight). Lazy render throughout.
-      gsap.utils.toArray<HTMLElement>('.stat').forEach((el) => {
-        gsap.fromTo(
-          el,
-          { y: 48, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 68%', scrub: 1.2 },
-          },
-        )
-        // stat hairline scrub-fills with its own stat (own element, own
-        // property — the rise tween never touches scaleX)
-        const rule = el.querySelector('.stat-rule')
-        if (rule) {
-          gsap.fromTo(
-            rule,
-            { scaleX: 0 },
-            {
-              scaleX: 1,
-              ease: 'none',
-              immediateRender: false,
-              scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 68%', scrub: 1.2 },
-            },
-          )
-        }
-      })
-      gsap.utils.toArray<HTMLElement>('.tier').forEach((el) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0 },
-          {
-            opacity: 1,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 70%', scrub: 1.2 },
-          },
-        )
-      })
+      // second-half rhythm: footer title rises on the scrub:1.2 heartbeat.
+      // Lazy render throughout.
       gsap.fromTo(
         '.st-foot h2',
         { y: 60, opacity: 0 },
@@ -621,21 +516,6 @@ export default function EnterStage() {
           scrollTrigger: { trigger: '.st-foot', start: 'top 85%', end: 'top 60%', scrub: 1.2 },
         },
       )
-
-      // counters
-      gsap.utils.toArray<HTMLElement>('.stat-num').forEach((el) => {
-        const end = Number(el.dataset.n || 0)
-        const obj = { v: 0 }
-        gsap.to(obj, {
-          v: end,
-          duration: 1.4,
-          ease: 'expo.out',
-          scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: reduced ? 'play none none none' : 'play none none reverse' },
-          onUpdate: () => {
-            el.textContent = `${Math.round(obj.v)}${el.dataset.suffix || ''}`
-          },
-        })
-      })
     }, root)
 
     // active process row: IntersectionObserver toggles a class (discrete,
@@ -677,7 +557,7 @@ export default function EnterStage() {
         <div className="hero-echo" aria-hidden="true">
           XEVEN
         </div>
-        <p className="mono st-fade">00 — HERO VOID</p>
+        <p className="mono st-fade">00 — TOP</p>
         <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
         <p className="st-sub st-fade">Experience engine. Living systems. Nothing static survives.</p>
         <p className="st-hint">
@@ -688,19 +568,8 @@ export default function EnterStage() {
         </p>
       </section>
 
-      <section className="st-mani">
-        <p className="mono">01 — MANIFESTO</p>
-        <p className="mani-text">
-          {['The', 'web', 'went', 'flat.', 'We', 'build', 'places', 'with', 'weather,', 'gravity', 'and', 'mood.', 'Every', 'pixel', 'answers', 'back.'].map((w, i) => (
-            <span key={i} className={w === 'weather,' || w === 'gravity' || w === 'mood.' ? 'mani-word mani-ember' : 'mani-word'}>
-              {w}{' '}
-            </span>
-          ))}
-        </p>
-      </section>
-
       <section className="st-caps">
-        <p className="mono">02 — CAPABILITIES</p>
+        <p className="mono">01 — CAPABILITIES</p>
         {CAPS.map((c, i) => (
           <Tilt key={c.t} className={i % 2 ? 'cap-card cap-right' : 'cap-card cap-left'}>
             <span className="cap-ghost" aria-hidden="true">
@@ -712,7 +581,7 @@ export default function EnterStage() {
       </section>
 
       <section className="st-proc">
-        <p className="mono">03 — PROCESS</p>
+        <p className="mono">02 — PROCESS</p>
         <i className="thread-node" aria-hidden="true" />
         <div className="proc-line" aria-hidden="true">
           <i className="proc-stub" />
@@ -749,33 +618,8 @@ export default function EnterStage() {
         </div>
       </section>
 
-      <section className="st-stats">
-        <p className="mono">05 — PROOF</p>
-        <div className="stats-grid">
-          {STATS.map((s) => (
-            <div key={s.label} className="stat">
-              <div className="stat-num" data-n={s.n} data-suffix={s.suffix}>
-                {reduced ? `${s.n}${s.suffix}` : 0}
-              </div>
-              <i className="stat-rule" aria-hidden="true" />
-              <p>{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="st-tier">
-        <p className="mono">06 — ENGAGE</p>
-        <div className="tier-grid">
-          {['Spark — a single living page', 'World — a full dimensional site', 'Engine — us, embedded in your team'].map((t) => {
-            const [name, desc] = t.split(' — ')
-            return <TierCard key={name} name={name} desc={desc} />
-          })}
-        </div>
-      </section>
-
       <footer className="st-foot">
-        <p className="mono">07 — DEPARTURE</p>
+        <p className="mono">04 — DEPARTURE</p>
         <h2>STEP INSIDE</h2>
         <a href="mailto:hello@xeven.world" data-cursor>
           hello@xeven.world

@@ -41,23 +41,17 @@ const IDLE_MS = 6000
 
 const SECTIONS = [
   '.st-hero',
-  '.st-mani',
   '.st-caps',
   '.st-proc',
   '.st-reel',
-  '.st-stats',
-  '.st-tier',
   '.st-foot',
 ]
 // camera journey: one stop per index section [x, y, z]
 const WAYPOINTS: Array<[number, number, number]> = [
   [0, 0.4, 10],
-  [0, 0.2, 9.2],
   [0.5, 0, 8.4],
   [-0.5, -0.2, 7.6],
   [0, 0, 8.8],
-  [0, 0.3, 9.6],
-  [0, 0.5, 10.2],
   [0, 0.8, 11],
 ]
 
