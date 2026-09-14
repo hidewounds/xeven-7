@@ -182,11 +182,12 @@ export default function EnterStage() {
         },
       })
 
-      // showreel travels as ONE sequenced row — pinned horizontal, exact
-      // full travel, re-measured on resize. The camera sits dead level,
-      // so panels travel flat (no vertical arc — that read as a tilted
-      // camera): sequential entry left-to-right with un-tilt, exit fade
-      // as each panel has passed (containerAnimation triggers).
+      // showreel as an image globe in diagonal-row sequence — pinned
+      // horizontal, exact full travel, re-measured on resize. Cells rest
+      // on a diagonal (each step down-right from the last) and enter one
+      // by one along that same diagonal with un-tilt; exit fade as each
+      // panel has passed (containerAnimation triggers). Camera stays dead
+      // level: the diagonal is layout, never a tilted camera.
       const rowTween = gsap.to('.reel-track', {
         x: () => -(document.querySelector('.reel-track')!.scrollWidth - window.innerWidth),
         ease: 'none',
@@ -202,13 +203,21 @@ export default function EnterStage() {
         },
       })
       const arcY = () => 0
-      gsap.utils.toArray<HTMLElement>('.reel-cell').forEach((cell, i) => {
-        // entrance: rise off the curve, un-tilt, land readable
+      const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
+      const mid = (cells.length - 1) / 2
+      cells.forEach((cell, i) => {
+        // resting slot on the diagonal: down-right cascade, ± slope
+        const restY = (i - mid) * 44
+        const restX = (i - mid) * 28
+        // entrance: further out along the same diagonal, tilted, then
+        // settle into the diagonal slot (sequence falls out of scroll
+        // position — strict diagonal order, one image at a time)
         gsap.fromTo(
           cell,
-          { y: arcY, rotation: i % 2 ? 2.5 : -2.5, opacity: 0 },
+          { x: restX + 200, y: restY - 160, rotation: -8 + i * 3, opacity: 0 },
           {
-            y: 0,
+            x: restX,
+            y: restY,
             rotation: 0,
             opacity: 1,
             ease: 'none',
@@ -311,34 +320,54 @@ export default function EnterStage() {
           scrollTrigger: { trigger: '.st-proc', start: 'top 70%', end: 'bottom 30%', scrub: 1.2, invalidateOnRefresh: true },
         },
       )
-      // flip-cover into the reel: anchored to PROC exit (not the reel —
-      // the reel sits directly below proc now, so a reel-anchored start
-      // fired mid-proc and swallowed the rows). Word → 3D X crossfade,
-      // then the BLACK X drifts sideways while spinning up to full cover
-      // (all corners) as the reel pins (single timeline owns word/X
-      // opacity, mark x, scale, rotation and container fade — rise owns
-      // y, bloom owns color, nothing else writes these). Mark stays
-      // black from the bloom timeline through the entire cover.
+      // slide-cover into the reel (NO flip/spin): anchored to PROC exit.
+      // Beat 1 — the black X slides sideways. Beat 2 — it grows slowly
+      // from center until it covers every corner perfectly. The new
+      // screen opens FROM INSIDE the X: .st-reel un-clips from a small
+      // center window to full frame across the cover, so the continuation
+      // appears inside the growing X rather than after a white end.
+      // Single timeline owns word/X opacity, mark x/scale, reel clip and
+      // container fade — rise owns y, bloom owns color, nothing else
+      // writes these. Mark stays black from the bloom timeline.
       const flipTl = gsap.timeline({
-        scrollTrigger: { trigger: '.st-proc', start: 'bottom 95%', end: 'bottom 30%', scrub: 1.2 },
+        scrollTrigger: { trigger: '.st-proc', start: 'bottom 95%', end: 'bottom 10%', scrub: 1.2 },
       })
       flipTl
         .to('.mark-word', { opacity: 0, ease: 'none', duration: 0.15 }, 0)
         .to('.mark-x', { opacity: 1, ease: 'none', duration: 0.15 }, 0)
+        // beat 1: sideways travel, scale parked
         .fromTo(
           '.mark-fixed',
-          { scale: 1, rotationY: 0, x: 0, transformPerspective: 900 },
+          { scale: 1, x: 0 },
           {
+            x: () => -window.innerWidth * 0.28,
+            ease: 'none',
+            duration: 0.6,
+          },
+          0.15,
+        )
+        // beat 2: glide back toward center while growing slowly to a
+        // guaranteed full-viewport cover (90× ≈ 2–3× viewport on all
+        // corners, perspective kept flat — no rotationY flip)
+        .to(
+          '.mark-fixed',
+          {
+            x: () => window.innerWidth * 0.1,
             scale: 90,
-            rotationY: 360,
-            x: () => window.innerWidth * 0.22,
             transformOrigin: '50% 50%',
             ease: 'none',
-            duration: 1.1,
+            duration: 1.4,
           },
-          0.1,
+          0.75,
         )
-        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 1.2)
+        // the continuation opens inside the X: small center window → full
+        .fromTo(
+          '.st-reel',
+          { clipPath: 'inset(38% 38% 38% 38%)', opacity: 0.25 },
+          { clipPath: 'inset(0% 0% 0% 0%)', opacity: 1, ease: 'none', duration: 1.4 },
+          0.75,
+        )
+        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 2.15)
 
       // capability cards fan out of the mark: measured per-card deltas from
       // each slot to the live mark point (small, rotated deck → full slot),
