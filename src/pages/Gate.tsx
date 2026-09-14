@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef } from 'react'
 
-/* Intro — GRID IGNITION, tightened cut (1.9s, no muddy middle). Bone-white
-   flash, hard cut to the void dot-grid, one fast ignition wavefront with a
-   live 000→100 ledger + phase word, ember kiss, release into the index.
-   Pure rAF + 2D canvas. Click skips. Reduced skips. */
+/* Intro — MERGE (bone/mint sphere field gathers into one mass, then the
+   veil lifts). Full-screen dots drift to the centre on a distance-delayed
+   wave, growing and warming mint as they merge — overlaps add, never burst.
+   Live 000→100 ledger + phase word. Pure rAF + 2D canvas, no libraries to
+   drift. Click skips. Reduced skips. */
 
 const DUR = 1.9
 const WHITE_END = 0.22
@@ -73,22 +74,11 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
       canvas.width = Math.floor(w * dpr)
       canvas.height = Math.floor(h * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      cols = Math.max(8, Math.floor(w / 120))
-      rows = Math.max(6, Math.floor(h / 120))
+      cols = Math.max(10, Math.floor(w / 90))
+      rows = Math.max(8, Math.floor(h / 90))
     }
     build()
     window.addEventListener('resize', build)
-
-    const mouse = { x: -9999, y: -9999 }
-    const sm = { x: -9999, y: -9999 }
-    const onMove = (e: MouseEvent) => {
-      mouse.x = e.clientX
-      mouse.y = e.clientY
-    }
-    // touch devices never hover — no dead listener (taps still ride the wavefront)
-    if (!window.matchMedia('(pointer: coarse)').matches) {
-      window.addEventListener('mousemove', onMove, { passive: true })
-    }
 
     startRef.current = performance.now()
     let raf = 0
@@ -99,11 +89,6 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
         finish()
         return
       }
-      if (mouse.x > -9000) {
-        sm.x += (mouse.x - sm.x) * 0.12
-        sm.y += (mouse.y - sm.y) * 0.12
-      }
-
       // white beat: pure bone for exactly WHITE_END, then a hard cut to the
       // grid — no fade (a fade would read as gray frames over the dark field)
       white.style.opacity = t < WHITE_END ? '1' : '0'
@@ -116,32 +101,18 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
         word.textContent = t < 0.6 ? 'SIGNAL' : t < 1.1 ? 'WORLD' : 'LIVE'
       }
 
-      // ignition wavefront (fast burn) + ember kiss + release
-      const front = clamp01((t - 0.25) / 0.9) * maxR * 1.25
-      const wash = clamp01((t - 1.0) / 0.5)
+      // MERGE: a full-screen field of theme spheres (bone shells, mint
+      // hearts) drifts together and slowly merges — overlaps add in
+      // 'lighter' so the gathering reads as one mass forming, never
+      // bursting. Outer spheres join late (distance-delayed) for an inward
+      // wave; the veil lifts into the index at the end.
       const fade = 1 - clamp01((t - FADE_AT) / (DUR - FADE_AT))
       el.style.opacity = fade.toFixed(3)
 
-      // backdrop warms toward ember as the wash takes over —
-      // dots stay visible through it, never buried under a lid
-      ctx.globalCompositeOperation = 'source-over'
-      const wr = Math.round(6 + 194 * wash * 0.9)
-      const wg = Math.round(9 + 65 * wash * 0.9)
-      const wb = Math.round(15 + 3 * wash * 0.9)
-      ctx.fillStyle = `rgb(${wr},${wg},${wb})`
-      ctx.fillRect(0, 0, w, h)
-      // hot center grade: the takeover burns from the middle outward
-      if (wash > 0.01) {
-        const hg = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.9)
-        hg.addColorStop(0, `rgba(255,138,61,${(wash * 0.55 * fade).toFixed(3)})`)
-        hg.addColorStop(1, 'rgba(255,138,61,0)')
-        ctx.fillStyle = hg
-        ctx.fillRect(0, 0, w, h)
-      }
-
+      ctx.clearRect(0, 0, w, h)
+      ctx.globalCompositeOperation = 'lighter'
       const gx = w / (cols + 1)
       const gy = h / (rows + 1)
-      ctx.globalCompositeOperation = 'lighter'
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
           // deterministic jitter breaks the grid — organic field, not wallpaper
@@ -150,54 +121,26 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
           const bx = gx * (i + 1) + jx * 24
           const by = gy * (j + 1) + jy * 24
           const dist = Math.hypot(bx - cx, by - cy)
-          // heat: warm inside the front, igniting ring at the front —
-          // with radial falloff so the edges stay dark and brooding
-          const fall = Math.max(0.12, 1 - dist / (maxR * 0.95))
-          const inside = dist < front ? 0.9 : 0
-          const ring = Math.max(0, 1 - Math.abs(dist - front) / 200)
-          const heat = Math.min(1, inside + ring)
-          // cursor stokes nearby dots hotter
-          let hm = 0
-          if (sm.x > -9000) {
-            const md = Math.hypot(bx - sm.x, by - sm.y)
-            if (md < 170) hm = (1 - md / 170) * 0.7
-          }
-          const hh = Math.min(1, Math.max(heat, wash * 0.95) + hm) * (0.3 + 0.7 * fall)
-          const shimmer = 1 + 0.1 * Math.sin(t * 3 + (i * 7 + j * 13) * 0.7)
-          const r = (1.6 + Math.pow(hh, 1.5) * 44 * shimmer) * (smallFix(w))
-          if (r <= 0.2) continue
-          // chromatic fringe: ember + mint ghosts offset each side of the core —
-          // ignition edge only (the front band), so merged interiors read clean
-          if (ring > 0.15) {
-            ctx.fillStyle = `rgba(255,110,50,${(0.5 * hh * fade).toFixed(3)})`
-            ctx.beginPath()
-            ctx.arc(bx - 2.5, by, r, 0, Math.PI * 2)
-            ctx.fill()
-            ctx.fillStyle = `rgba(156,245,211,${(0.5 * hh * fade).toFixed(3)})`
-            ctx.beginPath()
-            ctx.arc(bx + 2.5, by, r, 0, Math.PI * 2)
-            ctx.fill()
-          }
-          // halo bleed: hot dots glow into their neighbors like liquid
-          if (hh > 0.3) {
-            ctx.fillStyle = `rgba(255,122,53,${(0.22 * hh * fade).toFixed(3)})`
-            ctx.beginPath()
-            ctx.arc(bx, by, r * 1.9, 0, Math.PI * 2)
-            ctx.fill()
-          }
-          const cr = Math.round(232 + 23 * hh)
-          const cg = Math.round(237 - 115 * hh)
-          const cb = Math.round(238 - 168 * hh)
-          ctx.fillStyle = `rgba(${cr},${cg},${cb},${(Math.min(1, 0.3 + hh) * fade * (1 - wash * 0.35)).toFixed(3)})`
+          // gather: 0 resting out in the field, 1 merged at the centre
+          const raw = (t - 0.2 - (dist / maxR) * 0.35) / 1.1
+          const u = Math.min(1, Math.max(0, raw))
+          const e = u * u * (3 - 2 * u)
+          if (e <= 0.001) continue
+          const px = bx + (cx - bx) * e
+          const py = by + (cy - by) * e
+          const r = (1.4 + e * 22) * smallFix(w)
+          const heart = e > 0.65
+          const a = ((heart ? 0.5 : 0.22) + e * 0.4) * fade
+          ctx.fillStyle = heart
+            ? `rgba(156,245,211,${a.toFixed(3)})`
+            : `rgba(232,237,238,${a.toFixed(3)})`
           ctx.beginPath()
-          ctx.arc(bx, by, r, 0, Math.PI * 2)
+          ctx.arc(px, py, r, 0, Math.PI * 2)
           ctx.fill()
         }
       }
-
-      // wash lives in the backdrop mix + dot heat above — no lid, no cut
     }
-    // hidden-tab pause: hidden time must not advance the 3.3s choreography
+    // hidden-tab pause: hidden time must not advance the choreography
     let hiddenAt = 0
     const onVis = () => {
       if (document.hidden) {
@@ -215,7 +158,6 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', build)
-      window.removeEventListener('mousemove', onMove)
       document.removeEventListener('visibilitychange', onVis)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
