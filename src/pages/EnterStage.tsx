@@ -202,7 +202,6 @@ export default function EnterStage() {
           invalidateOnRefresh: true,
         },
       })
-      const arcY = () => 0
       const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
       const mid = (cells.length - 1) / 2
       cells.forEach((cell, i) => {
@@ -232,12 +231,16 @@ export default function EnterStage() {
             },
           },
         )
-        // exit: passed panels sink back onto the curve and disappear
-        // (lazy — writes nothing until its own range starts, so the
-        // entrance tween owns opacity/y uncontested before that)
+        // exit: passed panels leave back UP the same diagonal they entered
+        // on, converging as they fade (symmetric path — enter and exit
+        // mirror, so the second half reads smooth; lazy — writes nothing
+        // until its own range starts, so the entrance tween owns these
+        // props uncontested before that)
         gsap.to(cell, {
+          x: restX + 200,
+          y: restY - 160,
+          rotation: -8 + i * 3,
           opacity: 0,
-          y: arcY,
           scale: 0.96,
           ease: 'none',
           immediateRender: false,
@@ -437,6 +440,47 @@ export default function EnterStage() {
       lineTl
         .fromTo('.proc-stub', { scaleX: 0 }, { scaleX: 1, ease: 'none', duration: 0.3 }, 0)
         .fromTo('.proc-line > span', { scaleY: 0 }, { scaleY: 1, ease: 'none', duration: 0.7 }, 0.3)
+
+      // second-half rhythm: stats rise, tiers fade, footer title rises —
+      // all on the same scrub:1.2 heartbeat, one tempo end to end. Tiers
+      // fade opacity-only (.tier has a CSS transform transition for hover
+      // that a scrubbed y would fight). Lazy render throughout.
+      gsap.utils.toArray<HTMLElement>('.stat').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { y: 48, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 68%', scrub: 1.2 },
+          },
+        )
+      })
+      gsap.utils.toArray<HTMLElement>('.tier').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 70%', scrub: 1.2 },
+          },
+        )
+      })
+      gsap.fromTo(
+        '.st-foot h2',
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: { trigger: '.st-foot', start: 'top 85%', end: 'top 60%', scrub: 1.2 },
+        },
+      )
 
       // counters
       gsap.utils.toArray<HTMLElement>('.stat-num').forEach((el) => {
