@@ -428,12 +428,15 @@ export default function EnterStage() {
         )
       })
 
-      // process line draw
-      gsap.fromTo(
-        '.proc-line span',
-        { scaleY: 0 },
-        { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.st-proc', start: 'top 70%', end: 'bottom 60%', scrub: 1.2 } },
-      )
+      // connector thread: a stub leaves the mark's side (center) and runs
+      // to the spine, then the proc spine draws top→bottom — ONE timeline
+      // owns both (single writer; scale-only, chained origins).
+      const lineTl = gsap.timeline({
+        scrollTrigger: { trigger: '.st-proc', start: 'top 85%', end: 'top 40%', scrub: 1.2 },
+      })
+      lineTl
+        .fromTo('.proc-stub', { scaleX: 0 }, { scaleX: 1, ease: 'none', duration: 0.3 }, 0)
+        .fromTo('.proc-line > span', { scaleY: 0 }, { scaleY: 1, ease: 'none', duration: 0.7 }, 0.3)
 
       // counters
       gsap.utils.toArray<HTMLElement>('.stat-num').forEach((el) => {
@@ -496,6 +499,7 @@ export default function EnterStage() {
       <section className="st-proc">
         <p className="mono">03 — PROCESS</p>
         <div className="proc-line" aria-hidden="true">
+          <i className="proc-stub" />
           <span />
         </div>
         {STEPS.map((s) => (
