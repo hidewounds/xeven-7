@@ -1,4 +1,8 @@
 {
+  "introMerge": {
+    "ledger": "039",
+    "canvas": true
+  },
   "legacyGone": {
     "strata": true,
     "void": true,
@@ -13,11 +17,11 @@
     "stats": true,
     "tiers": true,
     "heroLabel": "00 — TOP",
-    "reticleDots": 1,
+    "reticleDots": 0,
     "reticleRings": 0,
     "reelCells": 5
   },
-  "fpsWorld": 12,
+  "fpsWorld": 14,
   "worldsAlive": true,
   "returnAlive": true,
   "overflowX": 0,

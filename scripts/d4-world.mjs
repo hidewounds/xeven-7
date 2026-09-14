@@ -25,7 +25,13 @@ const go = async (y, settle = 1500) => {
 };
 
 await page.goto(URL, { waitUntil: 'load' });
-await page.waitForTimeout(900);
+await page.waitForTimeout(1100);
+// intro merge mid-gather (fresh load, before skip)
+M.introMerge = await page.evaluate(() => ({
+  ledger: document.querySelector('.intro-count')?.textContent ?? null,
+  canvas: !!document.querySelector('.intro-stage'),
+}));
+await page.screenshot({ path: `${OUT}/g3-intro-merge.png` });
 try { await page.click('.intro', { timeout: 4000 }); } catch {}
 try { await page.waitForSelector('.intro', { state: 'detached', timeout: 20000 }); } catch { M.introStuck = true; }
 await page.waitForSelector('canvas.world-fixed', { timeout: 20000 });
