@@ -36,6 +36,18 @@
   display: flex; align-items: center; gap: var(--s24);
   padding: calc(var(--s16) + env(safe-area-inset-top)) var(--s24) var(--s16);
   color: #fff;
+  transition: background 320ms ease, border-color 320ms ease;
+  border-bottom: 1px solid transparent;
+}
+/* floating chrome: transparent over the hero, frosted material past it —
+   content scrolls under, never an opaque bar (blur gated off touch GPUs) */
+.topbar-solid {
+  background: rgba(6, 9, 15, 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  border-bottom-color: var(--line);
+}
+@media (pointer: coarse) {
+  .topbar-solid { backdrop-filter: none; background: rgba(6, 9, 15, 0.82); }
 }
 .tb-logo { font-family: var(--disp); font-size: 20px; letter-spacing: 0.12em; min-height: 44px; display: inline-flex; align-items: center; }
 .tb-center { display: flex; gap: var(--s24); margin: 0 0 0 auto; }
@@ -119,6 +131,13 @@
   z-index: 20; display: flex; flex-direction: column; gap: 1px;
   opacity: 0.8;
 }
+/* page-progress hairline running behind the ticks (sole writer: the rail
+   progress tween — transform-only, mint whisper) */
+.rail-progress {
+  position: absolute; left: 22px; top: 4px; bottom: 4px; width: 1px;
+  background: var(--mint); opacity: 0.7;
+  transform: scaleY(0); transform-origin: top center;
+}
 .rail-btn {
   display: flex; align-items: center; gap: 5px; padding: 0;
   font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em;
@@ -149,7 +168,7 @@
 /* content sections must each stack above the fixed canvas */
 .st-scroll > section, .st-scroll > footer { position: relative; z-index: 2; }
 .st-hero { position: relative; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s24); padding: 0 6vw; }
-.st-hero-title { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; text-wrap: balance; }
+.st-hero-title { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; text-wrap: balance; letter-spacing: -0.02em; }
 .st-sub { font-family: var(--cond); font-size: 18px; color: var(--muted); margin: 0; }
 .st-hint { position: absolute; bottom: 34px; left: 0; right: 0; margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted); }
 .st-hint span { display: inline-block; animation: kvbob 2.2s ease-in-out infinite; }
@@ -188,7 +207,7 @@
 .proc-stub { position: absolute; top: 0; left: 1px; width: calc(50vw - 8vw - 23px); height: 1px; background: var(--mint); transform: scaleX(0); transform-origin: right center; }
 .proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; padding: 4vh 0; }
 .proc-n { font-family: var(--mono); font-size: 12px; color: var(--mint); letter-spacing: 0.2em; }
-.proc-row h3 { font-family: var(--disp); font-size: clamp(28px, 4.5vw, 56px); margin: 0; }
+.proc-row h3 { font-family: var(--disp); font-size: clamp(28px, 4.5vw, 56px); margin: 0; letter-spacing: -0.015em; }
 .proc-row p { grid-column: 2; color: var(--muted); margin: 0; max-width: 52ch; }
 .proc-meta { grid-column: 2; font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--mint); margin: 0; }
 .proc-points { grid-column: 2; list-style: none; margin: var(--s8) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--s8); }
@@ -209,14 +228,14 @@
   transition: border-color 200ms ease, transform 200ms ease;
 }
 .tier:hover { border-color: var(--mint); transform: translateY(-4px); }
-.tier h3 { font-family: var(--disp); font-size: 32px; margin: 0 0 var(--s8); }
+.tier h3 { font-family: var(--disp); font-size: 32px; margin: 0 0 var(--s8); letter-spacing: -0.015em; }
 .tier p { color: var(--muted); margin: 0 0 var(--s16); }
 .tier span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; color: var(--mint); }
 .tier-go { display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--s8); padding: var(--s8) 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; color: var(--mint); }
 .tier-go:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 .st-foot { padding: 30vh 6vw 20vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
-.st-foot h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; }
+.st-foot h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; letter-spacing: -0.02em; }
 .st-foot a { font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
 
 /* ---------- index scroll cinema: migrating mark + white veil ---------- */

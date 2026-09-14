@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 /* Index section rail: a fixed measurement-style ruler on the left edge.
    Eight ticks (00–07) mirror the enter sections; the live section lights
@@ -36,7 +40,22 @@ export default function SectionRail() {
       { rootMargin: '-42% 0px -42% 0px', threshold: 0 },
     )
     els.forEach((el) => io.observe(el))
-    return () => io.disconnect()
+    // progress hairline: fills top→bottom with page scroll (scrubbed,
+    // transform-only; static zero under reduced motion)
+    let st: ScrollTrigger | undefined
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      st = ScrollTrigger.create({
+        trigger: document.body,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.6,
+        animation: gsap.to('.rail-progress', { scaleY: 1, ease: 'none', paused: true }),
+      })
+    }
+    return () => {
+      io.disconnect()
+      st?.kill()
+    }
   }, [])
 
   const jump = (sel: string) => {
@@ -48,6 +67,7 @@ export default function SectionRail() {
 
   return (
     <nav className="rail" aria-label="Index sections">
+      <span className="rail-progress" aria-hidden="true" />
       {STOPS.map((s, i) => (
         <button
           key={s.n}

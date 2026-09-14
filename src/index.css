@@ -55,3 +55,10 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 ::selection { background: var(--mint); color: #06231b; }
 
 :focus-visible { outline: 1px solid var(--mint); outline-offset: 3px; }
+
+/* premium scrollbar: thin bone-on-void, never the native gray block */
+html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; border: 2px solid var(--void); }
+::-webkit-scrollbar-thumb:hover { background: var(--mint); }
