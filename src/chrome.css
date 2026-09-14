@@ -232,7 +232,7 @@
 .cap-right { align-self: flex-end; }
 .cap-card .vid { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
 
-.st-reel { position: relative; overflow: hidden; padding: 22vh 0; }
+.st-reel { position: relative; overflow: hidden; }
 /* reel cells play ABOVE the white veil (the generic section rule below
    would otherwise bury them under it) */
 .st-scroll > section.st-reel { z-index: 31; }
@@ -243,8 +243,15 @@
   animation: marquee 22s linear infinite;
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.reel-track { display: flex; gap: 4vw; padding: 0 6vw; width: max-content; align-items: center; will-change: transform, opacity; }
-.reel-cell { width: min(72vw, 860px); flex-shrink: 0; will-change: transform, opacity; }
+/* showreel STAGE: one pinned viewport; cells stack centered (inset + auto
+   margins, transform-free so GSAP owns scale uncontested) and assemble /
+   yield through the frame. Base opacity 0 = correct pre-JS state. */
+.reel-track { position: relative; height: 100svh; will-change: transform, opacity; }
+.reel-cell {
+  position: absolute; inset: 0; margin: auto;
+  width: min(76vw, 900px, calc(78svh * 1.6)); height: fit-content;
+  opacity: 0; will-change: transform, opacity;
+}
 /* reel counter readout (sole writer: pin onUpdate, direct DOM text) */
 .reel-count {
   position: absolute; top: 4vh; right: 6vw; z-index: 5; margin: 0;
@@ -473,13 +480,13 @@
   .proc-stub { transform: scaleX(1); }
   .thread-node { display: none; }
   .proc-row::after, .proc-row h3 { transition: none; }
-  /* pinned horizontal reel becomes a plain vertical stack — every cell
+  /* pinned stage reel becomes a plain vertical stack — every cell
      reachable with no animation. Keep the section clipped: the ghost
      marquee is 2400px+ of nowrap display type and would page-overflow
      once visible. */
   .st-reel { overflow: hidden; }
-  .reel-track { flex-direction: column; width: auto; }
-  .reel-cell { width: 100%; max-width: 860px; margin-inline: auto; }
+  .reel-track { height: auto; display: flex; flex-direction: column; gap: var(--s32); padding: 10vh 6vw; }
+  .reel-cell { position: static; inset: auto; margin: 0 auto; opacity: 1; width: 100%; max-width: 860px; }
   /* cinema layers stand down entirely — veil clip is already zero, but
      keep them out of the a11y/paint tree for certainty */
   .veil-white, .mark-fixed, .proc-bloom { display: none; }

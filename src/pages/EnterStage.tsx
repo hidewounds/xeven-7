@@ -200,24 +200,20 @@ export default function EnterStage() {
         },
       })
 
-      // showreel as an image globe in diagonal-row sequence — pinned
-      // horizontal, exact full travel, re-measured on resize. Cells rest
-      // on a diagonal (each step down-right from the last) and enter one
-      // by one along that same diagonal with un-tilt; exit fade as each
-      // panel has passed (containerAnimation triggers). Camera stays dead
-      // level: the diagonal is layout, never a tilted camera.
+      // showreel STAGE: one pinned viewport, one item at a time taking it
+      // full — each panel assembles (scale + fade in), holds, then yields
+      // to the next through the frame. No conveyor, no tilt: cuts through
+      // space, not across it. Single timeline owns every cell's opacity and
+      // scale end to end (nothing else writes them).
       const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
-      const mid = (cells.length - 1) / 2
       // reel counter readout: 01→N scrubbed to pin progress (direct DOM
       // write, no react state down the scroll path)
       const reelCount = root.current.querySelector('.reel-count span')
-      const rowTween = gsap.to('.reel-track', {
-        x: () => -(document.querySelector('.reel-track')!.scrollWidth - window.innerWidth),
-        ease: 'none',
+      const stageTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.st-reel',
           start: 'top top',
-          end: '+=220%',
+          end: '+=300%',
           pin: true,
           scrub: 1.2,
           anticipatePin: 1,
@@ -230,57 +226,20 @@ export default function EnterStage() {
           },
         },
       })
+      const STEP = 1.2
       cells.forEach((cell, i) => {
-        // resting slot on the diagonal: down-right cascade, ± slope
-        const restY = (i - mid) * 44
-        const restX = (i - mid) * 28
-        // entrance: further out along the same diagonal, tilted, then
-        // settle into the diagonal slot (sequence falls out of scroll
-        // position — strict diagonal order, one image at a time)
-        gsap.fromTo(
+        const at = i * STEP
+        // assemble: rise from small to full
+        stageTl.fromTo(
           cell,
-          { x: restX + 200, y: restY - 160, rotation: -8 + i * 3, opacity: 0 },
-          {
-            x: restX,
-            y: restY,
-            rotation: 0,
-            opacity: 1,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: cell,
-              containerAnimation: rowTween,
-              start: 'left 100%',
-              end: 'left 45%',
-              scrub: 1.2,
-              invalidateOnRefresh: true,
-            },
-          },
+          { opacity: 0, scale: 0.9 },
+          { opacity: 1, scale: 1, ease: 'none', duration: 0.5, immediateRender: false },
+          at,
         )
-        // exit: passed panels leave back UP the same diagonal they entered
-        // on, converging as they fade (symmetric path — enter and exit
-        // mirror, so the second half reads smooth; lazy — writes nothing
-        // until its own range starts, so the entrance tween owns these
-        // props uncontested before that)
-        gsap.to(cell, {
-          x: restX + 200,
-          y: restY - 160,
-          rotation: -8 + i * 3,
-          opacity: 0,
-          scale: 0.96,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: cell,
-            containerAnimation: rowTween,
-            start: 'right 55%',
-            end: 'right -10%',
-            scrub: 1.2,
-            invalidateOnRefresh: true,
-          },
-        })
+        // yield: push past full and dissolve for the next (the last cell
+        // holds longest, then clears as the pin releases for departure)
+        stageTl.to(cell, { opacity: 0, scale: 1.06, ease: 'none', duration: 0.5 }, at + (i < cells.length - 1 ? 0.7 : 1.0))
       })
-
       // white wash: a soft light that integrates with the dark field instead
       // of covering it — one timeline owns the veil end to end (two
       // competing scrubbed tweens on one property resolve
@@ -357,9 +316,9 @@ export default function EnterStage() {
       // only — compositor-friendly, no layout-property animation), so the
       // continuation appears inside the growing X rather than after a
       // white end. Single timeline owns word/X opacity, mark x/scale and
-      // reel-track opacity/scale — rise owns y, bloom owns color, the pin
-      // tween owns reel-track x, nothing else writes these. Mark stays
-      // black from the bloom timeline.
+      // reel-track opacity/scale — rise owns y, bloom owns color, the stage
+      // timeline owns each cell's opacity/scale, nothing else writes these.
+      // Mark stays black from the bloom timeline.
       const flipTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.st-proc',
