@@ -413,8 +413,8 @@ export default function EnterStage() {
         .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 2.25)
 
       // capability deck: all 4 cards rest stacked directly BEHIND the
-      // fixed mark (small held deck, fanned ±16°, edges peeking) and deal
-      // out one-by-one to their alternating slots as you scroll.
+      // fixed mark (small held deck, fanned ±16°, edges peeking) and get
+      // THROWN one-by-one to their alternating slots as you scroll.
       // Measured per-card deltas to the live mark point, recomputed on
       // refresh so resize never strands them. Transform + opacity only.
       const markEl = document.querySelector('.mark-fixed')
@@ -450,30 +450,38 @@ export default function EnterStage() {
             dy: m.top + m.height / 2 - (b.top + b.height / 2) + gy,
           }
         }
-        gsap.fromTo(
-          card,
-          {
-            x: () => delta().dx,
-            y: () => delta().dy + peekY,
-            scale: 0.3,
-            rotation: fanRot[i % fanRot.length],
-            opacity: 0,
-            transformOrigin: '50% 50%',
+        // THROW: the deck materializes behind the mark, then each card is
+        // thrown arcing onto the page — x runs linear while y eases out, so
+        // the flight path curves; rotation unwinds and scale blooms as it
+        // lands. One timeline per card owns all its props (ghost parallax
+        // owns yPercent only — never contested). Lazy render: the deck
+        // displacement must not poison trigger measurement.
+        const throwTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 110%',
+            end: 'top 45%',
+            scrub: 1.2,
+            invalidateOnRefresh: true,
           },
-          {
-            x: 0,
-            y: 0,
-            scale: 1,
-            rotation: 0,
-            opacity: 1,
-            ease: 'none',
-            // the from-state displaces cards ~1100px to the mark — if it
-            // rendered at creation, trigger positions would be measured on
-            // the displaced boxes (all starts went negative). Render lazily.
-            immediateRender: false,
-            scrollTrigger: { trigger: card, start: 'top 100%', end: 'top 62%', scrub: 1.2, invalidateOnRefresh: true },
-          },
-        )
+        })
+        throwTl
+          .fromTo(
+            card,
+            {
+              x: () => delta().dx,
+              y: () => delta().dy + peekY,
+              scale: 0.25,
+              rotation: fanRot[i % fanRot.length],
+              opacity: 0,
+              transformOrigin: '50% 50%',
+            },
+            { opacity: 1, ease: 'none', duration: 0.25, immediateRender: false },
+            0,
+          )
+          .to(card, { x: 0, ease: 'none', duration: 0.7 }, 0.05)
+          .to(card, { y: 0, ease: 'power2.out', duration: 0.7 }, 0.05)
+          .to(card, { scale: 1, rotation: 0, ease: 'none', duration: 0.7 }, 0.05)
       })
 
       // connector thread: a stub leaves the mark's side (center) and runs
