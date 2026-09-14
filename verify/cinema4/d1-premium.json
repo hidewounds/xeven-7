@@ -1,0 +1,27 @@
+{
+  "ledger": {
+    "count": "013",
+    "word": "SIGNAL"
+  },
+  "echo": true,
+  "cue0": "matrix(0, 0, 0, 1, 0, 0)",
+  "topbarSolid": "topbar topbar-solid",
+  "railProgress": "matrix(1, 0, 0, 0.0983, 0, 0)",
+  "embers": 3,
+  "ghosts": 4,
+  "nodeRide": "matrix(1, 0, 0, 1, -650, 1223.08)",
+  "stubDrawn": "matrix(1, 0, 0, 1, 0, 0)",
+  "rowOn": 1,
+  "markScale": "matrix(28.5476, 0, 0, 28.5476, -304.56, -360.943)",
+  "reelCount": "04 / 05",
+  "ruleFull": "matrix(1, 0, 0, 1, 0, 0)",
+  "tiers": [
+    "1",
+    "1",
+    "1"
+  ],
+  "footClock": "06:03 PM — LOCAL",
+  "footH2op": "1",
+  "overflowX": 0,
+  "errors": []
+}
