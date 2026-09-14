@@ -121,6 +121,24 @@ export default function EnterStage() {
       const split = new SplitText('.st-hero-title', { type: 'lines,words,chars', mask: 'lines', autoSplit: true })
       gsap.from(split.chars, { yPercent: 120, duration: 1.1, ease: 'expo.out', stagger: 0.02, delay: 0.3 })
       gsap.to('.st-fade', { opacity: 0, y: -50, ease: 'none', scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 30%', scrub: 1.2 } })
+      // ghost echo drifts slower than the title (depth without parallax
+      // libraries — transform-only, own property, own trigger range)
+      gsap.to('.hero-echo', {
+        yPercent: 24,
+        ease: 'none',
+        scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom top', scrub: 1.2 },
+      })
+      // scroll cue: mint hairline draws as the hero leaves
+      gsap.fromTo(
+        '.st-cue b',
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 35%', scrub: 1.2 },
+        },
+      )
 
       // migrating mark: the topbar wordmark yields as a small fixed mark
       // rises bottom-center (both directions scrub cleanly)
@@ -512,11 +530,17 @@ export default function EnterStage() {
         </span>
       </button>
       <section className="st-hero">
+        <div className="hero-echo" aria-hidden="true">
+          XEVEN
+        </div>
         <p className="mono st-fade">00 — HERO VOID</p>
         <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
         <p className="st-sub st-fade">Experience engine. Living systems. Nothing static survives.</p>
         <p className="st-hint st-fade">
           <span>scroll to explore →</span>
+          <i className="st-cue" aria-hidden="true">
+            <b />
+          </i>
         </p>
       </section>
 

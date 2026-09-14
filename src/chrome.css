@@ -162,6 +162,15 @@
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em;
   color: var(--bone); opacity: 0; pointer-events: none;
 }
+/* ignition ledger: phase word left, 000→100 counter right, bottom row */
+.intro-ledger {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding: 0 var(--s24) calc(var(--s24) + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+.intro-word { font-family: var(--mono); font-size: 11px; letter-spacing: 0.34em; color: var(--mint); }
+.intro-count { font-family: var(--disp); font-size: clamp(48px, 8vw, 96px); line-height: 1; color: var(--bone); letter-spacing: -0.02em; }
 
 /* ---------- enter stage ---------- */
 .st-scroll { position: relative; z-index: 2; }
@@ -170,8 +179,19 @@
 .st-hero { position: relative; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s24); padding: 0 6vw; }
 .st-hero-title { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; text-wrap: balance; letter-spacing: -0.02em; }
 .st-sub { font-family: var(--cond); font-size: 18px; color: var(--muted); margin: 0; }
-.st-hint { position: absolute; bottom: 34px; left: 0; right: 0; margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted); }
+.st-hint { position: absolute; bottom: 34px; left: 0; right: 0; margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: var(--s12); }
 .st-hint span { display: inline-block; animation: kvbob 2.2s ease-in-out infinite; }
+/* scroll cue: mint hairline drawing as the hero leaves (sole writer: the
+   cue tween — transform-only) */
+.st-cue { display: block; width: 64px; height: 1px; background: var(--line-strong); }
+.st-cue b { display: block; width: 100%; height: 100%; background: var(--mint); transform: scaleX(0); transform-origin: left center; }
+/* ghost echo: giant outlined XEVEN breathing behind the title */
+.hero-echo {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--disp); font-size: clamp(120px, 26vw, 420px); letter-spacing: -0.02em;
+  color: transparent; -webkit-text-stroke: 1px rgba(232, 237, 238, 0.07);
+  pointer-events: none; user-select: none;
+}
 @keyframes kvbob { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(8px); opacity: 1; } }
 
 .st-mani { min-height: 120vh; display: flex; flex-direction: column; justify-content: center; gap: var(--s32); padding: 26vh 8vw; }
@@ -364,6 +384,7 @@
   .form-check { animation: none; }
   /* scroll-choreography stand-down: readable final states, zero motion */
   .mani-word { opacity: 1; }
+  .st-cue b { transform: scaleX(1); }
   .proc-line span { transform: scaleY(1); }
   .proc-stub { transform: scaleX(1); }
   /* pinned horizontal reel becomes a plain vertical stack — every cell

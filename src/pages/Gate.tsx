@@ -18,6 +18,8 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null!)
   const whiteRef = useRef<HTMLDivElement>(null!)
   const miniRef = useRef<HTMLDivElement>(null!)
+  const countRef = useRef<HTMLSpanElement>(null!)
+  const wordRef = useRef<HTMLSpanElement>(null!)
   const done = useRef(false)
   const startRef = useRef(0)
   const reduced = useMemo(
@@ -46,6 +48,8 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
     const ctx = canvas.getContext('2d')
     const white = whiteRef.current
     const mini = miniRef.current
+    const count = countRef.current
+    const word = wordRef.current
     const el = root.current
     if (!ctx || !white || !mini || !el) {
       finish()
@@ -106,6 +110,14 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
       // grid — no fade (a fade would read as gray frames over the dark field)
       white.style.opacity = t < WHITE_END ? '1' : '0'
       mini.style.opacity = clamp01((t - 0.45) / 0.5).toFixed(3)
+
+      // ignition ledger: 000→100 counter + phase word, textContent writes
+      // only (no react state down the rAF path)
+      if (count) count.textContent = String(Math.round(clamp01((t - 0.4) / 2.4) * 100)).padStart(3, '0')
+      if (word) {
+        word.textContent =
+          t < 1.0 ? 'SIGNAL' : t < 1.6 ? 'WORLD' : t < 2.2 ? 'IGNITE' : 'LIVE'
+      }
 
       // ignition wavefront (linear slow burn) + ember wash + release
       const front = clamp01((t - 0.4) / 1.9) * maxR * 1.25
@@ -223,6 +235,14 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
       <div ref={miniRef} className="intro-mini" aria-hidden="true">
         <span>XEVEN®</span>
         <span>EST. MMXXVI</span>
+      </div>
+      <div className="intro-ledger" aria-hidden="true">
+        <span ref={wordRef} className="intro-word">
+          SIGNAL
+        </span>
+        <span ref={countRef} className="intro-count">
+          000
+        </span>
       </div>
       <div ref={whiteRef} className="intro-white" aria-hidden="true" />
     </div>
