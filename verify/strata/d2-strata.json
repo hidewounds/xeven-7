@@ -1,0 +1,19 @@
+{
+  "canvas": {
+    "w": 1696,
+    "h": 996,
+    "x": -48,
+    "y": -48,
+    "vw": 1600,
+    "vh": 900
+  },
+  "oldGone": true,
+  "fpsHero": 60,
+  "errorsMid": 0,
+  "worldsCanvas": true,
+  "worldsTitle": "Built worlds.",
+  "overflowX": 0,
+  "mobOverflowX": 0,
+  "mobCanvas": true,
+  "errors": []
+}

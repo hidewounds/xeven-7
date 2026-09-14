@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
-import GraphBg from './components/GraphBg'
+import StrataBg from './components/StrataBg'
 import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
@@ -114,7 +114,7 @@ export default function App() {
         Skip to content
       </a>
       <TopBar route={route} />
-      <GraphBg />
+      <StrataBg />
       <main id="main" key={route}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
