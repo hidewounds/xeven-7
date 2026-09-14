@@ -671,7 +671,7 @@ export default function EnterStage() {
         <p className="mono st-fade">00 — HERO VOID</p>
         <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
         <p className="st-sub st-fade">Experience engine. Living systems. Nothing static survives.</p>
-        <p className="st-hint st-fade">
+        <p className="st-hint">
           <span>scroll to explore →</span>
           <i className="st-cue" aria-hidden="true">
             <b />
