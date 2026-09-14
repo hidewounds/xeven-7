@@ -1,0 +1,19 @@
+{
+  "canvases": {
+    "strata": true,
+    "void": true,
+    "reticle": 2
+  },
+  "webgl": {
+    "w": 1600,
+    "h": 900
+  },
+  "fpsBoth": 23,
+  "reticleHot": {
+    "ring": "translate3d(1299.73px, 450px, 0px) scale(1)",
+    "ringOp": "1"
+  },
+  "heroDolly": "matrix(1.125, 0, 0, 1.125, 0, -10.2916)",
+  "overflowX": 0,
+  "errors": []
+}

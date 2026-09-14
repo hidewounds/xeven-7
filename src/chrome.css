@@ -29,6 +29,17 @@
 .gl-fixed { position: fixed; inset: 0; z-index: var(--z-canvas); pointer-events: none; }
 .gl-fixed > div { width: 100%; height: 100%; }
 .strata-fixed { position: fixed; top: 0; left: 0; z-index: var(--z-graph); pointer-events: none; }
+/* void layer: WebGL solids + starfield above the STRATA field, below content
+   (same z token, later in DOM) — faint additive edges stay readable over copy */
+.void-fixed { position: fixed; inset: 0; z-index: var(--z-graph); pointer-events: none; }
+/* reticle cursor: difference-blend ring + dot trailing native (JS-owned
+   transform/opacity only; never capture input; never lock the pointer) */
+.reticle, .reticle-dot {
+  position: fixed; top: 0; left: 0; z-index: 200; pointer-events: none;
+  mix-blend-mode: difference; opacity: 0; will-change: transform;
+}
+.reticle { width: 26px; height: 26px; margin: -13px 0 0 -13px; border: 1px solid rgba(232, 237, 238, 0.85); border-radius: 50%; }
+.reticle-dot { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: rgba(232, 237, 238, 0.9); }
 
 /* ---------- topbar ---------- */
 .topbar {

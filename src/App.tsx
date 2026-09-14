@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import StrataBg from './components/StrataBg'
+import CursorReticle from './components/CursorReticle'
 import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
@@ -17,6 +18,9 @@ const Vision = lazy(() => import('./pages/Vision'))
 const Services = lazy(() => import('./pages/Services'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const Contact = lazy(() => import('./pages/Contact'))
+// WebGL void layer rides in its own async chunk — first paint never waits
+// for three.js; the STRATA field holds the frame until it lands.
+const VoidObjects = lazy(() => import('./components/VoidObjects'))
 
 gsap.registerPlugin(ScrollTrigger)
 ScrollTrigger.config({ ignoreMobileResize: true })
@@ -115,6 +119,10 @@ export default function App() {
       </a>
       <TopBar route={route} />
       <StrataBg />
+      <Suspense fallback={null}>
+        <VoidObjects />
+      </Suspense>
+      <CursorReticle />
       <main id="main" key={route}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}

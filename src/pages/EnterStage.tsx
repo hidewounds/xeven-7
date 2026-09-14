@@ -162,6 +162,15 @@ export default function EnterStage() {
       const split = new SplitText('.st-hero-title', { type: 'lines,words,chars', mask: 'lines', autoSplit: true })
       gsap.from(split.chars, { yPercent: 120, duration: 1.1, ease: 'expo.out', stagger: 0.02, delay: 0.3 })
       gsap.to('.st-fade', { opacity: 0, y: -50, ease: 'none', scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 30%', scrub: 1.2 } })
+      // dolly through space: the title pushes toward the camera and drifts
+      // up as the hero exits (parent scale — the SplitText chars own their
+      // own transforms, never contested)
+      gsap.to('.st-hero-title', {
+        scale: 1.18,
+        yPercent: -12,
+        ease: 'none',
+        scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 20%', scrub: 1.2 },
+      })
       // ghost echo drifts slower than the title (depth without parallax
       // libraries — transform-only, own property, own trigger range)
       gsap.to('.hero-echo', {
