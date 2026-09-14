@@ -17,29 +17,12 @@ const LINKS: { label: string; to: Route }[] = [
 
 export default function TopBar({ route }: { route: Route }) {
   const [open, setOpen] = useState(false)
-  const [solid, setSolid] = useState(false)
   const panel = useRef<HTMLDivElement>(null!)
   const burger = useMagnetic<HTMLButtonElement>(0.4)
 
   useEffect(() => {
     setOpen(false)
   }, [route])
-
-  // floating chrome: frost the bar once the hero is behind (threshold-cross
-  // writes only — no per-frame re-renders down the scroll path)
-  useEffect(() => {
-    let isSolid = false
-    const onScroll = () => {
-      const next = window.scrollY > window.innerHeight * 0.6
-      if (next !== isSolid) {
-        isSolid = next
-        setSolid(next)
-      }
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   useEffect(() => {
     if (!panel.current) return
@@ -62,7 +45,7 @@ export default function TopBar({ route }: { route: Route }) {
 
   return (
     <>
-      <header className={solid ? 'topbar topbar-solid' : 'topbar'}>
+      <header className="topbar">
         <button className="tb-logo" onClick={() => navigate('enter')} data-cursor>
           XEVEN
         </button>

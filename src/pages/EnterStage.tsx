@@ -449,7 +449,10 @@ export default function EnterStage() {
       // chained origins). The ember node rides the same path: across the
       // stub (0–0.3), then down the spine (0.3–1).
       const spineH = () => document.querySelector('.proc-line')?.clientHeight ?? 0
-      const stubW = () => -(window.innerWidth * 0.42 - 22)
+      // stub travel: viewport center → spine x (spine sits right of the rail
+      // on desktop, at the row gutter on small screens where the rail hides)
+      const stubW = () =>
+        -(window.innerWidth * 0.42 - (window.innerWidth <= 900 ? 22 : 114))
       const lineTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.st-proc',

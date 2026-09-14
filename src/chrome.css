@@ -31,30 +31,16 @@
 /* world layer: the unified VOIDWORLD canvas (lattice + panels + solids +
    presence, one draw journey) below content (same z token, later in DOM) */
 .world-fixed { position: fixed; inset: 0; z-index: var(--z-graph); pointer-events: none; }
-/* reticle cursor: one crisp difference-blend dot tracking native (JS-owned
-   transform/opacity only; never captures input; never trails) */
-.reticle-dot {
-  position: fixed; top: 0; left: 0; z-index: 200; pointer-events: none;
-  mix-blend-mode: difference; opacity: 0; will-change: transform;
-  width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%;
-  background: rgba(232, 237, 238, 0.9);
-}
+/* no custom cursor: native pointer only, fully visible, zero decoration. */
 
-/* ---------- topbar ---------- */
+/* ---------- topbar: bar-free by design ---------- */
+/* The bar itself is invisible — only logo + links float. No background,
+   no border, no blur: the field is the chrome. */
 .topbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-ui);
   display: flex; align-items: center; gap: var(--s24);
   padding: calc(var(--s16) + env(safe-area-inset-top)) var(--s24) var(--s16);
   color: #fff;
-  transition: background 320ms ease, border-color 320ms ease;
-  border-bottom: 1px solid transparent;
-}
-/* floating chrome: transparent over the hero, solid veil past it — zero
-   blur anywhere on the site (backdrop blur repaints the lattice every
-   frame). The hairline border carries the separation. */
-.topbar-solid {
-  background: rgba(6, 9, 15, 0.82);
-  border-bottom-color: var(--line);
 }
 .tb-logo { font-family: var(--disp); font-size: 20px; letter-spacing: 0.12em; min-height: 44px; display: inline-flex; align-items: center; }
 .tb-center { display: flex; gap: var(--s24); margin: 0 0 0 auto; }
@@ -263,13 +249,14 @@
 .reel-cell:hover .vid-meta p { transform: translateY(-4px); }
 .reel-cell:hover .vid-meta span { color: var(--mint); }
 
-.st-proc { padding: 30vh 8vw 32vh; display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
-.proc-line { position: absolute; left: calc(8vw + 22px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
+.st-proc { padding: 30vh 8vw 32vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
+/* spine sits with the rows, clear of the fixed rail instrument */
+.proc-line { position: absolute; left: calc(8vw + 114px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
 .proc-line span { display: block; width: 100%; height: 100%; background: var(--mint); transform: scaleY(0); transform-origin: top; }
 /* connector stub: leaves the mark's side (viewport center) and runs left
    into the spine top. Grows center→spine (origin right), then the spine
    draws. Scale-only, re-measured never (viewport-relative calc). */
-.proc-stub { position: absolute; top: 0; left: 1px; width: calc(50vw - 8vw - 23px); height: 1px; background: var(--mint); transform: scaleX(0); transform-origin: right center; }
+.proc-stub { position: absolute; top: 0; left: 1px; width: calc(50vw - 8vw - 115px); height: 1px; background: var(--mint); transform: scaleX(0); transform-origin: right center; }
 /* ember thread node: rides stub→spine inside lineTl (sole writer: x/y/scale).
    Static glow only — never animated, so the ride stays compositor-cheap. */
 .thread-node {
@@ -463,6 +450,10 @@
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
   .reel-cell { width: 84vw; }
   .proc-row { grid-template-columns: 44px 1fr; }
+  /* rail hides here, so process reclaims the gutter */
+  .st-proc { padding-left: 8vw; }
+  .proc-line { left: calc(8vw + 22px); }
+  .proc-stub { width: calc(50vw - 8vw - 23px); }
 }
 
 /* coarse pointers: no hover-only affordances depend on precision here. */

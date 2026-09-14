@@ -3,7 +3,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
-import CursorReticle from './components/CursorReticle'
 import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
@@ -122,7 +121,6 @@ export default function App() {
       <Suspense fallback={null}>
         <VoidWorld />
       </Suspense>
-      <CursorReticle />
       <main id="main" key={route}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
