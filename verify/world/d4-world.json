@@ -1,0 +1,13 @@
+{
+  "legacyGone": {
+    "strata": true,
+    "void": true,
+    "graph": true,
+    "world": true
+  },
+  "fpsWorld": 12,
+  "worldsAlive": true,
+  "returnAlive": true,
+  "overflowX": 0,
+  "errors": []
+}
