@@ -199,6 +199,19 @@ export default function EnterStage() {
           fastScrollEnd: true,
         },
       })
+      // ember keywords ignite at full illumination (color-only writer —
+      // the word tween owns opacity, nothing else touches color)
+      gsap.to('.mani-ember', {
+        color: '#ff4d2e',
+        ease: 'none',
+        immediateRender: false,
+        scrollTrigger: {
+          trigger: '.st-mani',
+          start: 'top top',
+          end: '+=160%',
+          scrub: 1.2,
+        },
+      })
 
       // showreel as an image globe in diagonal-row sequence — pinned
       // horizontal, exact full travel, re-measured on resize. Cells rest
@@ -408,6 +421,21 @@ export default function EnterStage() {
       const markEl = document.querySelector('.mark-fixed')
       const fanRot = [-16, -6, 6, 16]
       gsap.utils.toArray<HTMLElement>('.cap-card').forEach((card, i) => {
+        // ghost numeral drifts against its card (yPercent only — the deal
+        // tween owns y, so the two never contest one property)
+        const ghost = card.querySelector('.cap-ghost')
+        if (ghost) {
+          gsap.fromTo(
+            ghost,
+            { yPercent: 14 },
+            {
+              yPercent: -14,
+              ease: 'none',
+              immediateRender: false,
+              scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 1.2 },
+            },
+          )
+        }
         // deck peek: stacked cards offset a few px so the deck edges read
         // behind the logo before each card deals out
         const peekY = (i - 1.5) * 12
@@ -548,7 +576,7 @@ export default function EnterStage() {
         <p className="mono">01 — MANIFESTO</p>
         <p className="mani-text">
           {['The', 'web', 'went', 'flat.', 'We', 'build', 'places', 'with', 'weather,', 'gravity', 'and', 'mood.', 'Every', 'pixel', 'answers', 'back.'].map((w, i) => (
-            <span key={i} className="mani-word">
+            <span key={i} className={w === 'weather,' || w === 'gravity' || w === 'mood.' ? 'mani-word mani-ember' : 'mani-word'}>
               {w}{' '}
             </span>
           ))}
@@ -559,6 +587,9 @@ export default function EnterStage() {
         <p className="mono">02 — CAPABILITIES</p>
         {CAPS.map((c, i) => (
           <Tilt key={c.t} className={i % 2 ? 'cap-card cap-right' : 'cap-card cap-left'}>
+            <span className="cap-ghost" aria-hidden="true">
+              {`0${i + 1}`}
+            </span>
             <VideoCard src={c.src} title={c.t} sub={c.d} />
           </Tilt>
         ))}

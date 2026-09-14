@@ -199,7 +199,16 @@
 .mani-word { opacity: 0.13; }
 
 .st-caps { display: flex; flex-direction: column; gap: 20vh; padding: 36vh 6vw 32vh; }
-.cap-card { width: min(78%, 600px); will-change: transform; }
+.cap-card { position: relative; width: min(78%, 600px); will-change: transform; }
+/* gallery ghost numeral peeking from behind the card's top edge
+   (parallax writer owns yPercent — the deal tween owns y, never both) */
+.cap-ghost {
+  position: absolute; top: -72px; left: -16px;
+  font-family: var(--disp); font-size: clamp(110px, 14vw, 220px); line-height: 1;
+  letter-spacing: -0.02em; color: transparent;
+  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.16);
+  pointer-events: none; user-select: none;
+}
 .cap-left { align-self: flex-start; }
 .cap-right { align-self: flex-end; }
 .cap-card .vid { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
@@ -384,6 +393,7 @@
   .form-check { animation: none; }
   /* scroll-choreography stand-down: readable final states, zero motion */
   .mani-word { opacity: 1; }
+  .mani-ember { color: var(--ember); }
   .st-cue b { transform: scaleX(1); }
   .proc-line span { transform: scaleY(1); }
   .proc-stub { transform: scaleX(1); }
