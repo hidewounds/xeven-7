@@ -219,6 +219,11 @@ export default function EnterStage() {
       // by one along that same diagonal with un-tilt; exit fade as each
       // panel has passed (containerAnimation triggers). Camera stays dead
       // level: the diagonal is layout, never a tilted camera.
+      const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
+      const mid = (cells.length - 1) / 2
+      // reel counter readout: 01→N scrubbed to pin progress (direct DOM
+      // write, no react state down the scroll path)
+      const reelCount = root.current.querySelector('.reel-count span')
       const rowTween = gsap.to('.reel-track', {
         x: () => -(document.querySelector('.reel-track')!.scrollWidth - window.innerWidth),
         ease: 'none',
@@ -231,10 +236,13 @@ export default function EnterStage() {
           anticipatePin: 1,
           fastScrollEnd: true,
           invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            if (reelCount) {
+              reelCount.textContent = String(Math.min(cells.length, Math.floor(self.progress * cells.length) + 1)).padStart(2, '0')
+            }
+          },
         },
       })
-      const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
-      const mid = (cells.length - 1) / 2
       cells.forEach((cell, i) => {
         // resting slot on the diagonal: down-right cascade, ± slope
         const restY = (i - mid) * 44
@@ -390,7 +398,9 @@ export default function EnterStage() {
         )
         // beat 2: glide back toward center while growing slowly to a
         // guaranteed full-viewport cover (90× ≈ 2–3× viewport on all
-        // corners, perspective kept flat — no rotationY flip)
+        // corners, perspective kept flat — no rotationY flip), then a
+        // deterministic impact punch (90→94→90) so the takeover lands
+        // with weight instead of just arriving
         .to(
           '.mark-fixed',
           {
@@ -402,6 +412,8 @@ export default function EnterStage() {
           },
           0.75,
         )
+        .to('.mark-fixed', { scale: 94, ease: 'none', duration: 0.1 }, 2.05)
+        .to('.mark-fixed', { scale: 90, ease: 'none', duration: 0.1 }, 2.15)
         // the continuation opens inside the X: track blooms from a small
         // scale to full while fading in (lazy render — must not hide the
         // reel on first paint before its range starts)
@@ -411,7 +423,7 @@ export default function EnterStage() {
           { opacity: 1, scale: 1, ease: 'none', duration: 1.4, immediateRender: false },
           0.75,
         )
-        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 2.15)
+        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 2.25)
 
       // capability deck: all 4 cards rest stacked directly BEHIND the
       // fixed mark (small held deck, fanned ±16°, edges peeking) and deal
@@ -660,6 +672,9 @@ export default function EnterStage() {
         <div className="reel-ghost" aria-hidden="true">
           SHOWREEL — SHOWREEL — SHOWREEL
         </div>
+        <p className="reel-count" aria-hidden="true">
+          <span>01</span> / {String(REEL.length).padStart(2, '0')}
+        </p>
         <div className="reel-track">
           {REEL.map((r) => (
             <div key={r.title} className="reel-cell">

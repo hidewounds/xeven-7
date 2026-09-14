@@ -226,6 +226,16 @@
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .reel-track { display: flex; gap: 4vw; padding: 0 6vw; width: max-content; align-items: center; will-change: transform, opacity; }
 .reel-cell { width: min(72vw, 860px); flex-shrink: 0; will-change: transform, opacity; }
+/* reel counter readout (sole writer: pin onUpdate, direct DOM text) */
+.reel-count {
+  position: absolute; top: 4vh; right: 6vw; z-index: 5; margin: 0;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted);
+}
+/* cell title lift on hover (180ms, transform-only, no scrubbed conflicts) */
+.vid-meta p { transition: transform 180ms ease; }
+.vid-meta span { transition: color 180ms ease; }
+.reel-cell:hover .vid-meta p { transform: translateY(-4px); }
+.reel-cell:hover .vid-meta span { color: var(--mint); }
 
 .st-proc { padding: 30vh 8vw 32vh; display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
 .proc-line { position: absolute; left: calc(8vw + 22px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
