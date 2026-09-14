@@ -159,7 +159,7 @@
 .mani-text { font-family: var(--disp); font-size: clamp(30px, 5.5vw, 72px); line-height: 1.15; margin: 0; max-width: 20ch; }
 .mani-word { opacity: 0.13; }
 
-.st-caps { display: flex; flex-direction: column; gap: 20vh; padding: 26vh 6vw 32vh; }
+.st-caps { display: flex; flex-direction: column; gap: 20vh; padding: 36vh 6vw 32vh; }
 .cap-card { width: min(78%, 600px); will-change: transform; }
 .cap-left { align-self: flex-start; }
 .cap-right { align-self: flex-end; }

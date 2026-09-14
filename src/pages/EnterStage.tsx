@@ -379,12 +379,17 @@ export default function EnterStage() {
         )
         .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 2.15)
 
-      // capability cards fan out of the mark: measured per-card deltas from
-      // each slot to the live mark point (small, rotated deck → full slot),
-      // recomputed on refresh so resize never strands them. Transform only.
+      // capability deck: all 4 cards rest stacked directly BEHIND the
+      // fixed mark (small held deck, fanned ±16°, edges peeking) and deal
+      // out one-by-one to their alternating slots as you scroll.
+      // Measured per-card deltas to the live mark point, recomputed on
+      // refresh so resize never strands them. Transform + opacity only.
       const markEl = document.querySelector('.mark-fixed')
-      const fanRot = [-14, -5, 5, 14]
+      const fanRot = [-16, -6, 6, 16]
       gsap.utils.toArray<HTMLElement>('.cap-card').forEach((card, i) => {
+        // deck peek: stacked cards offset a few px so the deck edges read
+        // behind the logo before each card deals out
+        const peekY = (i - 1.5) * 12
         const delta = () => {
           const m = (
             markEl ?? { getBoundingClientRect: () => ({ left: window.innerWidth / 2, top: window.innerHeight - 48, width: 0, height: 0 }) }
@@ -401,8 +406,8 @@ export default function EnterStage() {
           card,
           {
             x: () => delta().dx,
-            y: () => delta().dy,
-            scale: 0.32,
+            y: () => delta().dy + peekY,
+            scale: 0.3,
             rotation: fanRot[i % fanRot.length],
             opacity: 0,
             transformOrigin: '50% 50%',
