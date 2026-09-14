@@ -255,121 +255,18 @@ export default function EnterStage() {
           0,
         )
         .to('.veil-white', { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0, ease: 'none', duration: 1 }, 2.2)
-      // process bloom: horizontal white band born from a straight center
-      // line — ONE timeline owns bloom, mark color, proc background and
-      // proc ink end to end (sole writer of each; the reel veil never
-      // touches these). Band wipes open on approach → holds full white
-      // through the steps → clears only at proc exit under the black X
-      // cover (never dies back mid-process; mark stays black into the
-      // flip so the giant X reads black-on-white to all corners).
-      const procBloomTl = gsap.timeline({
-        scrollTrigger: { trigger: '.st-proc', start: 'top 110%', end: 'bottom 30%', scrub: 1.2 },
+      // process lives on the dark field — no spread, no takeover. The ink
+      // stays bone/muted/mint throughout (pure CSS); the thread, the node
+      // and the active-row light carry the motion instead.
+      // departure handoff: the fixed mark simply yields as process ends so
+      // the returning wordmark owns the finale — no rise, no growth, no
+      // cover. Just release.
+      gsap.to('.mark-fixed', {
+        autoAlpha: 0,
+        ease: 'none',
+        immediateRender: false,
+        scrollTrigger: { trigger: '.st-proc', start: 'bottom 100%', end: 'bottom 40%', scrub: 1.2 },
       })
-      procBloomTl
-        .fromTo(
-          '.proc-bloom',
-          { clipPath: 'inset(50% 0 50% 0)', opacity: 0 },
-          { clipPath: 'inset(0% 0 0% 0)', opacity: 1, ease: 'none', duration: 1 },
-          0,
-        )
-        .fromTo('.mark-fixed', { color: '#e8edee' }, { color: '#0b0d0e', ease: 'none', duration: 1 }, 0)
-        .fromTo(
-          '.st-proc',
-          { backgroundColor: 'rgba(6,9,15,0)' },
-          { backgroundColor: '#f2f0ea', ease: 'none', duration: 1 },
-          0,
-        )
-        .to('.st-proc .mono', { color: '#5a6068', ease: 'none', duration: 1 }, 0)
-        .to('.st-proc h3', { color: '#0b0d0e', ease: 'none', duration: 1 }, 0)
-        .to('.st-proc p', { color: '#2c3138', ease: 'none', duration: 1 }, 0)
-        .to('.proc-points li', { color: '#2c3138', ease: 'none', duration: 1 }, 0)
-        .to('.proc-n, .proc-meta', { color: '#075e43', ease: 'none', duration: 1 }, 0)
-        // exit wipe happens under the black-X cover at proc exit: band
-        // collapses back to the center line while the giant black X owns
-        // the frame (mark color deliberately NOT reverted — stays black
-        // through the cover; mark is faded by the flip timeline after).
-        .to('.proc-bloom', { clipPath: 'inset(50% 0 50% 0)', opacity: 0, ease: 'none', duration: 0.6 }, 2.6)
-        .to('.st-proc', { backgroundColor: 'rgba(6,9,15,0)', ease: 'none', duration: 0.6 }, 2.6)
-        .to('.st-proc .mono', { color: '#93a3a8', ease: 'none', duration: 0.6 }, 2.6)
-        .to('.st-proc h3', { color: '#e8edee', ease: 'none', duration: 0.6 }, 2.6)
-        .to('.st-proc p, .proc-points li', { color: '#93a3a8', ease: 'none', duration: 0.6 }, 2.6)
-        .to('.proc-n, .proc-meta', { color: '#9cf5d3', ease: 'none', duration: 0.6 }, 2.6)
-      // rise: the mark detaches from bottom-center and travels to screen
-      // center while crossing process (lazy render: the hero-range tween
-      // owns y until this trigger starts — two scrubbed writers on one
-      // property resolve nondeterministically on jumps)
-      gsap.fromTo(
-        '.mark-fixed',
-        { y: 0 },
-        {
-          y: () => 48 - window.innerHeight / 2,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: { trigger: '.st-proc', start: 'top 70%', end: 'bottom 30%', scrub: 1.2, invalidateOnRefresh: true },
-        },
-      )
-      // slide-cover into the reel (NO flip/spin): anchored to PROC exit.
-      // Beat 1 — the black X slides sideways. Beat 2 — it grows slowly
-      // from center until it covers every corner perfectly. The new
-      // screen opens FROM INSIDE the X: the reel track fades + settles
-      // from a small scale to full across the cover (transform/opacity
-      // only — compositor-friendly, no layout-property animation), so the
-      // continuation appears inside the growing X rather than after a
-      // white end. Single timeline owns word/X opacity, mark x/scale and
-      // reel-track opacity/scale — rise owns y, bloom owns color, the stage
-      // timeline owns each cell's opacity/scale, nothing else writes these.
-      // Mark stays black from the bloom timeline.
-      const flipTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: '.st-proc',
-          start: 'bottom 95%',
-          end: 'bottom 10%',
-          scrub: 1.2,
-          invalidateOnRefresh: true,
-        },
-      })
-      flipTl
-        .to('.mark-word', { opacity: 0, ease: 'none', duration: 0.15 }, 0)
-        .to('.mark-x', { opacity: 1, ease: 'none', duration: 0.15 }, 0)
-        // beat 1: sideways travel, scale parked
-        .fromTo(
-          '.mark-fixed',
-          { scale: 1, x: 0 },
-          {
-            x: () => -window.innerWidth * 0.28,
-            ease: 'none',
-            duration: 0.6,
-          },
-          0.15,
-        )
-        // beat 2: glide back toward center while growing slowly to a
-        // guaranteed full-viewport cover (90× ≈ 2–3× viewport on all
-        // corners, perspective kept flat — no rotationY flip), then a
-        // deterministic impact punch (90→94→90) so the takeover lands
-        // with weight instead of just arriving
-        .to(
-          '.mark-fixed',
-          {
-            x: () => window.innerWidth * 0.1,
-            scale: 90,
-            transformOrigin: '50% 50%',
-            ease: 'none',
-            duration: 1.4,
-          },
-          0.75,
-        )
-        .to('.mark-fixed', { scale: 94, ease: 'none', duration: 0.1 }, 2.05)
-        .to('.mark-fixed', { scale: 90, ease: 'none', duration: 0.1 }, 2.15)
-        // the continuation opens inside the X: track blooms from a small
-        // scale to full while fading in (lazy render — must not hide the
-        // reel on first paint before its range starts)
-        .fromTo(
-          '.reel-track',
-          { opacity: 0, scale: 0.92, transformOrigin: '50% 50%' },
-          { opacity: 1, scale: 1, ease: 'none', duration: 1.4, immediateRender: false },
-          0.75,
-        )
-        .to('.mark-fixed', { autoAlpha: 0, ease: 'none', duration: 0.3 }, 2.25)
 
       // capability deck: all 4 cards rest stacked directly BEHIND the
       // fixed mark (small held deck, fanned ±16°, edges peeking) and get
@@ -379,8 +276,8 @@ export default function EnterStage() {
       const markEl = document.querySelector('.mark-fixed')
       const fanRot = [-16, -6, 6, 16]
       gsap.utils.toArray<HTMLElement>('.cap-card').forEach((card, i) => {
-        // ghost numeral drifts against its card (yPercent only — the deal
-        // tween owns y, so the two never contest one property)
+        // ghost numeral drifts against its card (yPercent only — the throw
+        // timeline owns y, so the two never contest one property)
         const ghost = card.querySelector('.cap-ghost')
         if (ghost) {
           gsap.fromTo(
@@ -516,7 +413,6 @@ export default function EnterStage() {
     <div className="st-scroll" ref={root}>
       <SectionRail />
       <div className="veil-white" aria-hidden="true" />
-      <div className="proc-bloom" aria-hidden="true" />
       <button className="mark-fixed" onClick={toTop} data-cursor aria-label="XEVEN — back to top">
         <span className="mark-word">XEVEN</span>
         <span className="mark-x" aria-hidden="true">

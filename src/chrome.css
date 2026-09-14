@@ -349,23 +349,8 @@
   opacity: 0; visibility: hidden; will-change: transform, opacity;
 }
 .mark-word { position: relative; }
-/* 3D X state of the mark: hidden until the process-exit flip crossfades
-   word → X (GSAP owns both opacities; CSS keeps X out by default) */
-.mark-x {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  opacity: 0; font-size: 1.6em; line-height: 1;
-}
-/* process bloom: horizontal white band born from a straight center line
-   (sole owner: the proc-bloom timeline — never the reel veil).
-   Paints BELOW the section boxes (they carry z-2; this is z-0 inside the
-   same scroll context) so proc copy stays readable above the white while
-   the band spreads over the dark field around it. */
-.proc-bloom {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: #f2f0ea;
-  clip-path: inset(50% 0 50% 0);
-  opacity: 0;
-}
+/* retired X-cover state: wordmark stays for the whole journey now */
+.mark-x { display: none; }
 .veil-white {
   position: fixed; inset: 0; z-index: 30; pointer-events: none;
   background: radial-gradient(circle at 50% 100%, rgba(242, 240, 234, 0.42), rgba(242, 240, 234, 0) 70%);
@@ -480,5 +465,5 @@
   .reel-cell { position: static; inset: auto; margin: 0 auto; opacity: 1; width: 100%; max-width: 860px; }
   /* cinema layers stand down entirely — veil clip is already zero, but
      keep them out of the a11y/paint tree for certainty */
-  .veil-white, .mark-fixed, .proc-bloom { display: none; }
+  .veil-white, .mark-fixed { display: none; }
 }
