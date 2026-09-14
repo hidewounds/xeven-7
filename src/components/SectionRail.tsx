@@ -77,11 +77,9 @@ export default function SectionRail() {
             {s.n}
           </span>
           <span className="rail-tick" aria-hidden="true" />
-          {i === active && (
-            <span className="rail-tag" aria-hidden="true">
-              {s.label}
-            </span>
-          )}
+          <span className="rail-tag" aria-hidden="true">
+            {s.label}
+          </span>
         </button>
       ))}
     </nav>

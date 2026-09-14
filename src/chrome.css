@@ -132,33 +132,42 @@
   .xload-fast { animation: none; }
 }
 
-/* ---------- index section rail: slim measurement ruler ---------- */
+/* ---------- index section rail: detailed survey instrument ---------- */
 .rail {
-  position: fixed; left: 10px; top: 50%; transform: translateY(-50%);
-  z-index: 20; display: flex; flex-direction: column; gap: 1px;
-  opacity: 0.8;
+  position: fixed; left: 14px; top: 50%; transform: translateY(-50%);
+  z-index: 20; display: flex; flex-direction: column; gap: 6px;
+  opacity: 0.92;
 }
+/* end caps: the instrument's survey brackets */
+.rail::before, .rail::after {
+  content: ''; position: absolute; left: 22px; width: 5px; height: 5px;
+  border: 1px solid var(--line-strong);
+}
+.rail::before { top: -14px; border-bottom: none; border-right: none; }
+.rail::after { bottom: -14px; border-top: none; border-right: none; }
 /* page-progress hairline running behind the ticks (sole writer: the rail
    progress tween — transform-only, mint whisper) */
 .rail-progress {
-  position: absolute; left: 23px; top: 4px; bottom: 4px; width: 1px;
+  position: absolute; left: 33px; top: 4px; bottom: 4px; width: 1px;
   background: var(--mint); opacity: 0.7;
   transform: scaleY(0); transform-origin: top center;
 }
 .rail-btn {
-  display: flex; align-items: center; gap: 5px; padding: 0;
-  font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em;
-  color: var(--faint); min-height: 22px;
+  display: flex; align-items: center; gap: 8px; padding: 0;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  color: var(--faint); min-height: 34px;
   transition: color 150ms ease;
 }
 .rail-btn:hover { color: var(--bone); }
-.rail-btn:hover .rail-tick { width: 14px; background: var(--bone); }
+.rail-btn:hover .rail-tick { width: 20px; background: var(--bone); }
 .rail-btn:focus-visible { outline: 1px solid var(--mint); outline-offset: 2px; color: var(--bone); }
-.rail-n { min-width: 14px; text-align: right; font-size: 8px; }
-.rail-tick { display: block; width: 8px; height: 1px; background: var(--line-strong); }
-.rail-btn.rail-on { color: var(--mint); }
-.rail-btn.rail-on .rail-tick { width: 16px; background: var(--mint); }
-.rail-tag { color: var(--bone); font-size: 8px; letter-spacing: 0.12em; }
+.rail-n { min-width: 18px; text-align: right; font-size: 10px; }
+.rail-tick { display: block; width: 14px; height: 1px; background: var(--line-strong); transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease; }
+.rail-btn.rail-on { color: var(--bone); }
+.rail-btn.rail-on .rail-n { color: var(--mint); }
+.rail-btn.rail-on .rail-tick { width: 28px; background: var(--mint); box-shadow: 0 0 8px rgba(156, 245, 211, 0.8); }
+.rail-tag { color: var(--faint); font-size: 10px; letter-spacing: 0.14em; transition: color 150ms ease; }
+.rail-btn.rail-on .rail-tag, .rail-btn:hover .rail-tag { color: var(--bone); }
 @media (max-width: 900px) {
   .rail { display: none; }
 }

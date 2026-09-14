@@ -116,7 +116,9 @@ export default function App() {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <TopBar route={route} />
+      {/* the index is navigated by the rail instrument — the topbar stays
+          invisible there and returns on subpages where it owns navigation */}
+      {route !== 'enter' && <TopBar route={route} />}
       <Suspense fallback={null}>
         <VoidWorld />
       </Suspense>
