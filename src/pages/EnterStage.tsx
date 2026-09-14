@@ -258,20 +258,21 @@ export default function EnterStage() {
           0,
         )
         .to('.veil-white', { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0, ease: 'none', duration: 1 }, 2.2)
-      // process bloom: white born from the mark point, integrating with
-      // the field — ONE timeline owns bloom, mark color, proc background
-      // and proc ink end to end (sole writer of each; the reel veil never
-      // touches these). Bloom in on approach → hold through the steps →
-      // die back into the logo as process ends (mark returns to bone so
-      // the 3D X cover reads on the dark field).
+      // process bloom: horizontal white band born from a straight center
+      // line — ONE timeline owns bloom, mark color, proc background and
+      // proc ink end to end (sole writer of each; the reel veil never
+      // touches these). Band wipes open on approach → holds full white
+      // through the steps → clears only at proc exit under the black X
+      // cover (never dies back mid-process; mark stays black into the
+      // flip so the giant X reads black-on-white to all corners).
       const procBloomTl = gsap.timeline({
         scrollTrigger: { trigger: '.st-proc', start: 'top 110%', end: 'bottom 30%', scrub: 1.2 },
       })
       procBloomTl
         .fromTo(
           '.proc-bloom',
-          { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0 },
-          { clipPath: 'circle(150vmax at 50% calc(100% - 48px))', opacity: 1, ease: 'none', duration: 1 },
+          { clipPath: 'inset(50% 0 50% 0)', opacity: 0 },
+          { clipPath: 'inset(0% 0 0% 0)', opacity: 1, ease: 'none', duration: 1 },
           0,
         )
         .fromTo('.mark-fixed', { color: '#e8edee' }, { color: '#0b0d0e', ease: 'none', duration: 1 }, 0)
@@ -286,13 +287,16 @@ export default function EnterStage() {
         .to('.st-proc p', { color: '#2c3138', ease: 'none', duration: 1 }, 0)
         .to('.proc-points li', { color: '#2c3138', ease: 'none', duration: 1 }, 0)
         .to('.proc-n, .proc-meta', { color: '#075e43', ease: 'none', duration: 1 }, 0)
-        .to('.proc-bloom', { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0, ease: 'none', duration: 1 }, 2.2)
-        .to('.mark-fixed', { color: '#e8edee', ease: 'none', duration: 1 }, 2.2)
-        .to('.st-proc', { backgroundColor: 'rgba(6,9,15,0)', ease: 'none', duration: 1 }, 2.2)
-        .to('.st-proc .mono', { color: '#93a3a8', ease: 'none', duration: 1 }, 2.2)
-        .to('.st-proc h3', { color: '#e8edee', ease: 'none', duration: 1 }, 2.2)
-        .to('.st-proc p, .proc-points li', { color: '#93a3a8', ease: 'none', duration: 1 }, 2.2)
-        .to('.proc-n, .proc-meta', { color: '#9cf5d3', ease: 'none', duration: 1 }, 2.2)
+        // exit wipe happens under the black-X cover at proc exit: band
+        // collapses back to the center line while the giant black X owns
+        // the frame (mark color deliberately NOT reverted — stays black
+        // through the cover; mark is faded by the flip timeline after).
+        .to('.proc-bloom', { clipPath: 'inset(50% 0 50% 0)', opacity: 0, ease: 'none', duration: 0.6 }, 2.6)
+        .to('.st-proc', { backgroundColor: 'rgba(6,9,15,0)', ease: 'none', duration: 0.6 }, 2.6)
+        .to('.st-proc .mono', { color: '#93a3a8', ease: 'none', duration: 0.6 }, 2.6)
+        .to('.st-proc h3', { color: '#e8edee', ease: 'none', duration: 0.6 }, 2.6)
+        .to('.st-proc p, .proc-points li', { color: '#93a3a8', ease: 'none', duration: 0.6 }, 2.6)
+        .to('.proc-n, .proc-meta', { color: '#9cf5d3', ease: 'none', duration: 0.6 }, 2.6)
       // rise: the mark detaches from bottom-center and travels to screen
       // center while crossing process (lazy render: the hero-range tween
       // owns y until this trigger starts — two scrubbed writers on one
@@ -310,10 +314,11 @@ export default function EnterStage() {
       // flip-cover into the reel: anchored to PROC exit (not the reel —
       // the reel sits directly below proc now, so a reel-anchored start
       // fired mid-proc and swallowed the rows). Word → 3D X crossfade,
-      // then the X drifts sideways while spinning up to full cover as
-      // the reel pins (single timeline owns word/X opacity, mark x,
-      // scale, rotation and container fade — rise owns y, bloom owns
-      // color, nothing else writes these).
+      // then the BLACK X drifts sideways while spinning up to full cover
+      // (all corners) as the reel pins (single timeline owns word/X
+      // opacity, mark x, scale, rotation and container fade — rise owns
+      // y, bloom owns color, nothing else writes these). Mark stays
+      // black from the bloom timeline through the entire cover.
       const flipTl = gsap.timeline({
         scrollTrigger: { trigger: '.st-proc', start: 'bottom 95%', end: 'bottom 30%', scrub: 1.2 },
       })
@@ -324,7 +329,7 @@ export default function EnterStage() {
           '.mark-fixed',
           { scale: 1, rotationY: 0, x: 0, transformPerspective: 900 },
           {
-            scale: 46,
+            scale: 90,
             rotationY: 360,
             x: () => window.innerWidth * 0.22,
             transformOrigin: '50% 50%',

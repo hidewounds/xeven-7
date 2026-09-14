@@ -226,15 +226,15 @@
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   opacity: 0; font-size: 1.6em; line-height: 1;
 }
-/* process bloom: white born from the mark point, integrating with the
-   field (sole owner: the proc-bloom timeline — never the reel veil).
+/* process bloom: horizontal white band born from a straight center line
+   (sole owner: the proc-bloom timeline — never the reel veil).
    Paints BELOW the section boxes (they carry z-2; this is z-0 inside the
    same scroll context) so proc copy stays readable above the white while
-   the disc spreads over the dark field around it. */
+   the band spreads over the dark field around it. */
 .proc-bloom {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background: #f2f0ea;
-  clip-path: circle(0px at 50% calc(100% - 48px));
+  clip-path: inset(50% 0 50% 0);
   opacity: 0;
 }
 .veil-white {
