@@ -479,12 +479,29 @@ export default function EnterStage() {
 
       // connector thread: a stub leaves the mark's side (center) and runs
       // to the spine, then the proc spine draws top→bottom — ONE timeline
-      // owns both (single writer; scale-only, chained origins).
+      // owns stub, node and spine (single writer; scale/translate only,
+      // chained origins). The ember node rides the same path: across the
+      // stub (0–0.3), then down the spine (0.3–1).
+      const spineH = () => document.querySelector('.proc-line')?.clientHeight ?? 0
+      const stubW = () => -(window.innerWidth * 0.42 - 22)
       const lineTl = gsap.timeline({
-        scrollTrigger: { trigger: '.st-proc', start: 'top 85%', end: 'top 40%', scrub: 1.2 },
+        scrollTrigger: {
+          trigger: '.st-proc',
+          start: 'top 85%',
+          end: 'top 40%',
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+        },
       })
       lineTl
         .fromTo('.proc-stub', { scaleX: 0 }, { scaleX: 1, ease: 'none', duration: 0.3 }, 0)
+        .fromTo(
+          '.thread-node',
+          { x: 0, y: 0, scale: 0 },
+          { x: stubW, y: 0, scale: 1, ease: 'none', duration: 0.3 },
+          0,
+        )
+        .to('.thread-node', { y: spineH, ease: 'none', duration: 0.7 }, 0.3)
         .fromTo('.proc-line > span', { scaleY: 0 }, { scaleY: 1, ease: 'none', duration: 0.7 }, 0.3)
 
       // second-half rhythm: stats rise, tiers fade, footer title rises —
@@ -543,7 +560,29 @@ export default function EnterStage() {
         })
       })
     }, root)
-    return () => ctx.revert()
+
+    // active process row: IntersectionObserver toggles a class (discrete,
+    // rail-pattern — deliberately NOT a GSAP color writer, which would
+    // contest the bloom timeline's ink on jumps; the class only touches
+    // text-shadow + the ::after bar, props bloom never writes)
+    const rows = root.current.querySelectorAll('.proc-row')
+    const rio = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            rows.forEach((r) => r.classList.remove('proc-on'))
+            e.target.classList.add('proc-on')
+          }
+        }
+      },
+      { rootMargin: '-42% 0px -42% 0px', threshold: 0 },
+    )
+    rows.forEach((r) => rio.observe(r))
+
+    return () => {
+      ctx.revert()
+      rio.disconnect()
+    }
   }, [reduced])
 
   return (
@@ -597,6 +636,7 @@ export default function EnterStage() {
 
       <section className="st-proc">
         <p className="mono">03 — PROCESS</p>
+        <i className="thread-node" aria-hidden="true" />
         <div className="proc-line" aria-hidden="true">
           <i className="proc-stub" />
           <span />

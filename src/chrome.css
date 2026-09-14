@@ -234,7 +234,25 @@
    into the spine top. Grows center→spine (origin right), then the spine
    draws. Scale-only, re-measured never (viewport-relative calc). */
 .proc-stub { position: absolute; top: 0; left: 1px; width: calc(50vw - 8vw - 23px); height: 1px; background: var(--mint); transform: scaleX(0); transform-origin: right center; }
-.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; padding: 4vh 0; }
+/* ember thread node: rides stub→spine inside lineTl (sole writer: x/y/scale).
+   Static glow only — never animated, so the ride stays compositor-cheap. */
+.thread-node {
+  position: absolute; left: 50%; top: 34vh; width: 8px; height: 8px;
+  margin: -4px 0 0 -4px; border-radius: 50%;
+  background: var(--ember); box-shadow: 0 0 12px 2px rgba(255, 77, 46, 0.55);
+  transform: scale(0); z-index: 3; pointer-events: none;
+}
+.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; padding: 4vh 0; position: relative; }
+.proc-row h3 { transition: text-shadow 240ms ease; }
+/* active-row illumination: ember edge bar + title glow, class-toggled
+   (transitioned, never scrubbed — no writer conflicts by construction) */
+.proc-row::after {
+  content: ''; position: absolute; left: -14px; top: 4vh; bottom: 4vh; width: 2px;
+  background: var(--ember); transform: scaleY(0); transform-origin: top center;
+  transition: transform 240ms ease;
+}
+.proc-row.proc-on::after { transform: scaleY(1); }
+.proc-row.proc-on h3 { text-shadow: 0 0 26px rgba(255, 77, 46, 0.35); }
 .proc-n { font-family: var(--mono); font-size: 12px; color: var(--mint); letter-spacing: 0.2em; }
 .proc-row h3 { font-family: var(--disp); font-size: clamp(28px, 4.5vw, 56px); margin: 0; letter-spacing: -0.015em; }
 .proc-row p { grid-column: 2; color: var(--muted); margin: 0; max-width: 52ch; }
@@ -397,6 +415,8 @@
   .st-cue b { transform: scaleX(1); }
   .proc-line span { transform: scaleY(1); }
   .proc-stub { transform: scaleX(1); }
+  .thread-node { display: none; }
+  .proc-row::after, .proc-row h3 { transition: none; }
   /* pinned horizontal reel becomes a plain vertical stack — every cell
      reachable with no animation. Keep the section clipped: the ghost
      marquee is 2400px+ of nowrap display type and would page-overflow
