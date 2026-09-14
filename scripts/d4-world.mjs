@@ -37,6 +37,19 @@ M.legacyGone = await page.evaluate(() => ({
   graph: !document.querySelector('canvas.graph-fixed'),
   world: !!document.querySelector('canvas.world-fixed'),
 }));
+// five-act index: no topbar, 5-stop rail, dead sections gone
+M.acts = await page.evaluate(() => ({
+  topbar: !document.querySelector('.topbar'),
+  railBtns: document.querySelectorAll('.rail-btn').length,
+  railFirst: document.querySelector('.rail-btn')?.textContent.replace(/\s+/g, ' ').trim(),
+  mani: !document.querySelector('.st-mani'),
+  stats: !document.querySelector('.st-stats'),
+  tiers: !document.querySelector('.st-tier'),
+  heroLabel: document.querySelector('.st-hero .mono')?.textContent,
+  reticleDots: document.querySelectorAll('.reticle-dot').length,
+  reticleRings: document.querySelectorAll('.reticle').length,
+  reelCells: document.querySelectorAll('.reel-cell').length,
+}));
 M.fpsWorld = await page.evaluate(() => new Promise((res) => {
   let n = 0;
   const t0 = performance.now();

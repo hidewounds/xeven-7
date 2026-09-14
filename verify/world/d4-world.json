@@ -5,6 +5,18 @@
     "graph": true,
     "world": true
   },
+  "acts": {
+    "topbar": true,
+    "railBtns": 5,
+    "railFirst": "00TOP",
+    "mani": true,
+    "stats": true,
+    "tiers": true,
+    "heroLabel": "00 — TOP",
+    "reticleDots": 1,
+    "reticleRings": 0,
+    "reelCells": 5
+  },
   "fpsWorld": 12,
   "worldsAlive": true,
   "returnAlive": true,
