@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react'
 
-/* Intro — GRID IGNITION (original, buttermax-schooled grammar). Bone-white
-   flash, hard cut to a void dot-grid with the micro-nav already up, an
-   ignition wave blooms from center — dots swell, ignite ember and merge
-   into a liquid mass with chromatic fringe — the mass takes the whole
-   screen ember, holds, and releases into the index. Pure rAF + 2D canvas,
-   no libraries to drift. Click skips. Reduced skips. */
+/* Intro — GRID IGNITION, tightened cut (1.9s, no muddy middle). Bone-white
+   flash, hard cut to the void dot-grid, one fast ignition wavefront with a
+   live 000→100 ledger + phase word, ember kiss, release into the index.
+   Pure rAF + 2D canvas. Click skips. Reduced skips. */
 
-const DUR = 3.3
-const WHITE_END = 0.35
-const FADE_AT = 2.8
+const DUR = 1.9
+const WHITE_END = 0.22
+const FADE_AT = 1.55
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 
@@ -109,19 +107,18 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
       // white beat: pure bone for exactly WHITE_END, then a hard cut to the
       // grid — no fade (a fade would read as gray frames over the dark field)
       white.style.opacity = t < WHITE_END ? '1' : '0'
-      mini.style.opacity = clamp01((t - 0.45) / 0.5).toFixed(3)
+      mini.style.opacity = clamp01((t - 0.3) / 0.3).toFixed(3)
 
       // ignition ledger: 000→100 counter + phase word, textContent writes
       // only (no react state down the rAF path)
-      if (count) count.textContent = String(Math.round(clamp01((t - 0.4) / 2.4) * 100)).padStart(3, '0')
+      if (count) count.textContent = String(Math.round(clamp01((t - 0.25) / 1.3) * 100)).padStart(3, '0')
       if (word) {
-        word.textContent =
-          t < 1.0 ? 'SIGNAL' : t < 1.6 ? 'WORLD' : t < 2.2 ? 'IGNITE' : 'LIVE'
+        word.textContent = t < 0.6 ? 'SIGNAL' : t < 1.1 ? 'WORLD' : 'LIVE'
       }
 
-      // ignition wavefront (linear slow burn) + ember wash + release
-      const front = clamp01((t - 0.4) / 1.9) * maxR * 1.25
-      const wash = clamp01((t - 2.2) / 0.6)
+      // ignition wavefront (fast burn) + ember kiss + release
+      const front = clamp01((t - 0.25) / 0.9) * maxR * 1.25
+      const wash = clamp01((t - 1.0) / 0.5)
       const fade = 1 - clamp01((t - FADE_AT) / (DUR - FADE_AT))
       el.style.opacity = fade.toFixed(3)
 
