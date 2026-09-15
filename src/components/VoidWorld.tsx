@@ -16,12 +16,13 @@ gsap.registerPlugin(ScrollTrigger)
  * normalized-progress waypoint camera (Grantmantek/zyliu grammar) lerped in
  * the loop so motion stays interruptible and scrub-reversible.
  *
- * The world: a 45° diamond lattice bowed on a convex cylinder (baked once
- * per resize), black quad panels with in-shader borders + breathing shimmer
- * + cursor kindle + 7s roaming cinema, plus survey crosses, an additive
- * starfield, four lit wireframe solids, exponential haze, and the shapeless
- * cursor presence is kindle light only: the field breathes around the
- * pointer, but no line, streak, or shape ever chases it — by design.
+ * The world: a 45° diamond lattice bowed on an INWARD (concave) cylinder —
+ * centre recedes, flanks come close, you sit inside it. Black quad panels
+ * with in-shader borders + breathing shimmer + 7s roaming cinema, survey
+ * crosses, an additive starfield, four lit wireframe solids, exponential
+ * haze. The pointer lights NOTHING, ever — its only touch is the liquid
+ * press (ripple + gloss that settles back solid). A fixed glass finish
+ * layer (DOM, zero blur) sits above for the crystal grade.
  *
  * 4D (time as the fourth dimension): uTime drives the cinema clock, haze
  * breathing, rim orbit and shimmer phase — the world evolves standing still.
@@ -32,11 +33,10 @@ gsap.registerPlugin(ScrollTrigger)
 
 const VOID = new THREE.Color(0x06090f)
 // world scale, calibrated to the mock's on-screen densities: quad ≈ 140px,
-// kindle σ ≈ 190px, plus grid ≈ 280px at 1600×900 (anything ~3× bigger
-// washes the field gray and triples the kindle falloff)
+// plus grid ≈ 280px at 1600×900
 const HALF = 14 // field half-extent, world units
 const GAP = 0.45
-const BOW = 2.2 // convex bulge at centre, world units
+const BOW = 2.2 // concave hollow at centre, world units
 const IDLE_MS = 6000
 
 const SECTIONS = [
@@ -97,8 +97,10 @@ export default function VoidWorld() {
 
     // ---- static geometry (rebuilt per resize / route tier) ----
     let statics: THREE.Object3D[] = []
+    // inward cylinder: the centre recedes, the flanks come close — you sit
+    // INSIDE the cylinder looking at walls curving away (subpages run flat).
     const bowZ = (x: number, showcase: boolean) =>
-      showcase ? BOW * Math.max(0, 1 - (x / HALF) * (x / HALF)) : 0
+      showcase ? -BOW * Math.max(0, 1 - (x / HALF) * (x / HALF)) : 0
 
     function buildStatic(showcase: boolean) {
       for (const o of statics) {
@@ -192,10 +194,7 @@ export default function VoidWorld() {
     quadGeo.setAttribute('aQJ', new THREE.InstancedBufferAttribute(aQJ, 1))
     const quadUniforms = {
       uTime: { value: 0 },
-      uCursor: { value: new THREE.Vector2(9999, 9999) },
-      uEcho: { value: new THREE.Vector2(9999, 9999) },
-      uStir: { value: 0 },
-      uBloom: { value: 0 },
+      uPress: { value: new THREE.Vector3(0, 0, -100) },
       uVel: { value: 0 },
       uShowcase: { value: 1 },
       uVoid: { value: new THREE.Vector3(0.0235, 0.0353, 0.0588) },
@@ -223,10 +222,7 @@ export default function VoidWorld() {
       `,
       fragmentShader: /* glsl */ `
         uniform float uTime;
-        uniform vec2 uCursor;
-        uniform vec2 uEcho;
-        uniform float uStir;
-        uniform float uBloom;
+        uniform vec3 uPress;
         uniform float uVel;
         uniform float uShowcase;
         uniform vec3 uVoid;
@@ -247,16 +243,21 @@ export default function VoidWorld() {
             1.0 - smoothstep(0.0, e.x * 1.5 + 1e-4, b.x),
             1.0 - smoothstep(0.0, e.y * 1.5 + 1e-4, b.y));
           col += vec3(1.0) * bl * 0.16;
-          // breathing shimmer riding the bow axis
+          // breathing shimmer riding the bow axis (scroll-kindled only —
+          // the pointer lights nothing, ever)
           float wave = 0.03 + 0.04 * (0.5 + 0.5 * sin(uTime * 1.5 - (vWorld.x * 0.14 + vWorld.y * 0.05) + vSeed * 6.28));
-          float amp = 1.0 + uStir * 0.9 + uBloom * 0.6 + uVel * 0.3;
+          float amp = 1.0 + uVel * 0.3;
           float glow = wave * amp;
-          // kindle falloffs in world units (≈190px / ≈330px at 1600×900)
-          float dc = distance(vWorld.xy, uCursor);
-          glow += (0.11 + uBloom * 0.1) * exp(-dc * dc / 12.0);
-          float de = distance(vWorld.xy, uEcho);
-          glow += 0.045 * exp(-de * de / 36.0);
           col += vec3(1.0) * glow * uShowcase;
+          // liquid press: a ripple + gloss swell where the pointer last
+          // touched, settling back solid over ~3.5s. Touch, not hover.
+          float age = uTime - uPress.z;
+          if (age > 0.0 && age < 4.0) {
+            float dp = distance(vWorld.xy, uPress.xy);
+            float ring = sin(dp * 2.2 - age * 5.0) * exp(-age * 1.0) * exp(-dp * 0.22);
+            float gloss = exp(-dp * dp / 8.0) * exp(-age * 0.9);
+            col += vec3(1.0) * (ring * 0.22 + gloss * 0.18) * uShowcase;
+          }
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
@@ -373,20 +374,11 @@ export default function VoidWorld() {
       group.add(mesh)
     }
 
-    // ---- cursor presence: eased finger + echo ring feed the shader
-    // kindle (light that breathes around the pointer). No streak geometry —
-    // nothing draws lines that chase the cursor, by design.
+    // ---- liquid press feed: pointer position for the ripple (touch only —
+    // the pointer lights nothing, ever; this only stamps where it pressed)
     let btx = window.innerWidth / 2
     let bty = window.innerHeight / 2
-    let bInside = true
-    let ccx = btx
-    let ccy = bty
-    let cvx = 0
-    let cvy = 0
-    let stir = 0
-    let bloom = 0
-    let ptx = btx
-    let pty = bty
+    let lastPressT = -10000
 
     // ---- waypoint journey ----
     let fracs: number[] = []
@@ -426,7 +418,6 @@ export default function VoidWorld() {
     const ndc = new THREE.Vector2()
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -2.5)
     const hit = new THREE.Vector3()
-    const echo = { x: 9999, y: 9999 }
 
     const clock = new THREE.Clock()
     let lastInput = performance.now()
@@ -442,7 +433,7 @@ export default function VoidWorld() {
     function loop() {
       const dt = Math.min(0.05, clock.getDelta())
       const t = clock.elapsedTime
-      if (performance.now() - lastInput > IDLE_MS && bloom <= 0.01 && stir <= 0.03) {
+      if (performance.now() - lastInput > IDLE_MS) {
         xs.vel = 0
         ticking = false
         gsap.ticker.remove(loop)
@@ -486,39 +477,12 @@ export default function VoidWorld() {
           mm.userData.by + Math.sin(t * mm.userData.fs + mm.userData.fo) * mm.userData.fa
       }
 
-      // cursor feed: eased finger + echo ring + velocity + click bloom
-      if (bInside) {
-        ccx += (btx - ccx) * 0.18
-        ccy += (bty - ccy) * 0.18
-        echo.x += (btx - echo.x) * 0.07
-        echo.y += (bty - echo.y) * 0.07
-      }
-      const rvx = (btx - ptx) / Math.max(1, dt * 1000)
-      const rvy = (bty - pty) / Math.max(1, dt * 1000)
-      ptx = btx
-      pty = bty
-      cvx += (rvx - cvx) * 0.15
-      cvy += (rvy - cvy) * 0.15
-      const spd = Math.hypot(cvx, cvy)
-      stir += ((bInside ? Math.min(1, spd * 0.9) : 0) - stir) * 0.08
-      bloom = Math.max(0, bloom * Math.pow(0.93, (dt * 1000) / 16.7))
+      // scroll kindle only (the pointer lights nothing — see uPress)
       const vBoost = Math.min(1, xs.vel * 1.5) * 0.3
       xs.vel *= 0.9
 
-      // uniforms: the whole quad field runs on these + time
-      ndc.set((ccx / window.innerWidth) * 2 - 1, -(ccy / window.innerHeight) * 2 + 1)
-      raycaster.setFromCamera(ndc, camera)
-      if (raycaster.ray.intersectPlane(plane, hit)) {
-        ;(quadUniforms.uCursor.value as THREE.Vector2).set(hit.x, hit.y)
-      }
-      ndc.set((echo.x / window.innerWidth) * 2 - 1, -(echo.y / window.innerHeight) * 2 + 1)
-      raycaster.setFromCamera(ndc, camera)
-      if (raycaster.ray.intersectPlane(plane, hit)) {
-        ;(quadUniforms.uEcho.value as THREE.Vector2).set(hit.x, hit.y)
-      }
+      // uniforms: the whole quad field runs on time + scroll + press
       quadUniforms.uTime.value = t
-      quadUniforms.uStir.value = stir
-      quadUniforms.uBloom.value = bloom
       quadUniforms.uVel.value = vBoost
 
       renderer.render(scene, camera)
@@ -527,20 +491,18 @@ export default function VoidWorld() {
     const onMove = (e: PointerEvent) => {
       pm.x = e.clientX / window.innerWidth - 0.5
       pm.y = e.clientY / window.innerHeight - 0.5
+      // liquid press, throttled: stamp position + time, the shader settles
+      // it back solid over ~2.5s. No hover light, no follow glow.
+      const now = performance.now()
+      if (now - lastPressT < 60) return
+      lastPressT = now
       btx = e.clientX
       bty = e.clientY
-      bInside = true
-      if (echo.x > 9000) {
-        echo.x = btx
-        echo.y = bty
+      ndc.set((btx / window.innerWidth) * 2 - 1, -(bty / window.innerHeight) * 2 + 1)
+      raycaster.setFromCamera(ndc, camera)
+      if (raycaster.ray.intersectPlane(plane, hit)) {
+        ;(quadUniforms.uPress.value as THREE.Vector3).set(hit.x, hit.y, clock.elapsedTime)
       }
-    }
-    const onDown = (e: PointerEvent) => {
-      onMove(e)
-      bloom = 1
-    }
-    const onGone = () => {
-      bInside = false
     }
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight
@@ -554,7 +516,6 @@ export default function VoidWorld() {
       buildStatic(showcase)
       layoutQuads(showcase)
       quadUniforms.uShowcase.value = showcase ? 1 : 0.5
-      bloom = 1 // switch pulse knits the X veil to the field
       computeWaypoints()
       wake()
     }
@@ -591,24 +552,18 @@ export default function VoidWorld() {
     gsap.ticker.add(loop)
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointermove', wake, { passive: true })
-    window.addEventListener('pointerdown', onDown, { passive: true })
     window.addEventListener('pointerdown', wake, { passive: true })
     window.addEventListener('wheel', wake, { passive: true })
     window.addEventListener('scroll', wake, { passive: true })
-    window.addEventListener('pointerleave', onGone, { passive: true })
-    window.addEventListener('blur', onGone)
     window.addEventListener('resize', onResize)
     window.addEventListener('hashchange', onHash)
     document.addEventListener('visibilitychange', onVis)
     return () => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointermove', wake)
-      window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerdown', wake)
       window.removeEventListener('wheel', wake)
       window.removeEventListener('scroll', wake)
-      window.removeEventListener('pointerleave', onGone)
-      window.removeEventListener('blur', onGone)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('hashchange', onHash)
       document.removeEventListener('visibilitychange', onVis)

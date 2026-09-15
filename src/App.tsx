@@ -120,6 +120,9 @@ export default function App() {
       <Suspense fallback={null}>
         <VoidWorld />
       </Suspense>
+      {/* glass finish: a lens grade between world and content — sheen +
+          depth vignette, zero blur, zero backdrop-filter, pointer-transparent */}
+      <div className="glass-finish" aria-hidden="true" />
       <main id="main" key={route}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
