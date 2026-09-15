@@ -20,8 +20,8 @@ gsap.registerPlugin(ScrollTrigger)
  * per resize), black quad panels with in-shader borders + breathing shimmer
  * + cursor kindle + 7s roaming cinema, plus survey crosses, an additive
  * starfield, four lit wireframe solids, exponential haze, and the shapeless
- * cursor blob (ported streak-for-streak from the mock: motion intensity
- * only, drains at rest, native cursor untouched).
+ * cursor presence is kindle light only: the field breathes around the
+ * pointer, but no line, streak, or shape ever chases it — by design.
  *
  * 4D (time as the fourth dimension): uTime drives the cinema clock, haze
  * breathing, rim orbit and shimmer phase — the world evolves standing still.
@@ -58,10 +58,6 @@ const WAYPOINTS: Array<[number, number, number]> = [
 interface Floater extends THREE.Mesh {
   userData: { rx: number; ry: number; fs: number; fo: number; fa: number; by: number }
 }
-
-interface BlobP { x: number; y: number; vx: number; vy: number; e: number }
-const BLOB_N = 110
-const BLOB_REACH = 260
 
 export default function VoidWorld() {
   const ref = useRef<HTMLCanvasElement>(null!)
@@ -377,23 +373,9 @@ export default function VoidWorld() {
       group.add(mesh)
     }
 
-    // ---- cursor blob: ported streak-for-streak, projected to z=3 ----
-    const blob: BlobP[] = []
-    const blobPos = new Float32Array(BLOB_N * 2 * 3)
-    const blobGeo = new THREE.BufferGeometry()
-    const blobAttr = new THREE.BufferAttribute(blobPos, 3)
-    blobAttr.setUsage(THREE.DynamicDrawUsage)
-    blobGeo.setAttribute('position', blobAttr)
-    const blobLines = new THREE.LineSegments(
-      blobGeo,
-      new THREE.LineBasicMaterial({
-        color: 0xffffff, transparent: true, opacity: 0.5,
-        blending: THREE.AdditiveBlending, depthWrite: false,
-      }),
-    )
-    blobLines.frustumCulled = false
-    scene.add(blobLines)
-    let blobPlaced = false
+    // ---- cursor presence: eased finger + echo ring feed the shader
+    // kindle (light that breathes around the pointer). No streak geometry —
+    // nothing draws lines that chase the cursor, by design.
     let btx = window.innerWidth / 2
     let bty = window.innerHeight / 2
     let bInside = true
@@ -405,18 +387,6 @@ export default function VoidWorld() {
     let bloom = 0
     let ptx = btx
     let pty = bty
-    const projV = new THREE.Vector3()
-    const projD = new THREE.Vector3()
-    const toWorld = (px: number, py: number, out: { x: number; y: number }) => {
-      projV.set((px / window.innerWidth) * 2 - 1, -(py / window.innerHeight) * 2 + 1, 0.5)
-      projV.unproject(camera)
-      projD.copy(projV).sub(camera.position).normalize()
-      const dist = (3 - camera.position.z) / projD.z
-      out.x = camera.position.x + projD.x * dist
-      out.y = camera.position.y + projD.y * dist
-    }
-    const wA = { x: 0, y: 0 }
-    const wB = { x: 0, y: 0 }
 
     // ---- waypoint journey ----
     let fracs: number[] = []
@@ -551,63 +521,6 @@ export default function VoidWorld() {
       quadUniforms.uBloom.value = bloom
       quadUniforms.uVel.value = vBoost
 
-      // blob streaks, projected to the z=3 plane
-      if (!blobPlaced) {
-        if (bInside) {
-          for (let i = 0; i < BLOB_N; i++) {
-            blob.push({
-              x: ccx + (Math.random() - 0.5) * 90,
-              y: ccy + (Math.random() - 0.5) * 90,
-              vx: 0, vy: 0, e: 0,
-            })
-          }
-          blobPlaced = true
-        }
-      } else {
-        const k = Math.min(1.6, (dt * 1000) / 16.7)
-        const drive = bInside ? Math.min(1, spd * 1.15) : 0
-        for (let bi = 0; bi < blob.length; bi++) {
-          const p = blob[bi]
-          const dx = ccx - p.x
-          const dy = ccy - p.y
-          const d = Math.hypot(dx, dy)
-          p.vx = (p.vx + dx * 0.009 * k) * Math.pow(0.93, k)
-          p.vy = (p.vy + dy * 0.009 * k) * Math.pow(0.93, k)
-          const curl =
-            Math.sin(p.x * 0.017 + t * 2.6) * Math.cos(p.y * 0.019 - t * 2.1)
-          const curl2 =
-            Math.cos(p.x * 0.008 - t * 1.4) * Math.sin(p.y * 0.011 + t * 1.9)
-          p.vx += (curl * 0.5 + curl2 * 0.3) * k
-          p.vy += (curl2 * 0.5 - curl * 0.3) * k
-          p.x += p.vx * k
-          p.y += p.vy * k
-          const target = drive * Math.min(1, Math.max(0, 1.2 - d / BLOB_REACH))
-          p.e += (target - p.e) * Math.min(1, dt * 1000 * 0.009)
-          if (p.e <= 0.02) {
-            // drained particles collapse to zero-length segments: nothing
-            // rasterizes, no per-particle alpha state needed
-            blobPos[bi * 6] = 0
-            blobPos[bi * 6 + 1] = 0
-            blobPos[bi * 6 + 2] = 3
-            blobPos[bi * 6 + 3] = 0
-            blobPos[bi * 6 + 4] = 0
-            blobPos[bi * 6 + 5] = 3
-            continue
-          }
-          toWorld(p.x, p.y, wA)
-          toWorld(p.x - p.vx * 8, p.y - p.vy * 8, wB)
-          blobPos[bi * 6] = wA.x
-          blobPos[bi * 6 + 1] = wA.y
-          blobPos[bi * 6 + 2] = 3
-          blobPos[bi * 6 + 3] = wB.x
-          blobPos[bi * 6 + 4] = wB.y
-          blobPos[bi * 6 + 5] = 3
-        }
-        blobAttr.needsUpdate = true
-        // energy gate lives in the material via per-frame opacity? No —
-        // per-particle energy is baked into length; keep material steady.
-      }
-
       renderer.render(scene, camera)
     }
 
@@ -672,7 +585,6 @@ export default function VoidWorld() {
       setQuads: (v: boolean) => { quads.visible = v },
       setSolids: (v: boolean) => { group.visible = v },
       setStars: (v: boolean) => { stars.visible = v },
-      setBlob: (v: boolean) => { blobLines.visible = v },
     }
 
     ticking = true

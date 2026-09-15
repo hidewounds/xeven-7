@@ -1,6 +1,6 @@
 {
   "introMerge": {
-    "ledger": "047",
+    "ledger": "043",
     "canvas": true
   },
   "legacyGone": {
@@ -10,7 +10,7 @@
     "world": true
   },
   "acts": {
-    "topbar": true,
+    "topbar": false,
     "railBtns": 5,
     "railFirst": "00TOP",
     "mani": true,
@@ -21,7 +21,7 @@
     "reticleRings": 0,
     "reelCells": 5
   },
-  "fpsWorld": 16,
+  "fpsWorld": 14,
   "worldsAlive": true,
   "returnAlive": true,
   "overflowX": 0,
