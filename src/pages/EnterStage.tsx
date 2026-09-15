@@ -69,68 +69,6 @@ const STEPS = [
   },
 ]
 
-/* Specimen index: editorial rows that open as they cross center —
-   IO-driven (rail/proc pattern: zero GSAP writers, zero conflicts).
-   Clicking a row opens it exclusively. First specimen open by default. */
-function SpecimenRows() {
-  const [open, setOpen] = useState(0)
-  const list = useRef<HTMLDivElement>(null!)
-  useEffect(() => {
-    const el = list.current
-    if (!el) return
-    const rows = [...el.querySelectorAll('.spec-row')]
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (!e.isIntersecting) continue
-          const i = rows.indexOf(e.target as Element)
-          if (i >= 0) setOpen(i)
-        }
-      },
-      { rootMargin: '-38% 0px -38% 0px', threshold: 0 },
-    )
-    rows.forEach((r) => io.observe(r))
-    return () => io.disconnect()
-  }, [])
-  return (
-    <div className="spec-list" ref={list}>
-      {CAPS.map((c, i) => (
-        <div key={c.t} className={i === open ? 'spec-row spec-open' : 'spec-row'}>
-          <button
-            className="spec-head"
-            onClick={() => setOpen(i)}
-            aria-expanded={i === open}
-            data-cursor
-          >
-            <span className="spec-n" aria-hidden="true">
-              {`0${i + 1}`}
-            </span>
-            <span className="spec-title">{c.t}</span>
-            <span className="spec-x" aria-hidden="true">
-              {i === open ? '—' : '+'}
-            </span>
-          </button>
-          <div className="spec-body" aria-hidden={i !== open}>
-            <div className="spec-inner">
-              <div className="spec-media">
-                <VideoCard src={c.src} title={c.t} sub={c.d} />
-              </div>
-              <div className="spec-info">
-                <p>{c.d}</p>
-                <div className="cap-specs" aria-label={`${c.t} stack`}>
-                  {c.specs.map((s) => (
-                    <span key={s}>{s}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 /* Departure clock: local time, per-minute tick (one interval, one text
    node — zero scroll-path cost). */
 function FootTime() {
@@ -408,7 +346,26 @@ export default function EnterStage() {
 
       <section className="st-caps">
         <p className="mono">01 — CAPABILITIES</p>
-        <SpecimenRows />
+        <div className="chapter-stack">
+          {CAPS.map((c, i) => (
+            <article key={c.t} className="chapter" aria-label={`${c.t}, capability ${i + 1} of ${CAPS.length}`}>
+              <span className="chapter-ghost" aria-hidden="true">
+                {`0${i + 1}`}
+              </span>
+              <p className="mono chapter-kicker">
+                CAPABILITY {`0${i + 1}`} / {`0${CAPS.length}`}
+              </p>
+              <h3>{c.t}</h3>
+              <p className="chapter-desc">{c.d}</p>
+              <VideoCard src={c.src} title={c.t} sub={c.d} />
+              <div className="cap-specs" aria-label={`${c.t} stack`}>
+                {c.specs.map((s) => (
+                  <span key={s}>{s}</span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="st-proc">
