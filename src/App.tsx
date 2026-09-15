@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
+import RulerBar from './components/RulerBar'
 import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
@@ -117,6 +118,8 @@ export default function App() {
       </a>
       {/* bar-free everywhere: content floats, the field is the chrome */}
       <TopBar route={route} />
+      {/* fake survey ruler: inches are routes, cm ticks the scroll travel */}
+      <RulerBar route={route} />
       <Suspense fallback={null}>
         <VoidWorld />
       </Suspense>

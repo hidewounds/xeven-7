@@ -1,6 +1,6 @@
 {
   "introMerge": {
-    "ledger": "054",
+    "ledger": "055",
     "canvas": true
   },
   "legacyGone": {
@@ -11,7 +11,9 @@
   },
   "acts": {
     "topbarVisible": true,
-    "railBtns": 0,
+    "rulerInches": 6,
+    "rulerOn": "00TOP",
+    "needle": true,
     "procGone": true,
     "footGone": true,
     "markGone": true,
@@ -20,12 +22,20 @@
     "reticleDots": 0,
     "reticleRings": 0
   },
-  "fpsWorld": 12,
+  "fpsWorld": 10,
   "hold": {
     "scrollMax": 0,
     "tbLogoOp": "1"
   },
   "worldsAlive": true,
+  "ruler": {
+    "on": "02VISION",
+    "max": 185,
+    "travel": {
+      "needle0": "translateY(0px)",
+      "needle1": "translateY(684px)"
+    }
+  },
   "returnAlive": true,
   "overflowX": 0,
   "errors": []

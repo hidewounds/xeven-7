@@ -43,10 +43,12 @@ M.legacyGone = await page.evaluate(() => ({
   graph: !document.querySelector('canvas.graph-fixed'),
   world: !!document.querySelector('canvas.world-fixed'),
 }));
-// hero-only index: rail unmounted, process + departure gone
+// hero-only index + global ruler: 6 inch marks, needle rides scroll
 M.acts = await page.evaluate(() => ({
   topbarVisible: !!document.querySelector('.topbar'),
-  railBtns: document.querySelectorAll('.rail-btn').length,
+  rulerInches: document.querySelectorAll('.ruler-inch').length,
+  rulerOn: document.querySelector('.ruler-inch.ruler-on')?.textContent.replace(/\s+/g, ' ').trim(),
+  needle: !!document.querySelector('.ruler-needle'),
   procGone: !document.querySelector('.st-proc'),
   footGone: !document.querySelector('.st-foot'),
   markGone: !document.querySelector('.mark-fixed'),
@@ -79,10 +81,22 @@ M.hold = await page.evaluate(() => ({
 }));
 await page.screenshot({ path: `${OUT}/g4-hold.png` });
 
-// route tier: flat park on subpages, journey resumes on return
+// route tier: flat park on subpages, journey resumes on return — plus the
+// ruler needle travels cm ticks on a scrollable page, active inch follows
 await page.evaluate(() => { window.location.hash = '#/worlds'; });
 await page.waitForTimeout(2500);
 M.worldsAlive = await page.evaluate(() => !!document.querySelector('canvas.world-fixed'));
+await page.evaluate(() => { window.location.hash = '#/vision'; });
+await page.waitForTimeout(2000);
+M.ruler = await page.evaluate(() => ({
+  on: document.querySelector('.ruler-inch.ruler-on')?.textContent.replace(/\s+/g, ' ').trim(),
+  max: document.documentElement.scrollHeight - window.innerHeight,
+}));
+const needle0 = await page.evaluate(() => document.querySelector('.ruler-needle').style.transform);
+await go(await page.evaluate(() => document.body.scrollHeight));
+const needle1 = await page.evaluate(() => document.querySelector('.ruler-needle').style.transform);
+M.ruler.travel = { needle0, needle1 };
+await page.screenshot({ path: `${OUT}/g5-ruler.png` });
 await page.evaluate(() => { window.location.hash = '#/enter'; });
 await page.waitForTimeout(2500);
 M.returnAlive = await page.evaluate(() => !!document.querySelector('canvas.world-fixed'));

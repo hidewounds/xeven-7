@@ -187,7 +187,9 @@ export default function VoidWorld() {
     quadGeo.setAttribute('aQJ', new THREE.InstancedBufferAttribute(aQJ, 1))
     const quadUniforms = {
       uTime: { value: 0 },
-      uWakePos: { value: new THREE.Vector2(9999, 9999) },
+      uTrail: {
+        value: Array.from({ length: 5 }, () => new THREE.Vector3(9999, 9999, 0)),
+      },
       uWakeVel: { value: new THREE.Vector2(0, 0) },
       uVel: { value: 0 },
       uShowcase: { value: 1 },
@@ -204,7 +206,7 @@ export default function VoidWorld() {
         varying float vSeed;
         varying float vQI;
         varying float vQJ;
-        uniform vec2 uWakePos;
+        uniform vec3 uTrail[5];
         uniform vec2 uWakeVel;
         void main() {
           vUv = uv;
@@ -212,21 +214,25 @@ export default function VoidWorld() {
           vQI = aQI;
           vQJ = aQJ;
           vec4 wp = modelMatrix * instanceMatrix * vec4(position, 1.0);
-          // air flare: the medium bends around the cursor's motion — a wide
-          // invisible pressure field that flares with speed and dies at
-          // rest. Displacement only; the body and trail stay invisible.
-          vec2 wdir = wp.xy - uWakePos;
-          float wdist = length(wdir);
-          float wfall = exp(-wdist * wdist / 32.0);
-          float wmag = min(1.0, length(uWakeVel) * 0.35) * 0.55 * wfall;
-          wp.xy -= (wdir / max(wdist, 1e-3)) * wmag;
+          // fingertip air: the head + its short trail bend the medium at
+          // touch scale (σ≈0.8u), gated by damped speed — dead at rest.
+          // No body, no glow, no trail geometry; only the bend reads.
+          float wspd = min(1.0, length(uWakeVel) * 0.35);
+          vec2 bend = vec2(0.0);
+          for (int i = 0; i < 5; i++) {
+            vec2 tdir = wp.xy - uTrail[i].xy;
+            float td = length(tdir);
+            float tfall = exp(-td * td / 1.3);
+            bend -= (tdir / max(td, 1e-3)) * (tfall * uTrail[i].z * 0.12);
+          }
+          wp.xy += bend * wspd;
           vWorld = wp.xyz;
           gl_Position = projectionMatrix * viewMatrix * wp;
         }
       `,
       fragmentShader: /* glsl */ `
         uniform float uTime;
-        uniform vec2 uWakePos;
+        uniform vec3 uTrail[5];
         uniform vec2 uWakeVel;
         uniform float uVel;
         uniform float uShowcase;
@@ -254,11 +260,15 @@ export default function VoidWorld() {
           float amp = 1.0 + uVel * 0.3;
           float glow = wave * amp;
           col += vec3(1.0) * glow * uShowcase;
-          // flare whisper: a breath of shimmer where the air bends (the
-          // bend does the talking; this stays barely visible)
+          // translucent air: the head + trail read as a faint neutral
+          // presence where the medium bends — visible, never prominent
           float wspd = min(1.0, length(uWakeVel) * 0.35);
-          float wdp = distance(vWorld.xy, uWakePos);
-          col += vec3(1.0) * exp(-wdp * wdp / 32.0) * wspd * 0.09 * uShowcase;
+          float air = 0.0;
+          for (int i = 0; i < 5; i++) {
+            vec2 adp = vWorld.xy - uTrail[i].xy;
+            air += exp(-dot(adp, adp) / 1.3) * uTrail[i].z;
+          }
+          col += vec3(1.0) * air * wspd * 0.05 * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
@@ -375,14 +385,17 @@ export default function VoidWorld() {
       group.add(mesh)
     }
 
-    // ---- magnetic wake feed: damped pointer position + velocity drive
-    // the vertex bend. Eased (nothing snaps), decaying (nothing lingers).
+    // ---- fingertip air feed: eased pointer + a short decaying trail.
+    // Samples drop every ~40ms while inside; strengths drain per frame,
+    // so the trail evaporates behind motion and vanishes at rest.
     let btx = window.innerWidth / 2
     let bty = window.innerHeight / 2
     let bInside = false
     const wPos = { x: 9999, y: 9999 }
     const wVel = { x: 0, y: 0 }
     const wPrev = { x: 9999, y: 9999 }
+    const trail = Array.from({ length: 5 }, () => ({ x: 9999, y: 9999, s: 0 }))
+    let lastSample = 0
 
     // ---- waypoint journey ----
     let fracs: number[] = []
@@ -485,9 +498,9 @@ export default function VoidWorld() {
       const vBoost = Math.min(1, xs.vel * 1.5) * 0.3
       xs.vel *= 0.9
 
-      // magnetic wake: unproject the eased pointer once per frame, derive
-      // world velocity, damp both — the vertex bend follows motion and
-      // dies the moment it stops. No per-move writes.
+      // fingertip air: unproject the eased pointer once per frame, derive
+      // world velocity, lay trail samples, drain strengths — one uniform
+      // write, no per-move work
       wPos.x += (btx - wPos.x) * 0.25
       wPos.y += (bty - wPos.y) * 0.25
       ndc.set((wPos.x / window.innerWidth) * 2 - 1, -(wPos.y / window.innerHeight) * 2 + 1)
@@ -499,7 +512,16 @@ export default function VoidWorld() {
         wVel.y += (wvy - wVel.y) * 0.2
         wPrev.x = hit.x
         wPrev.y = hit.y
-        ;(quadUniforms.uWakePos.value as THREE.Vector2).set(hit.x, hit.y)
+        if (bInside && performance.now() - lastSample > 40) {
+          lastSample = performance.now()
+          trail.pop()
+          trail.unshift({ x: hit.x, y: hit.y, s: 1 })
+        }
+        const arr = quadUniforms.uTrail.value as THREE.Vector3[]
+        for (let i = 0; i < trail.length; i++) {
+          trail[i].s *= 0.9
+          arr[i].set(trail[i].x, trail[i].y, trail[i].s)
+        }
         ;(quadUniforms.uWakeVel.value as THREE.Vector2).set(wVel.x, wVel.y)
       }
       // uniforms: the whole quad field runs on time + scroll + wake

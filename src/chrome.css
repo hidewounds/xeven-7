@@ -127,44 +127,48 @@
   .xload-fast { animation: none; }
 }
 
-/* ---------- index section rail: detailed survey instrument ---------- */
-.rail {
-  position: fixed; left: 14px; top: 50%; transform: translateY(-50%);
-  z-index: 20; display: flex; flex-direction: column; gap: 6px;
-  opacity: 0.92;
+/* ---------- ruler: fake left-edge survey ruler, global ---------- */
+.ruler {
+  position: fixed; left: 14px; top: 12vh; bottom: 12vh; width: 132px;
+  z-index: 20; opacity: 0.92; pointer-events: none;
 }
-/* end caps: the instrument's survey brackets */
-.rail::before, .rail::after {
-  content: ''; position: absolute; left: 22px; width: 5px; height: 5px;
-  border: 1px solid var(--line-strong);
+/* cm ticks: fine subdivisions running the full travel between inches */
+.ruler-cm {
+  position: absolute; left: 44px; top: 0; bottom: 0; width: 7px;
+  background: repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 12px);
+  opacity: 0.55;
 }
-.rail::before { top: -14px; border-bottom: none; border-right: none; }
-.rail::after { bottom: -14px; border-top: none; border-right: none; }
-/* page-progress hairline running behind the ticks (sole writer: the rail
-   progress tween — transform-only, mint whisper) */
-.rail-progress {
-  position: absolute; left: 33px; top: 4px; bottom: 4px; width: 1px;
-  background: var(--mint); opacity: 0.7;
-  transform: scaleY(0); transform-origin: top center;
+/* inches: the main points, spread top→bottom; sole interactive children */
+.ruler-inches {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
 }
-.rail-btn {
+.ruler-inch {
   display: flex; align-items: center; gap: 8px; padding: 0;
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-  color: var(--faint); min-height: 34px;
+  color: var(--faint); min-height: 34px; background: none; border: none;
+  pointer-events: auto; cursor: pointer;
   transition: color 150ms ease;
 }
-.rail-btn:hover { color: var(--bone); }
-.rail-btn:hover .rail-tick { width: 20px; background: var(--bone); }
-.rail-btn:focus-visible { outline: 1px solid var(--mint); outline-offset: 2px; color: var(--bone); }
-.rail-n { min-width: 18px; text-align: right; font-size: 10px; }
-.rail-tick { display: block; width: 14px; height: 1px; background: var(--line-strong); transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease; }
-.rail-btn.rail-on { color: var(--bone); }
-.rail-btn.rail-on .rail-n { color: var(--mint); }
-.rail-btn.rail-on .rail-tick { width: 28px; background: var(--mint); box-shadow: 0 0 8px rgba(156, 245, 211, 0.8); }
-.rail-tag { color: var(--faint); font-size: 10px; letter-spacing: 0.14em; transition: color 150ms ease; }
-.rail-btn.rail-on .rail-tag, .rail-btn:hover .rail-tag { color: var(--bone); }
+.ruler-inch:hover { color: var(--bone); }
+.ruler-inch:hover .ruler-tick { width: 20px; background: var(--bone); }
+.ruler-inch:focus-visible { outline: 1px solid var(--mint); outline-offset: 2px; color: var(--bone); }
+.ruler-n { min-width: 18px; text-align: right; font-size: 10px; }
+.ruler-tick { display: block; width: 26px; height: 1px; background: var(--line-strong); transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease; }
+.ruler-inch.ruler-on { color: var(--bone); }
+.ruler-inch.ruler-on .ruler-n { color: var(--mint); }
+.ruler-inch.ruler-on .ruler-tick { width: 34px; background: var(--mint); box-shadow: 0 0 8px rgba(156, 245, 211, 0.8); }
+.ruler-tag { color: var(--faint); font-size: 10px; letter-spacing: 0.14em; transition: color 150ms ease; }
+.ruler-inch.ruler-on .ruler-tag, .ruler-inch:hover .ruler-tag { color: var(--bone); }
+/* needle: rides page scroll top→bottom across the cm ticks (sole writer:
+   the rAF scroll hook — transform-only, direct set, no animation) */
+.ruler-needle {
+  position: absolute; left: 36px; top: 0; width: 24px; height: 1px;
+  background: var(--mint); box-shadow: 0 0 8px rgba(156, 245, 211, 0.8);
+  will-change: transform;
+}
 @media (max-width: 900px) {
-  .rail { display: none; }
+  .ruler { display: none; }
 }
 .intro-mini {
   position: absolute; top: 0; left: 0; right: 0;
