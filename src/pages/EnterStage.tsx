@@ -8,10 +8,10 @@ import { navigate, xs } from '../app/store'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
 const CAPS = [
-  { t: 'Living 3D Worlds', d: 'Real-time scenes that breathe, react and remember.', src: PH.head },
-  { t: 'Cinematic Motion', d: 'Scroll-choreographed camera, cut like film.', src: PH.chrome },
-  { t: 'Interactive Systems', d: 'Every pixel answers the pointer.', src: PH.aerial },
-  { t: 'Reactive Systems', d: 'Interfaces that sense, respond and adapt.', src: PH.metal },
+  { t: 'Living 3D Worlds', d: 'Real-time scenes that breathe, react and remember.', src: PH.head, specs: ['WebGL', 'GLSL', '60fps'] },
+  { t: 'Cinematic Motion', d: 'Scroll-choreographed camera, cut like film.', src: PH.chrome, specs: ['GSAP', 'Scroll', 'Lenis'] },
+  { t: 'Interactive Systems', d: 'Every pixel answers the pointer.', src: PH.aerial, specs: ['Pointer', 'State', 'Realtime'] },
+  { t: 'Reactive Systems', d: 'Interfaces that sense, respond and adapt.', src: PH.metal, specs: ['Sensors', 'Motion', 'Adapt'] },
 ]
 
 const REEL = [
@@ -442,6 +442,11 @@ export default function EnterStage() {
               {`0${i + 1}`}
             </span>
             <VideoCard src={c.src} title={c.t} sub={c.d} />
+            <div className="cap-specs" aria-label={`${c.t} stack`}>
+              {c.specs.map((s) => (
+                <span key={s}>{s}</span>
+              ))}
+            </div>
           </Tilt>
         ))}
       </section>

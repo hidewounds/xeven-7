@@ -203,8 +203,15 @@
 .mani-text { font-family: var(--disp); font-size: clamp(30px, 5.5vw, 72px); line-height: 1.15; margin: 0; max-width: 20ch; }
 .mani-word { opacity: 0.13; }
 
-.st-caps { display: flex; flex-direction: column; gap: 20vh; padding: 36vh 6vw 32vh; }
+.st-caps { display: flex; flex-direction: column; gap: 12vh; padding: 30vh 6vw 28vh; }
 .cap-card { position: relative; width: min(78%, 600px); will-change: transform; }
+/* spec sheet: mono stack chips under the media (data density, not decor) */
+.cap-specs { display: flex; gap: var(--s8); margin-top: var(--s16); flex-wrap: wrap; }
+.cap-specs span {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  color: var(--muted); border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: var(--s8) var(--s16);
+}
 /* gallery ghost numeral peeking from behind the card's top edge
    (parallax writer owns yPercent — the deal tween owns y, never both) */
 .cap-ghost {
