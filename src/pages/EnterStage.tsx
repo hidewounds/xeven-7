@@ -239,73 +239,82 @@ export default function EnterStage() {
         },
       })
 
-      // showreel STAGE: one pinned viewport, one item at a time taking it
-      // full — each panel assembles (scale + fade in), holds, then yields
-      // to the next through the frame. No conveyor, no tilt: cuts through
-      // space, not across it. Single timeline owns every cell's opacity and
-      // scale end to end (nothing else writes them).
+      // showreel ORBIT: the takes ride a shared ellipse around the frame
+      // centre as the pin scrubs — upright always (no self-rotation, titles
+      // stay readable), depth driving scale/opacity/zIndex. Front = bottom
+      // of the ellipse; one full revolution cycles every take through it.
+      // ONE layout writer (scrub proxy + resize share it); transform-only.
       const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
-      // reel counter readout: 01→N scrubbed to pin progress (direct DOM
-      // write, no react state down the scroll path)
+      // reel counter readout: front-take index (direct DOM write, only on
+      // change — no react state down the scroll path)
       const reelCount = root.current.querySelector('.reel-count span')
-      const stageTl = gsap.timeline({
+      let lastCount = ''
+      const TAU = Math.PI * 2
+      const layoutOrbit = () => {
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+        const RX = Math.min(vw * 0.36, 560)
+        const RY = Math.min(vh * 0.22, 240)
+        let best = 0
+        let bf = -1
+        cells.forEach((cell, i) => {
+          const a = ((i / cells.length) * TAU + orbit.rot + Math.PI / 2) % TAU
+          const f = (Math.sin(a) + 1) / 2
+          gsap.set(cell, {
+            x: Math.cos(a) * RX,
+            y: Math.sin(a) * RY,
+            scale: 0.62 + f * 0.48,
+            opacity: 0.2 + f * 0.8,
+            zIndex: Math.round(f * 10),
+          })
+          if (f > bf) {
+            bf = f
+            best = i
+          }
+        })
+        if (reelCount) {
+          const t = String(best + 1).padStart(2, '0')
+          if (t !== lastCount) {
+            lastCount = t
+            reelCount.textContent = t
+          }
+        }
+      }
+      const orbit = { rot: 0 }
+      const orbitTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.st-reel',
           start: 'top top',
-          end: '+=300%',
+          end: '+=280%',
           pin: true,
           scrub: 1.2,
           anticipatePin: 1,
           fastScrollEnd: true,
           invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            if (reelCount) {
-              reelCount.textContent = String(Math.min(cells.length, Math.floor(self.progress * cells.length) + 1)).padStart(2, '0')
-            }
-          },
         },
       })
-      const STEP = 1.2
-      const TOTAL = (cells.length - 1) * STEP + 1.5
+      orbitTl.fromTo(
+        orbit,
+        { rot: 0 },
+        { rot: TAU, ease: 'none', duration: 1, onUpdate: layoutOrbit },
+        0,
+      )
       // letterbox: cinematic bars close over the pin and lift at release
-      stageTl.fromTo(
+      orbitTl.fromTo(
         '.reel-bar-top',
         { yPercent: -100 },
-        { yPercent: 0, ease: 'none', duration: 0.4 },
+        { yPercent: 0, ease: 'none', duration: 0.08 },
         0,
       )
-      stageTl.fromTo(
+      orbitTl.fromTo(
         '.reel-bar-bottom',
         { yPercent: 100 },
-        { yPercent: 0, ease: 'none', duration: 0.4 },
+        { yPercent: 0, ease: 'none', duration: 0.08 },
         0,
       )
-      stageTl.to('.reel-bar-top', { yPercent: -100, ease: 'none', duration: 0.4 }, TOTAL - 0.4)
-      stageTl.to('.reel-bar-bottom', { yPercent: 100, ease: 'none', duration: 0.4 }, TOTAL - 0.4)
-      cells.forEach((cell, i) => {
-        const at = i * STEP
-        // assemble: rise from small to full
-        stageTl.fromTo(
-          cell,
-          { opacity: 0, scale: 0.9 },
-          { opacity: 1, scale: 1, ease: 'none', duration: 0.5, immediateRender: false },
-          at,
-        )
-        // Ken Burns: the frame breathes while it holds (inner media owns
-        // scale — the cell owns its own, never contested)
-        const vid = cell.querySelector('.vid')
-        if (vid) {
-          stageTl.fromTo(
-            vid,
-            { scale: 1 },
-            { scale: 1.08, ease: 'none', duration: STEP, immediateRender: false },
-            at,
-          )
-        }
-        // yield: push past full and dissolve for the next (the last cell
-        // holds longest, then clears as the pin releases for departure)
-        stageTl.to(cell, { opacity: 0, scale: 1.06, ease: 'none', duration: 0.5 }, at + (i < cells.length - 1 ? 0.7 : 1.0))
-      })
+      orbitTl.to('.reel-bar-top', { yPercent: -100, ease: 'none', duration: 0.08 }, 0.92)
+      orbitTl.to('.reel-bar-bottom', { yPercent: 100, ease: 'none', duration: 0.08 }, 0.92)
+      layoutOrbit()
       // white wash: a soft light that integrates with the dark field instead
       // of covering it — one timeline owns the veil end to end (two
       // competing scrubbed tweens on one property resolve

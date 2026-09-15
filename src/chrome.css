@@ -254,13 +254,12 @@
   animation: marquee 22s linear infinite;
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-/* showreel STAGE: one pinned viewport; cells stack centered (inset + auto
-   margins, transform-free so GSAP owns scale uncontested) and assemble /
-   yield through the frame. Base opacity 0 = correct pre-JS state. */
+/* showreel ORBIT: takes ride a shared ellipse around the frame centre
+   (JS-laid x/y, upright, depth-scaled). Base opacity 0 = pre-JS state. */
 .reel-track { position: relative; height: 100svh; will-change: transform, opacity; }
 .reel-cell {
   position: absolute; inset: 0; margin: auto;
-  width: min(76vw, 900px, calc(78svh * 1.6)); height: fit-content;
+  width: min(56vw, 520px); height: fit-content;
   opacity: 0; will-change: transform, opacity;
 }
 /* reel counter readout (sole writer: pin onUpdate, direct DOM text) */

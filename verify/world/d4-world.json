@@ -1,6 +1,6 @@
 {
   "introMerge": {
-    "ledger": "041",
+    "ledger": "050",
     "canvas": true
   },
   "legacyGone": {
@@ -21,7 +21,7 @@
     "reticleRings": 0,
     "reelCells": 5
   },
-  "fpsWorld": 12,
+  "fpsWorld": 15,
   "stage": {
     "count": "03 / 05",
     "lit": 0,
