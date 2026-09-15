@@ -299,37 +299,7 @@ export default function EnterStage() {
         { rot: TAU, ease: 'none', duration: 1, onUpdate: layoutOrbit },
         0,
       )
-      // letterbox: cinematic bars close over the pin and lift at release
-      orbitTl.fromTo(
-        '.reel-bar-top',
-        { yPercent: -100 },
-        { yPercent: 0, ease: 'none', duration: 0.08 },
-        0,
-      )
-      orbitTl.fromTo(
-        '.reel-bar-bottom',
-        { yPercent: 100 },
-        { yPercent: 0, ease: 'none', duration: 0.08 },
-        0,
-      )
-      orbitTl.to('.reel-bar-top', { yPercent: -100, ease: 'none', duration: 0.08 }, 0.92)
-      orbitTl.to('.reel-bar-bottom', { yPercent: 100, ease: 'none', duration: 0.08 }, 0.92)
       layoutOrbit()
-      // white wash: a soft light that integrates with the dark field instead
-      // of covering it — one timeline owns the veil end to end (two
-      // competing scrubbed tweens on one property resolve
-      // nondeterministically on discontinuous jumps)
-      const veilTl = gsap.timeline({
-        scrollTrigger: { trigger: '.st-reel', start: 'top 90%', end: 'bottom -120%', scrub: 1.2 },
-      })
-      veilTl
-        .fromTo(
-          '.veil-white',
-          { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0 },
-          { clipPath: 'circle(150vmax at 50% calc(100% - 48px))', opacity: 1, ease: 'none', duration: 0.8 },
-          0,
-        )
-        .to('.veil-white', { clipPath: 'circle(0px at 50% calc(100% - 48px))', opacity: 0, ease: 'none', duration: 1 }, 2.2)
       // process lives on the dark field — no spread, no takeover. The ink
       // stays bone/muted/mint throughout (pure CSS); the thread, the node
       // and the active-row light carry the motion instead.
@@ -415,7 +385,6 @@ export default function EnterStage() {
   return (
     <div className="st-scroll" ref={root}>
       <SectionRail />
-      <div className="veil-white" aria-hidden="true" />
       <button className="mark-fixed" onClick={toTop} data-cursor aria-label="XEVEN — back to top">
         <span className="mark-word">XEVEN</span>
         <span className="mark-x" aria-hidden="true">
@@ -478,8 +447,6 @@ export default function EnterStage() {
             </div>
           ))}
         </div>
-        <div className="reel-bar reel-bar-top" aria-hidden="true" />
-        <div className="reel-bar reel-bar-bottom" aria-hidden="true" />
       </section>
 
       <footer className="st-foot">
