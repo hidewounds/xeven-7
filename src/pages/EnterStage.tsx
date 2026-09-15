@@ -69,25 +69,64 @@ const STEPS = [
   },
 ]
 
-function Tilt({ children, className }: { children: React.ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null!)
+/* Specimen index: editorial rows that open as they cross center —
+   IO-driven (rail/proc pattern: zero GSAP writers, zero conflicts).
+   Clicking a row opens it exclusively. First specimen open by default. */
+function SpecimenRows() {
+  const [open, setOpen] = useState(0)
+  const list = useRef<HTMLDivElement>(null!)
+  useEffect(() => {
+    const el = list.current
+    if (!el) return
+    const rows = [...el.querySelectorAll('.spec-row')]
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue
+          const i = rows.indexOf(e.target as Element)
+          if (i >= 0) setOpen(i)
+        }
+      },
+      { rootMargin: '-38% 0px -38% 0px', threshold: 0 },
+    )
+    rows.forEach((r) => io.observe(r))
+    return () => io.disconnect()
+  }, [])
   return (
-    <div
-      ref={ref}
-      className={className}
-      onMouseMove={(e) => {
-        const el = ref.current
-        if (!el || window.matchMedia('(pointer: coarse)').matches) return
-        const r = el.getBoundingClientRect()
-        const rx = ((e.clientY - r.top) / r.height - 0.5) * -8
-        const ry = ((e.clientX - r.left) / r.width - 0.5) * 10
-        el.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`
-      }}
-      onMouseLeave={() => {
-        ref.current.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)'
-      }}
-    >
-      {children}
+    <div className="spec-list" ref={list}>
+      {CAPS.map((c, i) => (
+        <div key={c.t} className={i === open ? 'spec-row spec-open' : 'spec-row'}>
+          <button
+            className="spec-head"
+            onClick={() => setOpen(i)}
+            aria-expanded={i === open}
+            data-cursor
+          >
+            <span className="spec-n" aria-hidden="true">
+              {`0${i + 1}`}
+            </span>
+            <span className="spec-title">{c.t}</span>
+            <span className="spec-x" aria-hidden="true">
+              {i === open ? '—' : '+'}
+            </span>
+          </button>
+          <div className="spec-body" aria-hidden={i !== open}>
+            <div className="spec-inner">
+              <div className="spec-media">
+                <VideoCard src={c.src} title={c.t} sub={c.d} />
+              </div>
+              <div className="spec-info">
+                <p>{c.d}</p>
+                <div className="cap-specs" aria-label={`${c.t} stack`}>
+                  {c.specs.map((s) => (
+                    <span key={s}>{s}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -295,78 +334,6 @@ export default function EnterStage() {
         scrollTrigger: { trigger: '.st-proc', start: 'bottom 100%', end: 'bottom 40%', scrub: 1.2 },
       })
 
-      // capability deck: all 4 cards rest stacked directly BEHIND the
-      // fixed mark (small held deck, fanned ±16°, edges peeking) and get
-      // THROWN one-by-one to their alternating slots as you scroll.
-      // Measured per-card deltas to the live mark point, recomputed on
-      // refresh so resize never strands them. Transform + opacity only.
-      const markEl = document.querySelector('.mark-fixed')
-      const fanRot = [-16, -6, 6, 16]
-      gsap.utils.toArray<HTMLElement>('.cap-card').forEach((card, i) => {
-        // ghost numeral drifts against its card (yPercent only — the throw
-        // timeline owns y, so the two never contest one property)
-        const ghost = card.querySelector('.cap-ghost')
-        if (ghost) {
-          gsap.fromTo(
-            ghost,
-            { yPercent: 14 },
-            {
-              yPercent: -14,
-              ease: 'none',
-              immediateRender: false,
-              scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 1.2 },
-            },
-          )
-        }
-        // deck peek: stacked cards offset a few px so the deck edges read
-        // behind the logo before each card deals out
-        const peekY = (i - 1.5) * 12
-        const delta = () => {
-          const m = (
-            markEl ?? { getBoundingClientRect: () => ({ left: window.innerWidth / 2, top: window.innerHeight - 48, width: 0, height: 0 }) }
-          ).getBoundingClientRect()
-          const b = card.getBoundingClientRect()
-          const gx = gsap.getProperty(card, 'x') as number
-          const gy = gsap.getProperty(card, 'y') as number
-          return {
-            dx: m.left + m.width / 2 - (b.left + b.width / 2) + gx,
-            dy: m.top + m.height / 2 - (b.top + b.height / 2) + gy,
-          }
-        }
-        // THROW: the deck materializes behind the mark, then each card is
-        // thrown arcing onto the page — x runs linear while y eases out, so
-        // the flight path curves; rotation unwinds and scale blooms as it
-        // lands. One timeline per card owns all its props (ghost parallax
-        // owns yPercent only — never contested). Lazy render: the deck
-        // displacement must not poison trigger measurement.
-        const throwTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 110%',
-            end: 'top 45%',
-            scrub: 1.2,
-            invalidateOnRefresh: true,
-          },
-        })
-        throwTl
-          .fromTo(
-            card,
-            {
-              x: () => delta().dx,
-              y: () => delta().dy + peekY,
-              scale: 0.25,
-              rotation: fanRot[i % fanRot.length],
-              opacity: 0,
-              transformOrigin: '50% 50%',
-            },
-            { opacity: 1, ease: 'none', duration: 0.25, immediateRender: false },
-            0,
-          )
-          .to(card, { x: 0, ease: 'none', duration: 0.7 }, 0.05)
-          .to(card, { y: 0, ease: 'power2.out', duration: 0.7 }, 0.05)
-          .to(card, { scale: 1, rotation: 0, ease: 'none', duration: 0.7 }, 0.05)
-      })
-
       // connector thread: a stub leaves the mark's side (center) and runs
       // to the spine, then the proc spine draws top→bottom — ONE timeline
       // owns stub, node and spine (single writer; scale/translate only,
@@ -463,19 +430,7 @@ export default function EnterStage() {
 
       <section className="st-caps">
         <p className="mono">01 — CAPABILITIES</p>
-        {CAPS.map((c, i) => (
-          <Tilt key={c.t} className={i % 2 ? 'cap-card cap-right' : 'cap-card cap-left'}>
-            <span className="cap-ghost" aria-hidden="true">
-              {`0${i + 1}`}
-            </span>
-            <VideoCard src={c.src} title={c.t} sub={c.d} />
-            <div className="cap-specs" aria-label={`${c.t} stack`}>
-              {c.specs.map((s) => (
-                <span key={s}>{s}</span>
-              ))}
-            </div>
-          </Tilt>
-        ))}
+        <SpecimenRows />
       </section>
 
       <section className="st-proc">
