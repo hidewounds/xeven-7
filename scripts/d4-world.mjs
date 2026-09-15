@@ -45,7 +45,7 @@ M.legacyGone = await page.evaluate(() => ({
 }));
 // five-act index: no topbar, 5-stop rail, dead sections gone
 M.acts = await page.evaluate(() => ({
-  topbar: !document.querySelector('.topbar'),
+  topbarVisible: !!document.querySelector('.topbar'),
   railBtns: document.querySelectorAll('.rail-btn').length,
   railFirst: document.querySelector('.rail-btn')?.textContent.replace(/\s+/g, ' ').trim(),
   mani: !document.querySelector('.st-mani'),
@@ -75,6 +75,17 @@ await page.screenshot({ path: `${OUT}/g1-world-caps.png` });
 const procTop = await page.evaluate(() => document.querySelector('.st-proc').getBoundingClientRect().top + window.scrollY);
 await go(procTop + 900);
 await page.screenshot({ path: `${OUT}/g2-world-proc.png` });
+
+// showreel stage mid-pin: letterboxed take + counter + a landed caps card
+const reelTop = await page.evaluate(() => document.querySelector('.st-reel').getBoundingClientRect().top + window.scrollY);
+await go(reelTop + 1400);
+M.stage = await page.evaluate(() => ({
+  count: document.querySelector('.reel-count')?.textContent.replace(/\s+/g, ' ').trim() ?? null,
+  lit: [...document.querySelectorAll('.reel-cell')].filter((c) => getComputedStyle(c).opacity === '1').length,
+  bars: document.querySelectorAll('.reel-bar').length,
+  specs: document.querySelectorAll('.cap-specs span').length,
+}));
+await page.screenshot({ path: `${OUT}/g4-reel-stage.png` });
 
 // route tier: flat park on subpages, journey resumes on return
 await page.evaluate(() => { window.location.hash = '#/worlds'; });

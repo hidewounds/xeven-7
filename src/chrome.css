@@ -203,7 +203,7 @@
 .mani-text { font-family: var(--disp); font-size: clamp(30px, 5.5vw, 72px); line-height: 1.15; margin: 0; max-width: 20ch; }
 .mani-word { opacity: 0.13; }
 
-.st-caps { display: flex; flex-direction: column; gap: 12vh; padding: 30vh 6vw 28vh; }
+.st-caps { display: flex; flex-direction: column; gap: 12vh; padding: 30vh 6vw 28vh calc(6vw + 64px); }
 .cap-card { position: relative; width: min(78%, 600px); will-change: transform; }
 /* spec sheet: mono stack chips under the media (data density, not decor) */
 .cap-specs { display: flex; gap: var(--s8); margin-top: var(--s16); flex-wrap: wrap; }
@@ -250,6 +250,10 @@
   position: absolute; top: 4vh; right: 6vw; z-index: 5; margin: 0;
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted);
 }
+/* letterbox bars: pure black, in/out with the pin (sole writer: stageTl) */
+.reel-bar { position: absolute; left: 0; right: 0; height: 8svh; background: #000; z-index: 4; }
+.reel-bar-top { top: 0; }
+.reel-bar-bottom { bottom: 0; }
 /* cell title lift on hover (180ms, transform-only, no scrubbed conflicts) */
 .vid-meta p { transition: transform 180ms ease; }
 .vid-meta span { transition: color 180ms ease; }
@@ -444,6 +448,7 @@
   .proc-row { grid-template-columns: 44px 1fr; }
   /* rail hides here, so process reclaims the gutter */
   .st-proc { padding-left: 8vw; }
+  .st-caps { padding-left: 6vw; }
   .proc-line { left: calc(8vw + 22px); }
   .proc-stub { width: calc(50vw - 8vw - 23px); }
 }
@@ -470,6 +475,7 @@
   .st-reel { overflow: hidden; }
   .reel-track { height: auto; display: flex; flex-direction: column; gap: var(--s32); padding: 10vh 6vw; }
   .reel-cell { position: static; inset: auto; margin: 0 auto; opacity: 1; width: 100%; max-width: 860px; }
+  .reel-bar { display: none; }
   /* cinema layers stand down entirely — veil clip is already zero, but
      keep them out of the a11y/paint tree for certainty */
   .veil-white, .mark-fixed { display: none; }

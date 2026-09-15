@@ -227,6 +227,22 @@ export default function EnterStage() {
         },
       })
       const STEP = 1.2
+      const TOTAL = (cells.length - 1) * STEP + 1.5
+      // letterbox: cinematic bars close over the pin and lift at release
+      stageTl.fromTo(
+        '.reel-bar-top',
+        { yPercent: -100 },
+        { yPercent: 0, ease: 'none', duration: 0.4 },
+        0,
+      )
+      stageTl.fromTo(
+        '.reel-bar-bottom',
+        { yPercent: 100 },
+        { yPercent: 0, ease: 'none', duration: 0.4 },
+        0,
+      )
+      stageTl.to('.reel-bar-top', { yPercent: -100, ease: 'none', duration: 0.4 }, TOTAL - 0.4)
+      stageTl.to('.reel-bar-bottom', { yPercent: 100, ease: 'none', duration: 0.4 }, TOTAL - 0.4)
       cells.forEach((cell, i) => {
         const at = i * STEP
         // assemble: rise from small to full
@@ -236,6 +252,17 @@ export default function EnterStage() {
           { opacity: 1, scale: 1, ease: 'none', duration: 0.5, immediateRender: false },
           at,
         )
+        // Ken Burns: the frame breathes while it holds (inner media owns
+        // scale — the cell owns its own, never contested)
+        const vid = cell.querySelector('.vid')
+        if (vid) {
+          stageTl.fromTo(
+            vid,
+            { scale: 1 },
+            { scale: 1.08, ease: 'none', duration: STEP, immediateRender: false },
+            at,
+          )
+        }
         // yield: push past full and dissolve for the next (the last cell
         // holds longest, then clears as the pin releases for departure)
         stageTl.to(cell, { opacity: 0, scale: 1.06, ease: 'none', duration: 0.5 }, at + (i < cells.length - 1 ? 0.7 : 1.0))
@@ -487,6 +514,8 @@ export default function EnterStage() {
             </div>
           ))}
         </div>
+        <div className="reel-bar reel-bar-top" aria-hidden="true" />
+        <div className="reel-bar reel-bar-bottom" aria-hidden="true" />
       </section>
 
       <footer className="st-foot">
