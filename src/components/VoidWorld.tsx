@@ -194,7 +194,7 @@ export default function VoidWorld() {
     quadGeo.setAttribute('aQJ', new THREE.InstancedBufferAttribute(aQJ, 1))
     const quadUniforms = {
       uTime: { value: 0 },
-      uPress: { value: new THREE.Vector3(0, 0, -100) },
+      uFinger: { value: new THREE.Vector3(0, 0, 0) },
       uVel: { value: 0 },
       uShowcase: { value: 1 },
       uVoid: { value: new THREE.Vector3(0.0235, 0.0353, 0.0588) },
@@ -222,7 +222,7 @@ export default function VoidWorld() {
       `,
       fragmentShader: /* glsl */ `
         uniform float uTime;
-        uniform vec3 uPress;
+        uniform vec3 uFinger;
         uniform float uVel;
         uniform float uShowcase;
         uniform vec3 uVoid;
@@ -249,15 +249,12 @@ export default function VoidWorld() {
           float amp = 1.0 + uVel * 0.3;
           float glow = wave * amp;
           col += vec3(1.0) * glow * uShowcase;
-          // liquid press: a ripple + gloss swell where the pointer last
-          // touched, settling back solid over ~3.5s. Touch, not hover.
-          float age = uTime - uPress.z;
-          if (age > 0.0 && age < 4.0) {
-            float dp = distance(vWorld.xy, uPress.xy);
-            float ring = sin(dp * 2.2 - age * 5.0) * exp(-age * 1.0) * exp(-dp * 0.22);
-            float gloss = exp(-dp * dp / 8.0) * exp(-age * 0.9);
-            col += vec3(1.0) * (ring * 0.22 + gloss * 0.18) * uShowcase;
-          }
+          // fingertip: a soft diffuse presence where the finger hovers —
+          // wide falloff, gentle core, eased in/out over ~1s. No rings,
+          // no lines, no follow-glow chasing the pointer.
+          float fd = distance(vWorld.xy, uFinger.xy);
+          float finger = exp(-fd * fd / 18.0) * 0.16 + exp(-fd * fd / 3.0) * 0.10;
+          col += vec3(1.0) * finger * uFinger.z * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
@@ -374,11 +371,15 @@ export default function VoidWorld() {
       group.add(mesh)
     }
 
-    // ---- liquid press feed: pointer position for the ripple (touch only —
-    // the pointer lights nothing, ever; this only stamps where it pressed)
+    // ---- fingertip feed: eased pointer mass for the hover presence.
+    // Position lerps behind the finger (~1s in/out on strength), so it
+    // reads as a fingertip under frosted glass — never a dot, never a ring.
     let btx = window.innerWidth / 2
     let bty = window.innerHeight / 2
-    let lastPressT = -10000
+    let bInside = false
+    let fcx = btx
+    let fcy = bty
+    let fstr = 0
 
     // ---- waypoint journey ----
     let fracs: number[] = []
@@ -477,13 +478,27 @@ export default function VoidWorld() {
           mm.userData.by + Math.sin(t * mm.userData.fs + mm.userData.fo) * mm.userData.fa
       }
 
-      // scroll kindle only (the pointer lights nothing — see uPress)
+      // scroll kindle only (the pointer only ever presses fingertip light)
       const vBoost = Math.min(1, xs.vel * 1.5) * 0.3
       xs.vel *= 0.9
 
-      // uniforms: the whole quad field runs on time + scroll + press
+      // fingertip: ease position + strength toward the pointer, then feed
+      // the shader once per frame (no per-move writes, no hover chasing)
+      fcx += (btx - fcx) * 0.12
+      fcy += (bty - fcy) * 0.12
+      fstr += ((bInside ? 1 : 0) - fstr) * 0.04
+      // uniforms: the whole quad field runs on time + scroll + fingertip
       quadUniforms.uTime.value = t
       quadUniforms.uVel.value = vBoost
+      if (fstr > 0.01) {
+        ndc.set((fcx / window.innerWidth) * 2 - 1, -(fcy / window.innerHeight) * 2 + 1)
+        raycaster.setFromCamera(ndc, camera)
+        if (raycaster.ray.intersectPlane(plane, hit)) {
+          ;(quadUniforms.uFinger.value as THREE.Vector3).set(hit.x, hit.y, fstr)
+        }
+      } else {
+        ;(quadUniforms.uFinger.value as THREE.Vector3).set(0, 0, 0)
+      }
 
       renderer.render(scene, camera)
     }
@@ -491,18 +506,12 @@ export default function VoidWorld() {
     const onMove = (e: PointerEvent) => {
       pm.x = e.clientX / window.innerWidth - 0.5
       pm.y = e.clientY / window.innerHeight - 0.5
-      // liquid press, throttled: stamp position + time, the shader settles
-      // it back solid over ~2.5s. No hover light, no follow glow.
-      const now = performance.now()
-      if (now - lastPressT < 60) return
-      lastPressT = now
       btx = e.clientX
       bty = e.clientY
-      ndc.set((btx / window.innerWidth) * 2 - 1, -(bty / window.innerHeight) * 2 + 1)
-      raycaster.setFromCamera(ndc, camera)
-      if (raycaster.ray.intersectPlane(plane, hit)) {
-        ;(quadUniforms.uPress.value as THREE.Vector3).set(hit.x, hit.y, clock.elapsedTime)
-      }
+      bInside = true
+    }
+    const onGone = () => {
+      bInside = false
     }
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight
@@ -555,6 +564,8 @@ export default function VoidWorld() {
     window.addEventListener('pointerdown', wake, { passive: true })
     window.addEventListener('wheel', wake, { passive: true })
     window.addEventListener('scroll', wake, { passive: true })
+    window.addEventListener('pointerleave', onGone, { passive: true })
+    window.addEventListener('blur', onGone)
     window.addEventListener('resize', onResize)
     window.addEventListener('hashchange', onHash)
     document.addEventListener('visibilitychange', onVis)
@@ -564,6 +575,8 @@ export default function VoidWorld() {
       window.removeEventListener('pointerdown', wake)
       window.removeEventListener('wheel', wake)
       window.removeEventListener('scroll', wake)
+      window.removeEventListener('pointerleave', onGone)
+      window.removeEventListener('blur', onGone)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('hashchange', onHash)
       document.removeEventListener('visibilitychange', onVis)

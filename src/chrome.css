@@ -268,13 +268,16 @@
   animation: marquee 22s linear infinite;
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-/* showreel ORBIT: takes ride a shared ellipse around the frame centre
-   (JS-laid x/y, upright, depth-scaled). Base opacity 0 = pre-JS state. */
+/* showreel mosaic: takes assemble into a grid measured in JS (slot math
+   owns positions; width here must match it). Base opacity 0 = pre-JS. */
 .reel-track { position: relative; height: 100svh; will-change: transform, opacity; }
 .reel-cell {
   position: absolute; inset: 0; margin: auto;
-  width: min(56vw, 520px); height: fit-content;
+  width: min(26vw, 300px); height: fit-content;
   opacity: 0; will-change: transform, opacity;
+}
+@media (max-width: 700px) {
+  .reel-cell { width: min(42vw, 340px); }
 }
 /* reel counter readout (sole writer: pin onUpdate, direct DOM text) */
 .reel-count {

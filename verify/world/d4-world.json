@@ -1,6 +1,6 @@
 {
   "introMerge": {
-    "ledger": "038",
+    "ledger": "057",
     "canvas": true
   },
   "legacyGone": {
@@ -24,7 +24,7 @@
   "fpsWorld": 13,
   "stage": {
     "count": "03 / 05",
-    "lit": 0,
+    "lit": 5,
     "bars": 0,
     "specs": 12
   },

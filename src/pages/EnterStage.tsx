@@ -177,67 +177,94 @@ export default function EnterStage() {
         },
       })
 
-      // showreel ORBIT: the takes ride a shared ellipse around the frame
-      // centre as the pin scrubs — upright always (no self-rotation, titles
-      // stay readable), depth driving scale/opacity/zIndex. Front = bottom
-      // of the ellipse; one full revolution cycles every take through it.
-      // ONE layout writer (scrub proxy + resize share it); transform-only.
+      // assembly mosaic: takes scattered off-frame converge into a tight
+      // mosaic as the pin scrubs, hold, then scatter back out. Slot and
+      // scatter positions are viewport-relative functions (invalidateOn-
+      // Refresh re-measures) — one timeline owns every cell end to end,
+      // transform + opacity only.
       const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
-      // reel counter readout: front-take index (direct DOM write, only on
-      // change — no react state down the scroll path)
+      // reel counter readout: assembly progress as take index (direct DOM
+      // write, no react state down the scroll path)
       const reelCount = root.current.querySelector('.reel-count span')
-      let lastCount = ''
-      const TAU = Math.PI * 2
-      const layoutOrbit = () => {
+      const mosaic = () => {
         const vw = window.innerWidth
         const vh = window.innerHeight
-        const RX = Math.min(vw * 0.36, 560)
-        const RY = Math.min(vh * 0.22, 240)
-        let best = 0
-        let bf = -1
-        cells.forEach((cell, i) => {
-          const a = ((i / cells.length) * TAU + orbit.rot + Math.PI / 2) % TAU
-          const f = (Math.sin(a) + 1) / 2
-          gsap.set(cell, {
-            x: Math.cos(a) * RX,
-            y: Math.sin(a) * RY,
-            scale: 0.62 + f * 0.48,
-            opacity: 0.2 + f * 0.8,
-            zIndex: Math.round(f * 10),
-          })
-          if (f > bf) {
-            bf = f
-            best = i
-          }
-        })
-        if (reelCount) {
-          const t = String(best + 1).padStart(2, '0')
-          if (t !== lastCount) {
-            lastCount = t
-            reelCount.textContent = t
-          }
+        const cols = vw < 700 ? 2 : 3
+        const cw = vw < 700 ? Math.min(vw * 0.42, 340) : Math.min(vw * 0.26, 300)
+        const gap = vw * 0.03
+        const ch = cw * 0.625 + 92
+        const rows = Math.ceil(cells.length / cols)
+        const totalW = cols * cw + (cols - 1) * gap
+        const totalH = rows * ch + (rows - 1) * gap
+        const dist = Math.max(vw, vh) * 0.9
+        return { cols, cw, gap, ch, rows, totalW, totalH, dist, vh }
+      }
+      const slotPos = (i: number) => {
+        const m = mosaic()
+        const c = i % m.cols
+        const r = Math.floor(i / m.cols)
+        return {
+          x: c * (m.cw + m.gap) - m.totalW / 2 + m.cw / 2,
+          y: r * (m.ch + m.gap) - m.totalH / 2 + m.ch / 2,
         }
       }
-      const orbit = { rot: 0 }
-      const orbitTl = gsap.timeline({
+      const scatterPos = (i: number) => {
+        const m = mosaic()
+        const a = (i / cells.length) * Math.PI * 2 + 0.6
+        return {
+          x: Math.cos(a) * m.dist,
+          y: Math.sin(a) * m.dist - m.vh * 0.2,
+          r: i % 2 ? 16 : -16,
+        }
+      }
+      const mosaicTl = gsap.timeline({
         scrollTrigger: {
           trigger: '.st-reel',
           start: 'top top',
-          end: '+=280%',
+          end: '+=260%',
           pin: true,
           scrub: 1.2,
           anticipatePin: 1,
           fastScrollEnd: true,
           invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            if (reelCount) {
+              reelCount.textContent = String(Math.min(cells.length, Math.floor(self.progress * cells.length) + 1)).padStart(2, '0')
+            }
+          },
         },
       })
-      orbitTl.fromTo(
-        orbit,
-        { rot: 0 },
-        { rot: TAU, ease: 'none', duration: 1, onUpdate: layoutOrbit },
-        0,
-      )
-      layoutOrbit()
+      cells.forEach((cell, i) => {
+        const s = slotPos(i)
+        const p = scatterPos(i)
+        // assemble: fly in from the scatter ring, unwind, land in the slot
+        mosaicTl.fromTo(
+          cell,
+          { x: p.x, y: p.y, rotation: p.r, scale: 0.7, opacity: 0 },
+          {
+            x: s.x, y: s.y, rotation: 0, scale: 1, opacity: 1,
+            ease: 'none', duration: 0.5, immediateRender: false,
+          },
+          0.05 + i * 0.06,
+        )
+        // disassemble: reverse back out as the pin releases (after a full
+        // hold where every take sits landed — assemble ends 0.79, scatter
+        // opens 0.95, so the mosaic reads complete before it breaks)
+        mosaicTl.to(
+          cell,
+          {
+            x: () => scatterPos(i).x,
+            y: () => scatterPos(i).y,
+            rotation: i % 2 ? -14 : 14,
+            scale: 0.7,
+            opacity: 0,
+            ease: 'none',
+            duration: 0.35,
+            immediateRender: false,
+          },
+          0.95 + i * 0.02,
+        )
+      })
       // process lives on the dark field — no spread, no takeover. The ink
       // stays bone/muted/mint throughout (pure CSS); the thread, the node
       // and the active-row light carry the motion instead.
