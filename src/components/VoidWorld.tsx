@@ -41,15 +41,11 @@ const IDLE_MS = 6000
 
 const SECTIONS = [
   '.st-hero',
-  '.st-proc',
-  '.st-foot',
 ]
-// camera journey: one stop per index section [x, y, z] — a descent that
-// dips closest at process, then releases to departure
+// camera journey: a single hold over the hero [x, y, z] — the index is
+// one act now, the world simply breathes beneath it
 const WAYPOINTS: Array<[number, number, number]> = [
   [0, 0.4, 10],
-  [-0.3, -0.2, 6.8],
-  [0, 0.8, 11],
 ]
 
 interface Floater extends THREE.Mesh {
@@ -216,13 +212,13 @@ export default function VoidWorld() {
           vQI = aQI;
           vQJ = aQJ;
           vec4 wp = modelMatrix * instanceMatrix * vec4(position, 1.0);
-          // magnetic wake: panels bend toward the cursor's motion, Gaussian
-          // falloff, strength from damped speed — displacement only, the
-          // body and trail stay invisible
+          // air flare: the medium bends around the cursor's motion — a wide
+          // invisible pressure field that flares with speed and dies at
+          // rest. Displacement only; the body and trail stay invisible.
           vec2 wdir = wp.xy - uWakePos;
           float wdist = length(wdir);
-          float wfall = exp(-wdist * wdist / 12.5);
-          float wmag = min(1.0, length(uWakeVel) * 0.25) * 0.4 * wfall;
+          float wfall = exp(-wdist * wdist / 32.0);
+          float wmag = min(1.0, length(uWakeVel) * 0.35) * 0.55 * wfall;
           wp.xy -= (wdir / max(wdist, 1e-3)) * wmag;
           vWorld = wp.xyz;
           gl_Position = projectionMatrix * viewMatrix * wp;
@@ -258,11 +254,11 @@ export default function VoidWorld() {
           float amp = 1.0 + uVel * 0.3;
           float glow = wave * amp;
           col += vec3(1.0) * glow * uShowcase;
-          // wake whisper: a breath of shimmer where the field bends (the
-          // bend itself does the talking; this stays barely visible)
-          float wspd = min(1.0, length(uWakeVel) * 0.25);
+          // flare whisper: a breath of shimmer where the air bends (the
+          // bend does the talking; this stays barely visible)
+          float wspd = min(1.0, length(uWakeVel) * 0.35);
           float wdp = distance(vWorld.xy, uWakePos);
-          col += vec3(1.0) * exp(-wdp * wdp / 12.5) * wspd * 0.05 * uShowcase;
+          col += vec3(1.0) * exp(-wdp * wdp / 32.0) * wspd * 0.09 * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
@@ -519,6 +515,7 @@ export default function VoidWorld() {
       btx = e.clientX
       bty = e.clientY
       bInside = true
+      wake()
     }
     const onGone = () => {
       bInside = false

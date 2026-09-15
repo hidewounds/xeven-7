@@ -212,30 +212,8 @@
 .mani-text { font-family: var(--disp); font-size: clamp(30px, 5.5vw, 72px); line-height: 1.15; margin: 0; max-width: 20ch; }
 .mani-word { opacity: 0.13; }
 
-.st-proc { padding: 30vh 8vw 32vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
-/* spine sits with the rows, clear of the fixed rail instrument */
-.proc-line { position: absolute; left: calc(8vw + 114px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
-.proc-line span { display: block; width: 100%; height: 100%; background: var(--mint); transform: scaleY(0); transform-origin: top; }
-/* connector stub: leaves the mark's side (viewport center) and runs left
-   into the spine top. Grows center→spine (origin right), then the spine
-   draws. Scale-only, re-measured never (viewport-relative calc). */
-.proc-stub { position: absolute; top: 0; left: 1px; width: calc(50vw - 8vw - 115px); height: 1px; background: var(--mint); transform: scaleX(0); transform-origin: right center; }
-/* ember thread node: rides stub→spine inside lineTl (sole writer: x/y/scale).
-   Static glow only — never animated, so the ride stays compositor-cheap. */
-.thread-node {
-  position: absolute; left: 50%; top: 34vh; width: 8px; height: 8px;
-  margin: -4px 0 0 -4px; border-radius: 50%;
-  background: var(--ember); box-shadow: 0 0 12px 2px rgba(255, 77, 46, 0.55);
-  transform: scale(0); z-index: 3; pointer-events: none;
-}
-.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; align-content: center; padding: 4vh 0; position: relative; min-height: 88svh; }
-.proc-ghost {
-  position: absolute; top: 6vh; right: 0;
-  font-family: var(--disp); font-size: clamp(120px, 18vw, 260px); line-height: 1;
-  letter-spacing: -0.02em; color: transparent;
-  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.13);
-  pointer-events: none; user-select: none;
-}
+/* shared row system (index history + /vision principles) */
+.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; padding: 4vh 0; position: relative; }
 .proc-row h3 { transition: text-shadow 240ms ease; }
 /* active-row illumination: ember edge bar + title glow, class-toggled
    (transitioned, never scrubbed — no writer conflicts by construction) */
@@ -288,39 +266,6 @@
 .tier span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; color: var(--mint); }
 .tier-go { display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--s8); padding: var(--s8) 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; color: var(--mint); }
 .tier-go:hover { text-decoration: underline; text-underline-offset: 4px; }
-
-.st-foot { padding: 30vh 6vw 20vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
-/* finale title: bone→mint sweep on hover (background-clip text, 200ms) */
-.st-foot h2 {
-  font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95;
-  letter-spacing: -0.02em;
-  background: linear-gradient(90deg, var(--mint) 50%, var(--bone) 50%);
-  background-size: 200% 100%; background-position: 100% 0;
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  transition: background-position 300ms ease;
-}
-.st-foot h2:hover { background-position: 0 0; }
-.st-foot a { position: relative; font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
-.st-foot a::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1px;
-  background: var(--mint); transform: scaleX(0); transform-origin: right center;
-  transition: transform 240ms ease;
-}
-.st-foot a:hover::after { transform: scaleX(1); transform-origin: left center; }
-.foot-time { margin: 0; opacity: 0.8; }
-
-/* ---------- index scroll cinema: migrating mark ---------- */
-.mark-fixed {
-  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
-  z-index: 41; font-family: var(--disp); font-size: 20px; letter-spacing: 0.12em;
-  color: var(--bone); background: none; border: none;
-  min-height: 44px; min-width: 44px; padding: 0 var(--s16);
-  display: inline-flex; align-items: center; justify-content: center;
-  opacity: 0; visibility: hidden; will-change: transform, opacity;
-}
-.mark-word { position: relative; }
-/* retired X-cover state: wordmark stays for the whole journey now */
-.mark-x { display: none; }
 
 /* ---------- video cards ---------- */
 .vid { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 16/10; background: #0a0f14; }
@@ -399,10 +344,6 @@
   .tb-right { margin-left: auto; }
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
   .proc-row { grid-template-columns: 44px 1fr; }
-  /* rail hides here, so process reclaims the gutter */
-  .st-proc { padding-left: 8vw; }
-  .proc-line { left: calc(8vw + 22px); }
-  .proc-stub { width: calc(50vw - 8vw - 23px); }
 }
 
 /* coarse pointers: no hover-only affordances depend on precision here. */
@@ -415,8 +356,5 @@
   .mani-ember { color: var(--ember); }
   .stat-rule { transform: scaleX(1); }
   .st-cue b { transform: scaleX(1); }
-  .proc-line span { transform: scaleY(1); }
-  .proc-stub { transform: scaleX(1); }
-  .thread-node { display: none; }
   .proc-row::after, .proc-row h3 { transition: none; }
 }

@@ -43,22 +43,17 @@ M.legacyGone = await page.evaluate(() => ({
   graph: !document.querySelector('canvas.graph-fixed'),
   world: !!document.querySelector('canvas.world-fixed'),
 }));
-// three-act index: rail instrument, dead sections gone, depth stations live
+// hero-only index: rail unmounted, process + departure gone
 M.acts = await page.evaluate(() => ({
   topbarVisible: !!document.querySelector('.topbar'),
   railBtns: document.querySelectorAll('.rail-btn').length,
-  railFirst: document.querySelector('.rail-btn')?.textContent.replace(/\s+/g, ' ').trim(),
-  capsGone: !document.querySelector('.st-caps'),
-  reelGone: !document.querySelector('.st-reel'),
-  mani: !document.querySelector('.st-mani'),
-  stats: !document.querySelector('.st-stats'),
-  tiers: !document.querySelector('.st-tier'),
+  procGone: !document.querySelector('.st-proc'),
+  footGone: !document.querySelector('.st-foot'),
+  markGone: !document.querySelector('.mark-fixed'),
   heroLabel: document.querySelector('.st-hero .mono')?.textContent,
+  heroTitle: document.querySelector('.st-hero-title')?.textContent,
   reticleDots: document.querySelectorAll('.reticle-dot').length,
   reticleRings: document.querySelectorAll('.reticle').length,
-  procRows: document.querySelectorAll('.proc-row').length,
-  procGhosts: document.querySelectorAll('.proc-ghost').length,
-  footLabel: document.querySelector('.st-foot .mono')?.textContent,
 }));
 M.fpsWorld = await page.evaluate(() => new Promise((res) => {
   let n = 0;
@@ -73,23 +68,16 @@ for (let x = 300; x <= 1300; x += 250) { await page.mouse.move(x, 500, { steps: 
 await page.mouse.click(800, 450);
 await page.waitForTimeout(1000);
 await page.screenshot({ path: `${OUT}/g0-world-hero.png` });
-const procTop = await page.evaluate(() => document.querySelector('.st-proc').getBoundingClientRect().top + window.scrollY);
-await go(procTop + 700);
-await page.screenshot({ path: `${OUT}/g1-proc-stations.png` });
-await go(procTop + 2200);
-M.stations = await page.evaluate(() => ({
-  litRows: document.querySelectorAll('.proc-row.proc-on').length,
-  stubDrawn: getComputedStyle(document.querySelector('.proc-stub')).transform,
-}));
-await page.screenshot({ path: `${OUT}/g2-world-proc.png` });
 
-// departure finale over the field
+// hero hold: scroll the single act to its end, world breathes beneath
 await go(await page.evaluate(() => document.body.scrollHeight));
-M.finale = await page.evaluate(() => ({
-  footOp: getComputedStyle(document.querySelector('.st-foot h2')).opacity,
-  clock: document.querySelector('.foot-time')?.textContent ?? null,
+await page.mouse.move(1200, 300, { steps: 6 });
+await page.waitForTimeout(800);
+M.hold = await page.evaluate(() => ({
+  scrollMax: document.documentElement.scrollHeight - window.innerHeight,
+  tbLogoOp: getComputedStyle(document.querySelector('.tb-logo')).opacity,
 }));
-await page.screenshot({ path: `${OUT}/g4-finale.png` });
+await page.screenshot({ path: `${OUT}/g4-hold.png` });
 
 // route tier: flat park on subpages, journey resumes on return
 await page.evaluate(() => { window.location.hash = '#/worlds'; });
