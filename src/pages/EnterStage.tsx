@@ -2,25 +2,9 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
-import VideoCard, { PH } from '../components/VideoCard'
 import SectionRail from '../components/SectionRail'
 import { navigate, xs } from '../app/store'
 gsap.registerPlugin(ScrollTrigger, SplitText)
-
-const CAPS = [
-  { t: 'Living 3D Worlds', d: 'Real-time scenes that breathe, react and remember.', src: PH.head, specs: ['WebGL', 'GLSL', '60fps'] },
-  { t: 'Cinematic Motion', d: 'Scroll-choreographed camera, cut like film.', src: PH.chrome, specs: ['GSAP', 'Scroll', 'Lenis'] },
-  { t: 'Interactive Systems', d: 'Every pixel answers the pointer.', src: PH.aerial, specs: ['Pointer', 'State', 'Realtime'] },
-  { t: 'Reactive Systems', d: 'Interfaces that sense, respond and adapt.', src: PH.metal, specs: ['Sensors', 'Motion', 'Adapt'] },
-]
-
-const REEL = [
-  { src: PH.ink, title: 'Ink study 01', sub: 'fluid' },
-  { src: PH.aerial, title: 'Night passage', sub: 'aerial' },
-  { src: PH.chrome, title: 'Chrome drift', sub: 'metal' },
-  { src: PH.head, title: 'Signal head', sub: 'particles' },
-  { src: PH.metal, title: 'Melt 04', sub: 'heat' },
-]
 
 const STEPS = [
   {
@@ -177,94 +161,6 @@ export default function EnterStage() {
         },
       })
 
-      // assembly mosaic: takes scattered off-frame converge into a tight
-      // mosaic as the pin scrubs, hold, then scatter back out. Slot and
-      // scatter positions are viewport-relative functions (invalidateOn-
-      // Refresh re-measures) — one timeline owns every cell end to end,
-      // transform + opacity only.
-      const cells = gsap.utils.toArray<HTMLElement>('.reel-cell')
-      // reel counter readout: assembly progress as take index (direct DOM
-      // write, no react state down the scroll path)
-      const reelCount = root.current.querySelector('.reel-count span')
-      const mosaic = () => {
-        const vw = window.innerWidth
-        const vh = window.innerHeight
-        const cols = vw < 700 ? 2 : 3
-        const cw = vw < 700 ? Math.min(vw * 0.42, 340) : Math.min(vw * 0.26, 300)
-        const gap = vw * 0.03
-        const ch = cw * 0.625 + 92
-        const rows = Math.ceil(cells.length / cols)
-        const totalW = cols * cw + (cols - 1) * gap
-        const totalH = rows * ch + (rows - 1) * gap
-        const dist = Math.max(vw, vh) * 0.9
-        return { cols, cw, gap, ch, rows, totalW, totalH, dist, vh }
-      }
-      const slotPos = (i: number) => {
-        const m = mosaic()
-        const c = i % m.cols
-        const r = Math.floor(i / m.cols)
-        return {
-          x: c * (m.cw + m.gap) - m.totalW / 2 + m.cw / 2,
-          y: r * (m.ch + m.gap) - m.totalH / 2 + m.ch / 2,
-        }
-      }
-      const scatterPos = (i: number) => {
-        const m = mosaic()
-        const a = (i / cells.length) * Math.PI * 2 + 0.6
-        return {
-          x: Math.cos(a) * m.dist,
-          y: Math.sin(a) * m.dist - m.vh * 0.2,
-          r: i % 2 ? 16 : -16,
-        }
-      }
-      const mosaicTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: '.st-reel',
-          start: 'top top',
-          end: '+=260%',
-          pin: true,
-          scrub: 1.2,
-          anticipatePin: 1,
-          fastScrollEnd: true,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            if (reelCount) {
-              reelCount.textContent = String(Math.min(cells.length, Math.floor(self.progress * cells.length) + 1)).padStart(2, '0')
-            }
-          },
-        },
-      })
-      cells.forEach((cell, i) => {
-        const s = slotPos(i)
-        const p = scatterPos(i)
-        // assemble: fly in from the scatter ring, unwind, land in the slot
-        mosaicTl.fromTo(
-          cell,
-          { x: p.x, y: p.y, rotation: p.r, scale: 0.7, opacity: 0 },
-          {
-            x: s.x, y: s.y, rotation: 0, scale: 1, opacity: 1,
-            ease: 'none', duration: 0.5, immediateRender: false,
-          },
-          0.05 + i * 0.06,
-        )
-        // disassemble: reverse back out as the pin releases (after a full
-        // hold where every take sits landed — assemble ends 0.79, scatter
-        // opens 0.95, so the mosaic reads complete before it breaks)
-        mosaicTl.to(
-          cell,
-          {
-            x: () => scatterPos(i).x,
-            y: () => scatterPos(i).y,
-            rotation: i % 2 ? -14 : 14,
-            scale: 0.7,
-            opacity: 0,
-            ease: 'none',
-            duration: 0.35,
-            immediateRender: false,
-          },
-          0.95 + i * 0.02,
-        )
-      })
       // process lives on the dark field — no spread, no takeover. The ink
       // stays bone/muted/mint throughout (pure CSS); the thread, the node
       // and the active-row light carry the motion instead.
@@ -307,6 +203,23 @@ export default function EnterStage() {
         )
         .to('.thread-node', { y: spineH, ease: 'none', duration: 0.7 }, 0.3)
         .fromTo('.proc-line > span', { scaleY: 0 }, { scaleY: 1, ease: 'none', duration: 0.7 }, 0.3)
+
+      // depth stations: each step arrives (rise + materialize) as the
+      // camera descends past it — transform/opacity only, lazy render,
+      // one writer per row (the observer owns classes, never transforms)
+      gsap.utils.toArray<HTMLElement>('.proc-row').forEach((row) => {
+        gsap.fromTo(
+          row,
+          { y: 60, opacity: 0.35 },
+          {
+            y: 0,
+            opacity: 1,
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: { trigger: row, start: 'top 88%', end: 'top 48%', scrub: 1.2 },
+          },
+        )
+      })
 
       // second-half rhythm: footer title rises on the scrub:1.2 heartbeat.
       // Lazy render throughout.
@@ -371,32 +284,8 @@ export default function EnterStage() {
         </p>
       </section>
 
-      <section className="st-caps">
-        <p className="mono">01 — CAPABILITIES</p>
-        <div className="chapter-stack">
-          {CAPS.map((c, i) => (
-            <article key={c.t} className="chapter" aria-label={`${c.t}, capability ${i + 1} of ${CAPS.length}`}>
-              <span className="chapter-ghost" aria-hidden="true">
-                {`0${i + 1}`}
-              </span>
-              <p className="mono chapter-kicker">
-                CAPABILITY {`0${i + 1}`} / {`0${CAPS.length}`}
-              </p>
-              <h3>{c.t}</h3>
-              <p className="chapter-desc">{c.d}</p>
-              <VideoCard src={c.src} title={c.t} sub={c.d} />
-              <div className="cap-specs" aria-label={`${c.t} stack`}>
-                {c.specs.map((s) => (
-                  <span key={s}>{s}</span>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="st-proc">
-        <p className="mono">02 — PROCESS</p>
+        <p className="mono">01 — PROCESS</p>
         <i className="thread-node" aria-hidden="true" />
         <div className="proc-line" aria-hidden="true">
           <i className="proc-stub" />
@@ -404,6 +293,9 @@ export default function EnterStage() {
         </div>
         {STEPS.map((s) => (
           <div key={s.n} className="proc-row">
+            <span className="proc-ghost" aria-hidden="true">
+              {s.n}
+            </span>
             <span className="proc-n">{s.n}</span>
             <h3>{s.t}</h3>
             <p>{s.d}</p>
@@ -417,24 +309,8 @@ export default function EnterStage() {
         ))}
       </section>
 
-      <section className="st-reel">
-        <div className="reel-ghost" aria-hidden="true">
-          SHOWREEL — SHOWREEL — SHOWREEL
-        </div>
-        <p className="reel-count" aria-hidden="true">
-          <span>01</span> / {String(REEL.length).padStart(2, '0')}
-        </p>
-        <div className="reel-track">
-          {REEL.map((r) => (
-            <div key={r.title} className="reel-cell">
-              <VideoCard src={r.src} title={r.title} sub={r.sub} />
-            </div>
-          ))}
-        </div>
-      </section>
-
       <footer className="st-foot">
-        <p className="mono">04 — DEPARTURE</p>
+        <p className="mono">02 — DEPARTURE</p>
         <h2>STEP INSIDE</h2>
         <a href="mailto:hello@xeven.world" data-cursor>
           hello@xeven.world

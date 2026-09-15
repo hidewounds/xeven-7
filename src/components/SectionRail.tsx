@@ -5,17 +5,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 /* Index section rail: a fixed measurement-style ruler on the left edge.
-   Five ticks (00–04) mirror the enter sections; the live section lights
+   Three ticks (00–02) mirror the enter sections; the live section lights
    mint with its tag. Clicking a tick scrolls there. Index-only by
    construction (mounted inside EnterStage), hidden on small screens, and
    fully static under reduced motion. */
 
 const STOPS = [
   { n: '00', label: 'TOP', sel: '.st-hero' },
-  { n: '01', label: 'CAPABILITIES', sel: '.st-caps' },
-  { n: '02', label: 'PROCESS', sel: '.st-proc' },
-  { n: '03', label: 'SHOWREEL', sel: '.st-reel' },
-  { n: '04', label: 'DEPARTURE', sel: '.st-foot' },
+  { n: '01', label: 'PROCESS', sel: '.st-proc' },
+  { n: '02', label: 'DEPARTURE', sel: '.st-foot' },
 ]
 
 export default function SectionRail() {

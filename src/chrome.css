@@ -212,84 +212,6 @@
 .mani-text { font-family: var(--disp); font-size: clamp(30px, 5.5vw, 72px); line-height: 1.15; margin: 0; max-width: 20ch; }
 .mani-word { opacity: 0.13; }
 
-.st-caps { display: flex; flex-direction: column; gap: var(--s48); padding: 26vh 8vw 20vh calc(8vw + 92px); }
-/* glass chapters: full-viewport frosted sheets stacking over each other
-   (pure CSS sticky — zero JS writers, free on mobile + reduced motion).
-   Frost without blur: translucent dark fill + hairline border + top glow. */
-.chapter-stack { display: flex; flex-direction: column; gap: 12vh; }
-.chapter {
-  position: sticky; top: 0; min-height: 100svh;
-  display: flex; flex-direction: column; justify-content: center; gap: var(--s16);
-  background: rgba(8, 12, 17, 0.92);
-  border-top: 1px solid var(--line-strong);
-  padding: 12vh 4vw;
-  overflow: hidden;
-}
-.chapter:nth-child(2) { top: 12px; }
-.chapter:nth-child(3) { top: 24px; }
-.chapter:nth-child(4) { top: 36px; }
-.chapter-ghost {
-  position: absolute; top: 2vh; right: 2vw;
-  font-family: var(--disp); font-size: clamp(120px, 20vw, 300px); line-height: 1;
-  letter-spacing: -0.02em; color: transparent;
-  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.14);
-  pointer-events: none; user-select: none;
-}
-.chapter-kicker { margin: 0; }
-.chapter h3 {
-  font-family: var(--disp); font-size: clamp(40px, 7vw, 104px); line-height: 0.95;
-  letter-spacing: -0.02em; margin: 0; max-width: 12ch;
-}
-.chapter-desc { color: var(--muted); font-size: 18px; margin: 0; max-width: 52ch; }
-.chapter .vid { max-width: 760px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
-@media (max-width: 900px) {
-  .chapter { padding: 10vh 6vw; }
-}
-/* spec sheet: mono stack chips under the media (data density, not decor) */
-.cap-specs { display: flex; gap: var(--s8); margin-top: var(--s16); flex-wrap: wrap; }
-.cap-specs span {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
-  color: var(--muted); border: 1px solid var(--line-strong); border-radius: 999px;
-  padding: var(--s8) var(--s16);
-}
-.cap-card .vid { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
-
-.st-reel { position: relative; overflow: hidden; }
-.st-reel { position: relative; overflow: hidden; }
-
-.st-reel { position: relative; overflow: hidden; }
-/* reel cells play ABOVE the white veil (the generic section rule below
-   would otherwise bury them under it) */
-.st-scroll > section.st-reel { z-index: 31; }
-.reel-ghost {
-  position: absolute; top: 4vh; left: 0; white-space: nowrap;
-  font-family: var(--disp); font-size: clamp(60px, 12vw, 180px); color: transparent;
-  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.18);
-  animation: marquee 22s linear infinite;
-}
-@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-/* showreel mosaic: takes assemble into a grid measured in JS (slot math
-   owns positions; width here must match it). Base opacity 0 = pre-JS. */
-.reel-track { position: relative; height: 100svh; will-change: transform, opacity; }
-.reel-cell {
-  position: absolute; inset: 0; margin: auto;
-  width: min(26vw, 300px); height: fit-content;
-  opacity: 0; will-change: transform, opacity;
-}
-@media (max-width: 700px) {
-  .reel-cell { width: min(42vw, 340px); }
-}
-/* reel counter readout (sole writer: pin onUpdate, direct DOM text) */
-.reel-count {
-  position: absolute; top: 4vh; right: 6vw; z-index: 5; margin: 0;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted);
-}
-/* cell title lift on hover (180ms, transform-only, no scrubbed conflicts) */
-.vid-meta p { transition: transform 180ms ease; }
-.vid-meta span { transition: color 180ms ease; }
-.reel-cell:hover .vid-meta p { transform: translateY(-4px); }
-.reel-cell:hover .vid-meta span { color: var(--mint); }
-
 .st-proc { padding: 30vh 8vw 32vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
 /* spine sits with the rows, clear of the fixed rail instrument */
 .proc-line { position: absolute; left: calc(8vw + 114px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
@@ -306,7 +228,14 @@
   background: var(--ember); box-shadow: 0 0 12px 2px rgba(255, 77, 46, 0.55);
   transform: scale(0); z-index: 3; pointer-events: none;
 }
-.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; padding: 4vh 0; position: relative; }
+.proc-row { display: grid; grid-template-columns: 60px 1fr; gap: var(--s8) var(--s24); align-items: baseline; align-content: center; padding: 4vh 0; position: relative; min-height: 88svh; }
+.proc-ghost {
+  position: absolute; top: 6vh; right: 0;
+  font-family: var(--disp); font-size: clamp(120px, 18vw, 260px); line-height: 1;
+  letter-spacing: -0.02em; color: transparent;
+  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.13);
+  pointer-events: none; user-select: none;
+}
 .proc-row h3 { transition: text-shadow 240ms ease; }
 /* active-row illumination: ember edge bar + title glow, class-toggled
    (transitioned, never scrubbed — no writer conflicts by construction) */
@@ -469,11 +398,9 @@
   .tb-burger { display: flex; }
   .tb-right { margin-left: auto; }
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
-  .reel-cell { width: 84vw; }
   .proc-row { grid-template-columns: 44px 1fr; }
-  /* rail hides here, so sections reclaim the gutter */
+  /* rail hides here, so process reclaims the gutter */
   .st-proc { padding-left: 8vw; }
-  .st-caps { padding-left: 8vw; }
   .proc-line { left: calc(8vw + 22px); }
   .proc-stub { width: calc(50vw - 8vw - 23px); }
 }
@@ -482,7 +409,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .st-hint span { animation: none; }
-  .reel-ghost { animation: none; }
   .form-check { animation: none; }
   /* scroll-choreography stand-down: readable final states, zero motion */
   .mani-word { opacity: 1; }
@@ -493,14 +419,4 @@
   .proc-stub { transform: scaleX(1); }
   .thread-node { display: none; }
   .proc-row::after, .proc-row h3 { transition: none; }
-  /* pinned stage reel becomes a plain vertical stack — every cell
-     reachable with no animation. Keep the section clipped: the ghost
-     marquee is 2400px+ of nowrap display type and would page-overflow
-     once visible. */
-  .st-reel { overflow: hidden; }
-  .reel-track { height: auto; display: flex; flex-direction: column; gap: var(--s32); padding: 10vh 6vw; }
-  .reel-cell { position: static; inset: auto; margin: 0 auto; opacity: 1; width: 100%; max-width: 860px; }
-  /* cinema layers stand down entirely — keep them out of the a11y/paint
-     tree for certainty */
-  .mark-fixed { display: none; }
 }

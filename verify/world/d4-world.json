@@ -1,6 +1,6 @@
 {
   "introMerge": {
-    "ledger": "057",
+    "ledger": "054",
     "canvas": true
   },
   "legacyGone": {
@@ -11,22 +11,28 @@
   },
   "acts": {
     "topbarVisible": true,
-    "railBtns": 5,
+    "railBtns": 3,
     "railFirst": "00TOP",
+    "capsGone": true,
+    "reelGone": true,
     "mani": true,
     "stats": true,
     "tiers": true,
     "heroLabel": "00 — TOP",
     "reticleDots": 0,
     "reticleRings": 0,
-    "reelCells": 5
+    "procRows": 4,
+    "procGhosts": 4,
+    "footLabel": "02 — DEPARTURE"
   },
-  "fpsWorld": 13,
-  "stage": {
-    "count": "03 / 05",
-    "lit": 5,
-    "bars": 0,
-    "specs": 12
+  "fpsWorld": 11,
+  "stations": {
+    "litRows": 1,
+    "stubDrawn": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  "finale": {
+    "footOp": "1",
+    "clock": "04:41 AM — LOCAL"
   },
   "worldsAlive": true,
   "returnAlive": true,

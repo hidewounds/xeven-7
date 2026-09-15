@@ -41,17 +41,14 @@ const IDLE_MS = 6000
 
 const SECTIONS = [
   '.st-hero',
-  '.st-caps',
   '.st-proc',
-  '.st-reel',
   '.st-foot',
 ]
-// camera journey: one stop per index section [x, y, z]
+// camera journey: one stop per index section [x, y, z] — a descent that
+// dips closest at process, then releases to departure
 const WAYPOINTS: Array<[number, number, number]> = [
   [0, 0.4, 10],
-  [0.5, 0, 8.4],
-  [-0.5, -0.2, 7.6],
-  [0, 0, 8.8],
+  [-0.3, -0.2, 6.8],
   [0, 0.8, 11],
 ]
 
@@ -194,7 +191,8 @@ export default function VoidWorld() {
     quadGeo.setAttribute('aQJ', new THREE.InstancedBufferAttribute(aQJ, 1))
     const quadUniforms = {
       uTime: { value: 0 },
-      uFinger: { value: new THREE.Vector3(0, 0, 0) },
+      uWakePos: { value: new THREE.Vector2(9999, 9999) },
+      uWakeVel: { value: new THREE.Vector2(0, 0) },
       uVel: { value: 0 },
       uShowcase: { value: 1 },
       uVoid: { value: new THREE.Vector3(0.0235, 0.0353, 0.0588) },
@@ -210,19 +208,30 @@ export default function VoidWorld() {
         varying float vSeed;
         varying float vQI;
         varying float vQJ;
+        uniform vec2 uWakePos;
+        uniform vec2 uWakeVel;
         void main() {
           vUv = uv;
           vSeed = aSeed;
           vQI = aQI;
           vQJ = aQJ;
           vec4 wp = modelMatrix * instanceMatrix * vec4(position, 1.0);
+          // magnetic wake: panels bend toward the cursor's motion, Gaussian
+          // falloff, strength from damped speed — displacement only, the
+          // body and trail stay invisible
+          vec2 wdir = wp.xy - uWakePos;
+          float wdist = length(wdir);
+          float wfall = exp(-wdist * wdist / 12.5);
+          float wmag = min(1.0, length(uWakeVel) * 0.25) * 0.4 * wfall;
+          wp.xy -= (wdir / max(wdist, 1e-3)) * wmag;
           vWorld = wp.xyz;
           gl_Position = projectionMatrix * viewMatrix * wp;
         }
       `,
       fragmentShader: /* glsl */ `
         uniform float uTime;
-        uniform vec3 uFinger;
+        uniform vec2 uWakePos;
+        uniform vec2 uWakeVel;
         uniform float uVel;
         uniform float uShowcase;
         uniform vec3 uVoid;
@@ -249,12 +258,11 @@ export default function VoidWorld() {
           float amp = 1.0 + uVel * 0.3;
           float glow = wave * amp;
           col += vec3(1.0) * glow * uShowcase;
-          // fingertip: a soft diffuse presence where the finger hovers —
-          // wide falloff, gentle core, eased in/out over ~1s. No rings,
-          // no lines, no follow-glow chasing the pointer.
-          float fd = distance(vWorld.xy, uFinger.xy);
-          float finger = exp(-fd * fd / 18.0) * 0.16 + exp(-fd * fd / 3.0) * 0.10;
-          col += vec3(1.0) * finger * uFinger.z * uShowcase;
+          // wake whisper: a breath of shimmer where the field bends (the
+          // bend itself does the talking; this stays barely visible)
+          float wspd = min(1.0, length(uWakeVel) * 0.25);
+          float wdp = distance(vWorld.xy, uWakePos);
+          col += vec3(1.0) * exp(-wdp * wdp / 12.5) * wspd * 0.05 * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
@@ -371,15 +379,14 @@ export default function VoidWorld() {
       group.add(mesh)
     }
 
-    // ---- fingertip feed: eased pointer mass for the hover presence.
-    // Position lerps behind the finger (~1s in/out on strength), so it
-    // reads as a fingertip under frosted glass — never a dot, never a ring.
+    // ---- magnetic wake feed: damped pointer position + velocity drive
+    // the vertex bend. Eased (nothing snaps), decaying (nothing lingers).
     let btx = window.innerWidth / 2
     let bty = window.innerHeight / 2
     let bInside = false
-    let fcx = btx
-    let fcy = bty
-    let fstr = 0
+    const wPos = { x: 9999, y: 9999 }
+    const wVel = { x: 0, y: 0 }
+    const wPrev = { x: 9999, y: 9999 }
 
     // ---- waypoint journey ----
     let fracs: number[] = []
@@ -478,27 +485,30 @@ export default function VoidWorld() {
           mm.userData.by + Math.sin(t * mm.userData.fs + mm.userData.fo) * mm.userData.fa
       }
 
-      // scroll kindle only (the pointer only ever presses fingertip light)
+      // scroll kindle only (the pointer bends, never lights)
       const vBoost = Math.min(1, xs.vel * 1.5) * 0.3
       xs.vel *= 0.9
 
-      // fingertip: ease position + strength toward the pointer, then feed
-      // the shader once per frame (no per-move writes, no hover chasing)
-      fcx += (btx - fcx) * 0.12
-      fcy += (bty - fcy) * 0.12
-      fstr += ((bInside ? 1 : 0) - fstr) * 0.04
-      // uniforms: the whole quad field runs on time + scroll + fingertip
+      // magnetic wake: unproject the eased pointer once per frame, derive
+      // world velocity, damp both — the vertex bend follows motion and
+      // dies the moment it stops. No per-move writes.
+      wPos.x += (btx - wPos.x) * 0.25
+      wPos.y += (bty - wPos.y) * 0.25
+      ndc.set((wPos.x / window.innerWidth) * 2 - 1, -(wPos.y / window.innerHeight) * 2 + 1)
+      raycaster.setFromCamera(ndc, camera)
+      if (raycaster.ray.intersectPlane(plane, hit)) {
+        const wvx = bInside ? (hit.x - wPrev.x) / Math.max(1, dt * 1000) * 1000 : 0
+        const wvy = bInside ? (hit.y - wPrev.y) / Math.max(1, dt * 1000) * 1000 : 0
+        wVel.x += (wvx - wVel.x) * 0.2
+        wVel.y += (wvy - wVel.y) * 0.2
+        wPrev.x = hit.x
+        wPrev.y = hit.y
+        ;(quadUniforms.uWakePos.value as THREE.Vector2).set(hit.x, hit.y)
+        ;(quadUniforms.uWakeVel.value as THREE.Vector2).set(wVel.x, wVel.y)
+      }
+      // uniforms: the whole quad field runs on time + scroll + wake
       quadUniforms.uTime.value = t
       quadUniforms.uVel.value = vBoost
-      if (fstr > 0.01) {
-        ndc.set((fcx / window.innerWidth) * 2 - 1, -(fcy / window.innerHeight) * 2 + 1)
-        raycaster.setFromCamera(ndc, camera)
-        if (raycaster.ray.intersectPlane(plane, hit)) {
-          ;(quadUniforms.uFinger.value as THREE.Vector3).set(hit.x, hit.y, fstr)
-        }
-      } else {
-        ;(quadUniforms.uFinger.value as THREE.Vector3).set(0, 0, 0)
-      }
 
       renderer.render(scene, camera)
     }
