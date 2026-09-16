@@ -1,6 +1,6 @@
 {
   "introMerge": {
-    "ledger": "049",
+    "ledger": "052",
     "canvas": true
   },
   "legacyGone": {
@@ -14,18 +14,29 @@
     "rulerInches": 6,
     "rulerOn": "00TOP",
     "needle": true,
-    "procGone": true,
-    "footGone": true,
-    "markGone": true,
-    "heroLabel": "00 — TOP",
-    "heroTitle": "WHAT IS XEVEN?",
+    "heroKicker": "XEVEN — BURST STUDY X-002",
+    "heroTitle": "THE MODEL MOVES",
+    "stageVideo": true,
+    "stagePlaying": true,
+    "stageChrome": "SHEET X-002 · 8M STICKSTURNTABLE · 8S LOOP",
+    "parts": 4,
+    "ghosts": 4,
+    "cards": 3,
+    "finaleTitle": "STEP INSIDE",
     "reticleDots": 0,
     "reticleRings": 0
   },
-  "fpsWorld": 10,
+  "fpsWorld": 61,
   "hold": {
-    "scrollMax": 0,
+    "filmW": 1058,
     "tbLogoOp": "1"
+  },
+  "work": {
+    "imgs": [
+      800,
+      800,
+      800
+    ]
   },
   "worldsAlive": true,
   "ruler": {

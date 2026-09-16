@@ -40,7 +40,7 @@ const BOW = 2.2 // concave hollow at centre, world units
 const IDLE_MS = 6000
 
 const SECTIONS = [
-  '.st-hero',
+  '.bx-hero',
 ]
 // camera journey: a single hold over the hero [x, y, z] — the index is
 // one act now, the world simply breathes beneath it
@@ -343,7 +343,7 @@ export default function VoidWorld() {
     burstTex.colorSpace = THREE.SRGBColorSpace
     burstVid.addEventListener('canplay', () => {
       quadUniforms.uFace.value = burstTex
-      quadUniforms.uFaceAmt.value = 0.28
+      quadUniforms.uFaceAmt.value = 0.16
       quadUniforms.uDrift.value = reduced ? 0 : 1
     })
     burstVid.play().catch(() => {})
