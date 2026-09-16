@@ -199,7 +199,8 @@ export default function VoidWorld() {
       uFace: { value: facePlaceholder as THREE.Texture },
       uCells: { value: CELLS },
       uFaceAmt: { value: 0 },
-      uDrift: { value: reduced ? 0 : 1 }    }
+      uDrift: { value: reduced ? 0 : 1 },
+    }
     const quadMat = new THREE.ShaderMaterial({
       uniforms: quadUniforms,
       vertexShader: /* glsl */ `
@@ -280,9 +281,9 @@ export default function VoidWorld() {
           }
           float breathe = 0.85 + 0.15 * sin(uTime * 6.0 + vWorld.x * 8.0 + vWorld.y * 6.0);
           col += vec3(1.0) * air * wspd * 0.16 * breathe * uShowcase;
-          // living mosaic: the burst film woven across the diamond field.
+          // living mosaic: the face model woven across the diamond field.
           // Each cell samples its own UV sub-rect (counter-rotated so the
-          // figure reads upright), breathing + drifting, stirred brighter
+          // face reads upright), breathing + drifting, stirred brighter
           // under the pointer.
           vec2 fp = vec2(
             0.7071 * (vUv.x - 0.5) + 0.7071 * (vUv.y - 0.5),
@@ -330,23 +331,15 @@ export default function VoidWorld() {
     const quads = new THREE.InstancedMesh(quadGeo, quadMat, NQ)
     quads.frustumCulled = false // matrices re-laid on route rebuilds
     scene.add(quads)
-    // burst film: the 8M-stick turntable loop as a muted video texture —
-    // same cell-UV mosaic as before, now playing. Amount stays zero
-    // until first frames arrive (never a flash, never a stall).
-    const burstVid = document.createElement('video')
-    burstVid.muted = true
-    burstVid.loop = true
-    burstVid.playsInline = true
-    burstVid.preload = 'auto'
-    burstVid.src = '/assets/burst.mp4'
-    const burstTex = new THREE.VideoTexture(burstVid)
-    burstTex.colorSpace = THREE.SRGBColorSpace
-    burstVid.addEventListener('canplay', () => {
-      quadUniforms.uFace.value = burstTex
-      quadUniforms.uFaceAmt.value = 0.28
+    // face model: async texture for the living mosaic (placeholder holds
+    // the field at zero until it arrives — never a flash, never a stall)
+    new THREE.TextureLoader().load('/assets/face.png', (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.anisotropy = 4
+      quadUniforms.uFace.value = tex
+      quadUniforms.uFaceAmt.value = 0.32
       quadUniforms.uDrift.value = reduced ? 0 : 1
     })
-    burstVid.play().catch(() => {})
     // ---- quad placement: diamonds aligned to the rails ----
     // A uv-block (4×4 cells) maps to a world diamond: rotate the plane 45°
     // so its EDGES run along the lattice rails (mock grammar), centroids
