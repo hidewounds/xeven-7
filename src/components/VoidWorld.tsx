@@ -194,6 +194,8 @@ export default function VoidWorld() {
       uVel: { value: 0 },
       uShowcase: { value: 1 },
       uVoid: { value: new THREE.Vector3(0.0235, 0.0353, 0.0588) },
+      uThemeAmt: { value: 0.22 },
+      uDrift: { value: reduced ? 0 : 1 },
     }
     const quadMat = new THREE.ShaderMaterial({
       uniforms: quadUniforms,
@@ -237,6 +239,8 @@ export default function VoidWorld() {
         uniform float uVel;
         uniform float uShowcase;
         uniform vec3 uVoid;
+        uniform float uThemeAmt;
+        uniform float uDrift;
         varying vec2 vUv;
         varying vec3 vWorld;
         varying float vSeed;
@@ -271,6 +275,17 @@ export default function VoidWorld() {
           }
           float breathe = 0.85 + 0.15 * sin(uTime * 6.0 + vWorld.x * 8.0 + vWorld.y * 6.0);
           col += vec3(1.0) * air * wspd * 0.16 * breathe * uShowcase;
+          // rgb themes: each diamond takes a channel-dominant tint from
+          // its grid position — slow phase drift (frozen under reduced
+          // motion), stirred brighter under the pointer. Never white,
+          // never loud: visible but not prominent.
+          float tt = uTime * uDrift;
+          vec3 theme = vec3(
+            0.5 + 0.5 * sin(vQI * 0.45 + tt * 0.15),
+            0.5 + 0.5 * sin(vQJ * 0.45 + tt * 0.12 + 2.1),
+            0.5 + 0.5 * sin((vQI + vQJ) * 0.3 + tt * 0.1 + 4.2));
+          theme = mix(vec3(0.35), theme, 0.55);
+          col += theme * uThemeAmt * (0.6 + air * 1.6) * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
