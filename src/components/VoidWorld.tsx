@@ -185,6 +185,8 @@ export default function VoidWorld() {
     quadGeo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(aSeed, 1))
     quadGeo.setAttribute('aQI', new THREE.InstancedBufferAttribute(aQI, 1))
     quadGeo.setAttribute('aQJ', new THREE.InstancedBufferAttribute(aQJ, 1))
+    const facePlaceholder = new THREE.DataTexture(new Uint8Array([8, 10, 14, 255]), 1, 1)
+    facePlaceholder.needsUpdate = true
     const quadUniforms = {
       uTime: { value: 0 },
       uTrail: {
@@ -194,6 +196,10 @@ export default function VoidWorld() {
       uVel: { value: 0 },
       uShowcase: { value: 1 },
       uVoid: { value: new THREE.Vector3(0.0235, 0.0353, 0.0588) },
+      uFace: { value: facePlaceholder as THREE.Texture },
+      uCells: { value: CELLS },
+      uFaceAmt: { value: 0 },
+      uDrift: { value: reduced ? 0 : 1 },
     }
     const quadMat = new THREE.ShaderMaterial({
       uniforms: quadUniforms,
@@ -237,6 +243,10 @@ export default function VoidWorld() {
         uniform float uVel;
         uniform float uShowcase;
         uniform vec3 uVoid;
+        uniform sampler2D uFace;
+        uniform float uCells;
+        uniform float uFaceAmt;
+        uniform float uDrift;
         varying vec2 vUv;
         varying vec3 vWorld;
         varying float vSeed;
@@ -271,6 +281,18 @@ export default function VoidWorld() {
           }
           float breathe = 0.85 + 0.15 * sin(uTime * 6.0 + vWorld.x * 8.0 + vWorld.y * 6.0);
           col += vec3(1.0) * air * wspd * 0.16 * breathe * uShowcase;
+          // living mosaic: the face model woven across the diamond field.
+          // Each cell samples its own UV sub-rect (counter-rotated so the
+          // face reads upright), breathing + drifting, stirred brighter
+          // under the pointer.
+          vec2 fp = vec2(
+            0.7071 * (vUv.x - 0.5) + 0.7071 * (vUv.y - 0.5),
+            -0.7071 * (vUv.x - 0.5) + 0.7071 * (vUv.y - 0.5)) + 0.5;
+          vec2 fuv = (vec2(vQI, (uCells - 1.0) - vQJ) + fp) / uCells;
+          vec2 fz = (fuv - 0.5) * (1.0 + 0.05 * sin(uTime * 0.25)) + 0.5;
+          fz += uDrift * vec2(sin(uTime * 0.11), cos(uTime * 0.13)) * 0.02;
+          vec3 face = texture2D(uFace, fz).rgb;
+          col += face * uFaceAmt * (0.55 + air * 1.5) * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
@@ -309,6 +331,15 @@ export default function VoidWorld() {
     const quads = new THREE.InstancedMesh(quadGeo, quadMat, NQ)
     quads.frustumCulled = false // matrices re-laid on route rebuilds
     scene.add(quads)
+    // face model: async texture for the living mosaic (placeholder holds
+    // the field at zero until it arrives — never a flash, never a stall)
+    new THREE.TextureLoader().load('/assets/face.png', (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.anisotropy = 4
+      quadUniforms.uFace.value = tex
+      quadUniforms.uFaceAmt.value = 0.32
+      quadUniforms.uDrift.value = reduced ? 0 : 1
+    })
     // ---- quad placement: diamonds aligned to the rails ----
     // A uv-block (4×4 cells) maps to a world diamond: rotate the plane 45°
     // so its EDGES run along the lattice rails (mock grammar), centroids
