@@ -1,6 +1,6 @@
 {
   "introMerge": {
-    "ledger": "051",
+    "ledger": "048",
     "canvas": true
   },
   "legacyGone": {
@@ -22,7 +22,7 @@
     "reticleDots": 0,
     "reticleRings": 0
   },
-  "fpsWorld": 60,
+  "fpsWorld": 11,
   "hold": {
     "scrollMax": 0,
     "tbLogoOp": "1"
