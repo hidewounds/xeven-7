@@ -43,7 +43,21 @@ export default function RulerBar({ route }: { route: Route }) {
 
   return (
     <aside className="ruler" aria-label="Site ruler">
-      <div className="ruler-cm" aria-hidden="true" />
+      {/* subdivisions: exactly two cm ticks + one big mid-inch per gap,
+          positioned at quarters so every gap reads identically */}
+      <div className="ruler-subs" aria-hidden="true">
+        {INCHES.slice(0, -1).map((s, i) => (
+          <div
+            key={s.n}
+            className="ruler-gap"
+            style={{ top: `${(i / (INCHES.length - 1)) * 100}%`, height: `${100 / (INCHES.length - 1)}%` }}
+          >
+            <i className="ruler-cm" />
+            <i className="ruler-mid" />
+            <i className="ruler-cm" />
+          </div>
+        ))}
+      </div>
       <div className="ruler-inches" ref={track}>
         {INCHES.map((s) => (
           <button

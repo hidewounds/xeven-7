@@ -132,11 +132,18 @@
   position: fixed; left: 14px; top: 12vh; bottom: 12vh; width: 132px;
   z-index: 20; opacity: 0.92; pointer-events: none;
 }
-/* cm ticks: fine subdivisions running the full travel between inches */
-.ruler-cm {
-  position: absolute; left: 44px; top: 0; bottom: 0; width: 7px;
-  background: repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 12px);
-  opacity: 0.55;
+/* subdivisions: exactly two cm ticks + one big mid-inch per gap */
+.ruler-subs { position: absolute; inset: 0; }
+.ruler-gap { position: absolute; left: 0; right: 0; }
+.ruler-gap .ruler-cm {
+  position: absolute; left: 44px; width: 7px; height: 1px;
+  background: var(--line-strong); opacity: 0.55;
+}
+.ruler-gap .ruler-cm:first-child { top: 25%; }
+.ruler-gap .ruler-cm:last-child { top: 75%; }
+.ruler-mid {
+  position: absolute; left: 44px; top: 50%; width: 16px; height: 1px;
+  background: var(--muted); opacity: 0.8;
 }
 /* inches: the main points, spread top→bottom; sole interactive children */
 .ruler-inches {

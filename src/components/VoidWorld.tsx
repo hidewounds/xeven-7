@@ -223,7 +223,7 @@ export default function VoidWorld() {
             vec2 tdir = wp.xy - uTrail[i].xy;
             float td = length(tdir);
             float tfall = exp(-td * td / 1.3);
-            bend -= (tdir / max(td, 1e-3)) * (tfall * uTrail[i].z * 0.12);
+            bend -= (tdir / max(td, 1e-3)) * (tfall * uTrail[i].z * 0.25);
           }
           wp.xy += bend * wspd;
           vWorld = wp.xyz;
@@ -261,14 +261,16 @@ export default function VoidWorld() {
           float glow = wave * amp;
           col += vec3(1.0) * glow * uShowcase;
           // translucent air: the head + trail read as a faint neutral
-          // presence where the medium bends — visible, never prominent
+          // presence where the medium bends — alive with a slow shimmer,
+          // visible, never prominent
           float wspd = min(1.0, length(uWakeVel) * 0.35);
           float air = 0.0;
           for (int i = 0; i < 5; i++) {
             vec2 adp = vWorld.xy - uTrail[i].xy;
             air += exp(-dot(adp, adp) / 1.3) * uTrail[i].z;
           }
-          col += vec3(1.0) * air * wspd * 0.05 * uShowcase;
+          float breathe = 0.85 + 0.15 * sin(uTime * 6.0 + vWorld.x * 8.0 + vWorld.y * 6.0);
+          col += vec3(1.0) * air * wspd * 0.16 * breathe * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
@@ -519,7 +521,7 @@ export default function VoidWorld() {
         }
         const arr = quadUniforms.uTrail.value as THREE.Vector3[]
         for (let i = 0; i < trail.length; i++) {
-          trail[i].s *= 0.9
+          trail[i].s *= 0.96
           arr[i].set(trail[i].x, trail[i].y, trail[i].s)
         }
         ;(quadUniforms.uWakeVel.value as THREE.Vector2).set(wVel.x, wVel.y)
