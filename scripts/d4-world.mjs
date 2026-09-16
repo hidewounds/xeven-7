@@ -43,27 +43,20 @@ M.legacyGone = await page.evaluate(() => ({
   graph: !document.querySelector('canvas.graph-fixed'),
   world: !!document.querySelector('canvas.world-fixed'),
 }));
-// index v2 BURST: sharp stage film, anatomy stations, rotation cards
-M.acts = await page.evaluate(() => {
-  const vid = document.querySelector('.stage-film');
-  return {
-    topbarVisible: !!document.querySelector('.topbar'),
-    rulerInches: document.querySelectorAll('.ruler-inch').length,
-    rulerOn: document.querySelector('.ruler-inch.ruler-on')?.textContent.replace(/\s+/g, ' ').trim(),
-    needle: !!document.querySelector('.ruler-needle'),
-    heroKicker: document.querySelector('.bx-hero .mono')?.textContent,
-    heroTitle: document.querySelector('.bx-title')?.textContent,
-    stageVideo: !!vid,
-    stagePlaying: vid ? !vid.paused && vid.readyState >= 2 : false,
-    stageChrome: document.querySelector('.stage-chrome')?.textContent.replace(/\s+/g, ' ').trim(),
-    parts: document.querySelectorAll('.bx-part').length,
-    ghosts: document.querySelectorAll('.bx-ghost').length,
-    cards: document.querySelectorAll('.bx-card').length,
-    finaleTitle: document.querySelector('.bx-fin h2')?.textContent,
-    reticleDots: document.querySelectorAll('.reticle-dot').length,
-    reticleRings: document.querySelectorAll('.reticle').length,
-  };
-});
+// hero-only index + global ruler: 6 inch marks, needle rides scroll
+M.acts = await page.evaluate(() => ({
+  topbarVisible: !!document.querySelector('.topbar'),
+  rulerInches: document.querySelectorAll('.ruler-inch').length,
+  rulerOn: document.querySelector('.ruler-inch.ruler-on')?.textContent.replace(/\s+/g, ' ').trim(),
+  needle: !!document.querySelector('.ruler-needle'),
+  procGone: !document.querySelector('.st-proc'),
+  footGone: !document.querySelector('.st-foot'),
+  markGone: !document.querySelector('.mark-fixed'),
+  heroLabel: document.querySelector('.st-hero .mono')?.textContent,
+  heroTitle: document.querySelector('.st-hero-title')?.textContent,
+  reticleDots: document.querySelectorAll('.reticle-dot').length,
+  reticleRings: document.querySelectorAll('.reticle').length,
+}));
 M.fpsWorld = await page.evaluate(() => new Promise((res) => {
   let n = 0;
   const t0 = performance.now();
@@ -78,27 +71,15 @@ await page.mouse.click(800, 450);
 await page.waitForTimeout(1000);
 await page.screenshot({ path: `${OUT}/g0-world-hero.png` });
 
-// hero hold: stage playing under the title
+// hero hold: scroll the single act to its end, world breathes beneath
+await go(await page.evaluate(() => document.body.scrollHeight));
 await page.mouse.move(1200, 300, { steps: 6 });
 await page.waitForTimeout(800);
 M.hold = await page.evaluate(() => ({
-  filmW: document.querySelector('.stage-film')?.clientWidth ?? 0,
+  scrollMax: document.documentElement.scrollHeight - window.innerHeight,
   tbLogoOp: getComputedStyle(document.querySelector('.tb-logo')).opacity,
 }));
-await page.screenshot({ path: `${OUT}/g0-world-hero.png` });
-
-// anatomy descent + rotation cards + finale
-const figTop = await page.evaluate(() => document.querySelector('.bx-fig').getBoundingClientRect().top + window.scrollY);
-await go(figTop + 500);
-await page.screenshot({ path: `${OUT}/g1-anatomy.png` });
-const workTop = await page.evaluate(() => document.querySelector('.bx-work').getBoundingClientRect().top + window.scrollY);
-await go(workTop + 300);
-M.work = await page.evaluate(() => ({
-  imgs: [...document.querySelectorAll('.bx-card img')].map((i) => i.naturalWidth),
-}));
-await page.screenshot({ path: `${OUT}/g2-work.png` });
-await go(await page.evaluate(() => document.body.scrollHeight));
-await page.screenshot({ path: `${OUT}/g4-finale.png` });
+await page.screenshot({ path: `${OUT}/g4-hold.png` });
 
 // route tier: flat park on subpages, journey resumes on return — plus the
 // ruler needle travels cm ticks on a scrollable page, active inch follows

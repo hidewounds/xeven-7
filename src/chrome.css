@@ -198,57 +198,9 @@
 .st-scroll { position: relative; z-index: 2; }
 /* content sections must each stack above the fixed canvas */
 .st-scroll > section, .st-scroll > footer { position: relative; z-index: 2; }
-/* ---------- index v2 — BURST: the model is the hero ---------- */
-.bx-hero { position: relative; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s24); padding: 12vh 6vw 10vh; }
-/* sharp stage: near-native 16:9 film, crisp white-on-red, hairline frame */
-.stage { margin: 0; width: min(1060px, 88vw); }
-.stage-film {
-  display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover;
-  border: 1px solid var(--line-strong); border-radius: 4px;
-  background: #4d0608;
-}
-.stage-chrome {
-  display: flex; justify-content: space-between; gap: var(--s16);
-  margin-top: var(--s12); font-family: var(--mono); font-size: 10px;
-  letter-spacing: 0.24em; color: var(--muted);
-}
-.bx-title { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; text-wrap: balance; letter-spacing: -0.02em; }
-.bx-sub { font-family: var(--cond); font-size: 18px; color: var(--muted); margin: 0; }
-/* anatomy stations: full-height parts with ghost numerals */
-.bx-fig { padding: 24vh 8vw 16vh calc(8vw + 92px); display: flex; flex-direction: column; gap: 10vh; }
-.bx-part { position: relative; min-height: 70svh; display: flex; flex-direction: column; justify-content: center; gap: var(--s16); }
-.bx-ghost {
-  position: absolute; top: 4vh; right: 0;
-  font-family: var(--disp); font-size: clamp(120px, 18vw, 260px); line-height: 1;
-  letter-spacing: -0.02em; color: transparent;
-  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.13);
-  pointer-events: none; user-select: none;
-}
-.bx-part h3 { font-family: var(--disp); font-size: clamp(40px, 7vw, 104px); line-height: 0.95; letter-spacing: -0.02em; margin: 0; }
-.bx-part p { color: var(--muted); font-size: 18px; margin: 0; max-width: 52ch; }
-/* rotation study: three sharp angles */
-.bx-work { padding: 16vh 8vw 20vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s48); }
-.bx-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s24); }
-.bx-card { display: flex; flex-direction: column; gap: var(--s12); will-change: transform, opacity; }
-.bx-card img {
-  display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover;
-  border: 1px solid var(--line-strong); border-radius: 4px; background: #4d0608;
-  transition: transform 300ms ease, border-color 200ms ease;
-}
-.bx-card:hover img { transform: scale(1.02); border-color: var(--bone); }
-.bx-cardmeta { display: flex; flex-direction: column; gap: 4px; }
-.bx-cardmeta b { font-family: var(--disp); font-size: 24px; font-weight: 400; }
-.bx-cardmeta i { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; color: var(--muted); }
-/* departure finale */
-.bx-fin { padding: 30vh 6vw 20vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
-.bx-fin h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; letter-spacing: -0.02em; }
-.bx-fin a { position: relative; font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
-.bx-fin a::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1px;
-  background: var(--mint); transform: scaleX(0); transform-origin: right center;
-  transition: transform 240ms ease;
-}
-.bx-fin a:hover::after { transform: scaleX(1); transform-origin: left center; }
+.st-hero { position: relative; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--s24); padding: 0 6vw; }
+.st-hero-title { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; text-wrap: balance; letter-spacing: -0.02em; }
+.st-sub { font-family: var(--cond); font-size: 18px; color: var(--muted); margin: 0; }
 .st-hint { position: absolute; bottom: 34px; left: 0; right: 0; margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: var(--s12); }
 /* the hint rides the hero section off-screen (absolute) instead of fading
    against the arriving fixed mark — no crossfade overlap, and the cue
@@ -258,6 +210,13 @@
    cue tween — transform-only) */
 .st-cue { display: block; width: 64px; height: 1px; background: var(--line-strong); }
 .st-cue b { display: block; width: 100%; height: 100%; background: var(--mint); transform: scaleX(0); transform-origin: left center; }
+/* ghost echo: giant outlined XEVEN breathing behind the title */
+.hero-echo {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--disp); font-size: clamp(120px, 26vw, 420px); letter-spacing: -0.02em;
+  color: transparent; -webkit-text-stroke: 1px rgba(232, 237, 238, 0.07);
+  pointer-events: none; user-select: none;
+}
 @keyframes kvbob { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(8px); opacity: 1; } }
 
 .st-mani { min-height: 120vh; display: flex; flex-direction: column; justify-content: center; gap: var(--s32); padding: 26vh 8vw; }
@@ -396,8 +355,6 @@
   .tb-right { margin-left: auto; }
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
   .proc-row { grid-template-columns: 44px 1fr; }
-  .bx-fig, .bx-work { padding-left: 8vw; }
-  .bx-cards { grid-template-columns: 1fr; }
 }
 
 /* coarse pointers: no hover-only affordances depend on precision here. */

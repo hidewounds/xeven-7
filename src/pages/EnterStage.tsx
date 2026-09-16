@@ -2,67 +2,43 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
-import FilmStage from '../components/FilmStage'
 import { xs } from '../app/store'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
-/* Index v2 — BURST: the model is the hero. Sharp stage film up top,
-   anatomy stations on the descent, rotation-study cards, contact finale.
-   One timeline per property, transform/opacity only, lazy render. */
-
-const PARTS = [
-  {
-    n: '01',
-    t: 'Halo',
-    d: 'Starburst crown in sparse white linework — ten thousand sticks pretending to be ten million.',
-  },
-  {
-    n: '02',
-    t: 'Visor',
-    d: 'Smoked dark, drawn by absence. The face is what the lines refuse to say.',
-  },
-  {
-    n: '03',
-    t: 'Grin',
-    d: 'Gap-tooth grin over a ∇ torso. Friendly the way a signal flare is friendly.',
-  },
-  {
-    n: '04',
-    t: 'Hands',
-    d: 'Free hands floating on sine waves, out of phase with each other forever.',
-  },
-]
-
-const ANGLES = [
-  { src: '/assets/stills/front.png', t: 'Front', sub: '00 — face on' },
-  { src: '/assets/stills/three-quarter.png', t: 'Three-quarter', sub: '01 — mid-turn' },
-  { src: '/assets/stills/side.png', t: 'Side', sub: '02 — profile' },
-]
-
 export default function EnterStage() {
   const root = useRef<HTMLDivElement>(null!)
+  const scroll = useRef({ v: 0 })
+  const vel = useRef({ v: 0 })
   const [reduced] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
 
   useLayoutEffect(() => {
+    // reduced motion: no SplitText, pins, or scrubs — no ticker burn.
+    // Readable final states come from CSS + initial values below.
     if (reduced) return
     const ctx = gsap.context(() => {
-      // title reveal on load
-      const split = new SplitText('.bx-title', { type: 'lines,words,chars', mask: 'lines', autoSplit: true })
+      // headline reveal
+      const split = new SplitText('.st-hero-title', { type: 'lines,words,chars', mask: 'lines', autoSplit: true })
       gsap.from(split.chars, { yPercent: 120, duration: 1.1, ease: 'expo.out', stagger: 0.02, delay: 0.3 })
-      // stage settles: near-native scale lands as the hero arrives
-      gsap.fromTo(
-        '.stage-film',
-        { scale: 1.06 },
-        {
-          scale: 1,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: { trigger: '.bx-hero', start: 'top top', end: 'bottom 40%', scrub: 1.2 },
-        },
-      )
-      // scroll cue draws as the hero leaves
+      gsap.to('.st-fade', { opacity: 0, y: -50, ease: 'none', scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 30%', scrub: 1.2 } })
+      // dolly through space: the title pushes toward the camera and drifts
+      // up as the hero exits (parent scale — the SplitText chars own their
+      // own transforms, never contested)
+      gsap.to('.st-hero-title', {
+        scale: 1.18,
+        yPercent: -12,
+        ease: 'none',
+        scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 20%', scrub: 1.2 },
+      })
+      // ghost echo drifts slower than the title (depth without parallax
+      // libraries — transform-only, own property, own trigger range)
+      gsap.to('.hero-echo', {
+        yPercent: 24,
+        ease: 'none',
+        scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom top', scrub: 1.2 },
+      })
+      // scroll cue: mint hairline draws as the hero leaves
       gsap.fromTo(
         '.st-cue b',
         { scaleX: 0 },
@@ -70,73 +46,39 @@ export default function EnterStage() {
           scaleX: 1,
           ease: 'none',
           immediateRender: false,
-          scrollTrigger: { trigger: '.bx-hero', start: 'top top', end: 'bottom 35%', scrub: 1.2 },
+          scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 35%', scrub: 1.2 },
         },
       )
-      // wordmark yields while the model owns the page, returns for departure
+
+      // migrating mark: the topbar wordmark yields as the hero exits
+      // (it stays yielded — hero is the whole index now)
       const tbLogo = document.querySelector('.tb-logo')
       if (tbLogo) {
         gsap.to(tbLogo, {
           opacity: 0,
           ease: 'none',
-          scrollTrigger: { trigger: '.bx-hero', start: 'bottom 75%', end: 'bottom 30%', scrub: 1.2 },
-        })
-        gsap.to(tbLogo, {
-          opacity: 1,
-          ease: 'none',
-          scrollTrigger: { trigger: '.bx-fin', start: 'top 95%', end: 'top 55%', scrub: 1.2 },
+          scrollTrigger: { trigger: '.st-hero', start: 'bottom 75%', end: 'bottom 30%', scrub: 1.2 },
         })
       }
-      // scroll velocity mirror for the world kindle
+
+      // progress mirrors — trigger is the context root itself: selector text
+      // inside gsap.context only matches descendants, so '.st-scroll'
+      // resolves to nothing (GSAP "Element not found", mirror never fires)
       ScrollTrigger.create({
         trigger: root.current,
         start: 'top bottom',
         end: 'bottom top',
         scrub: true,
         onUpdate: (self) => {
-          xs.vel = Math.min(1, Math.abs(self.getVelocity()) / 3000)
+          scroll.current.v = self.progress
+          const v = Math.min(1, Math.abs(self.getVelocity()) / 3000)
+          vel.current.v = v
+          xs.vel = v
         },
       })
-      // anatomy stations rise on the descent — one writer per row
-      gsap.utils.toArray<HTMLElement>('.bx-part').forEach((row) => {
-        gsap.fromTo(
-          row,
-          { y: 60, opacity: 0.3 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: { trigger: row, start: 'top 88%', end: 'top 48%', scrub: 1.2 },
-          },
-        )
-      })
-      // rotation cards land in stagger
-      gsap.fromTo(
-        '.bx-card',
-        { y: 70, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          ease: 'none',
-          stagger: 0.08,
-          immediateRender: false,
-          scrollTrigger: { trigger: '.bx-cards', start: 'top 85%', end: 'top 45%', scrub: 1.2 },
-        },
-      )
-      // finale title rises
-      gsap.fromTo(
-        '.bx-fin h2',
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: { trigger: '.bx-fin', start: 'top 85%', end: 'top 60%', scrub: 1.2 },
-        },
-      )
+
     }, root)
+
     return () => {
       ctx.revert()
     }
@@ -144,55 +86,20 @@ export default function EnterStage() {
 
   return (
     <div className="st-scroll" ref={root}>
-      <section className="bx-hero">
-        <p className="mono">XEVEN — BURST STUDY X-002</p>
-        <FilmStage />
-        <h1 className="bx-title">THE MODEL MOVES</h1>
-        <p className="bx-sub">Eight million white sticks. One red room. Nothing static survives.</p>
+      <section className="st-hero">
+        <div className="hero-echo" aria-hidden="true">
+          XEVEN
+        </div>
+        <p className="mono st-fade">00 — TOP</p>
+        <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
+        <p className="st-sub st-fade">Experience engine. Living systems. Nothing static survives.</p>
         <p className="st-hint">
-          <span>scroll →</span>
+          <span>move to stir the air →</span>
           <i className="st-cue" aria-hidden="true">
             <b />
           </i>
         </p>
       </section>
-
-      <section className="bx-fig">
-        <p className="mono">ANATOMY — FOUR PARTS</p>
-        {PARTS.map((p) => (
-          <article key={p.n} className="bx-part">
-            <span className="bx-ghost" aria-hidden="true">
-              {p.n}
-            </span>
-            <span className="proc-n">{p.n}</span>
-            <h3>{p.t}</h3>
-            <p>{p.d}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="bx-work">
-        <p className="mono">ROTATION STUDY — THREE ANGLES</p>
-        <div className="bx-cards">
-          {ANGLES.map((a) => (
-            <a key={a.t} className="bx-card" href="#/worlds">
-              <img src={a.src} alt={`Burst model — ${a.t}`} loading="lazy" />
-              <span className="bx-cardmeta">
-                <b>{a.t}</b>
-                <i>{a.sub}</i>
-              </span>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <footer className="bx-fin">
-        <p className="mono">DEPARTURE</p>
-        <h2>STEP INSIDE</h2>
-        <a href="mailto:hello@xeven.world" data-cursor>
-          hello@xeven.world
-        </a>
-      </footer>
     </div>
   )
 }
