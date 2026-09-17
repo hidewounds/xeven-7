@@ -43,17 +43,20 @@ M.legacyGone = await page.evaluate(() => ({
   graph: !document.querySelector('canvas.graph-fixed'),
   world: !!document.querySelector('canvas.world-fixed'),
 }));
-// hero-only index + global ruler: 6 inch marks, needle rides scroll
+// index v3: hero, frameless capabilities, thread process, teaser, finale
 M.acts = await page.evaluate(() => ({
   topbarVisible: !!document.querySelector('.topbar'),
   rulerInches: document.querySelectorAll('.ruler-inch').length,
   rulerOn: document.querySelector('.ruler-inch.ruler-on')?.textContent.replace(/\s+/g, ' ').trim(),
-  needle: !!document.querySelector('.ruler-needle'),
-  procGone: !document.querySelector('.st-proc'),
-  footGone: !document.querySelector('.st-foot'),
-  markGone: !document.querySelector('.mark-fixed'),
-  heroLabel: document.querySelector('.st-hero .mono')?.textContent,
   heroTitle: document.querySelector('.st-hero-title')?.textContent,
+  stations: document.querySelectorAll('.cap-station').length,
+  ghosts: document.querySelectorAll('.cap-ghost').length,
+  procRows: document.querySelectorAll('.st-proc .proc-row').length,
+  stub: !!document.querySelector('.proc-stub'),
+  node: !!document.querySelector('.thread-node'),
+  teasers: document.querySelectorAll('.tease-card').length,
+  finaleTitle: document.querySelector('.st-fin h2')?.textContent,
+  clock: document.querySelector('.foot-time')?.textContent ?? null,
   reticleDots: document.querySelectorAll('.reticle-dot').length,
   reticleRings: document.querySelectorAll('.reticle').length,
 }));
@@ -71,15 +74,37 @@ await page.mouse.click(800, 450);
 await page.waitForTimeout(1000);
 await page.screenshot({ path: `${OUT}/g0-world-hero.png` });
 
-// hero hold: scroll the single act to its end, world breathes beneath
-await go(await page.evaluate(() => document.body.scrollHeight));
+// hero hold over the breathing field
 await page.mouse.move(1200, 300, { steps: 6 });
 await page.waitForTimeout(800);
 M.hold = await page.evaluate(() => ({
-  scrollMax: document.documentElement.scrollHeight - window.innerHeight,
   tbLogoOp: getComputedStyle(document.querySelector('.tb-logo')).opacity,
 }));
-await page.screenshot({ path: `${OUT}/g4-hold.png` });
+await page.screenshot({ path: `${OUT}/g0-world-hero.png` });
+
+// capabilities descent: stations arriving
+const capsTop = await page.evaluate(() => document.querySelector('.st-caps').getBoundingClientRect().top + window.scrollY);
+await go(capsTop + 600);
+await page.screenshot({ path: `${OUT}/g1-caps.png` });
+
+// process: thread drawn, a row lit
+const procTop = await page.evaluate(() => document.querySelector('.st-proc').getBoundingClientRect().top + window.scrollY);
+await go(procTop + 700);
+M.proc = await page.evaluate(() => ({
+  litRows: document.querySelectorAll('.st-proc .proc-row.proc-on').length,
+  stubDrawn: getComputedStyle(document.querySelector('.proc-stub')).transform,
+}));
+await page.screenshot({ path: `${OUT}/g2-proc.png` });
+
+// worlds teaser + departure finale
+const workTop = await page.evaluate(() => document.querySelector('.st-work').getBoundingClientRect().top + window.scrollY);
+await go(workTop + 300);
+await page.screenshot({ path: `${OUT}/g3-work.png` });
+await go(await page.evaluate(() => document.body.scrollHeight));
+M.finale = await page.evaluate(() => ({
+  footOp: getComputedStyle(document.querySelector('.st-fin h2')).opacity,
+}));
+await page.screenshot({ path: `${OUT}/g4-finale.png` });
 
 // route tier: flat park on subpages, journey resumes on return — plus the
 // ruler needle travels cm ticks on a scrollable page, active inch follows

@@ -41,13 +41,20 @@ const IDLE_MS = 6000
 
 const SECTIONS = [
   '.st-hero',
+  '.st-caps',
+  '.st-proc',
+  '.st-work',
+  '.st-fin',
 ]
-// camera journey: a single hold over the hero [x, y, z] — the index is
-// one act now, the world simply breathes beneath it
+// camera journey: one stop per index section [x, y, z] — a descent that
+// dips closest at process, then releases through worlds to departure
 const WAYPOINTS: Array<[number, number, number]> = [
   [0, 0.4, 10],
+  [0.5, 0, 8.6],
+  [-0.5, -0.2, 7.6],
+  [0, 0, 8.8],
+  [0, 0.8, 11],
 ]
-
 interface Floater extends THREE.Mesh {
   userData: { rx: number; ry: number; fs: number; fo: number; fa: number; by: number }
 }

@@ -1,7 +1,7 @@
 {
   "introMerge": {
-    "ledger": null,
-    "canvas": false
+    "ledger": "061",
+    "canvas": true
   },
   "legacyGone": {
     "strata": true,
@@ -13,19 +13,28 @@
     "topbarVisible": true,
     "rulerInches": 6,
     "rulerOn": "00TOP",
-    "needle": true,
-    "procGone": true,
-    "footGone": true,
-    "markGone": true,
-    "heroLabel": "00 — TOP",
     "heroTitle": "WHAT IS XEVEN?",
+    "stations": 4,
+    "ghosts": 4,
+    "procRows": 4,
+    "stub": true,
+    "node": true,
+    "teasers": 3,
+    "finaleTitle": "STEP INSIDE",
+    "clock": "08:16 PM — LOCAL",
     "reticleDots": 0,
     "reticleRings": 0
   },
-  "fpsWorld": 60,
+  "fpsWorld": 9,
   "hold": {
-    "scrollMax": 0,
     "tbLogoOp": "1"
+  },
+  "proc": {
+    "litRows": 1,
+    "stubDrawn": "matrix(1, 0, 0, 1, 0, 0)"
+  },
+  "finale": {
+    "footOp": "1"
   },
   "worldsAlive": true,
   "ruler": {

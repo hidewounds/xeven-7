@@ -348,6 +348,67 @@
 }
 @keyframes pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+/* ---------- index v3: frameless stations ---------- */
+.st-caps { padding: 26vh 8vw 20vh calc(8vw + 92px); display: flex; flex-direction: column; gap: 14vh; }
+/* capability stations: borderless sheets separated by depth and air —
+   no outlines, no cards, just the panels */
+.cap-station {
+  position: relative; min-height: 88svh;
+  display: flex; flex-direction: column; justify-content: center; gap: var(--s16);
+  will-change: transform, opacity;
+}
+.cap-ghost {
+  position: absolute; top: 4vh; right: 0;
+  font-family: var(--disp); font-size: clamp(120px, 20vw, 300px); line-height: 1;
+  letter-spacing: -0.02em; color: transparent;
+  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.14);
+  pointer-events: none; user-select: none;
+}
+.cap-kicker { margin: 0; }
+.cap-station h3 {
+  font-family: var(--disp); font-size: clamp(40px, 7vw, 104px); line-height: 0.95;
+  letter-spacing: -0.02em; margin: 0; max-width: 12ch;
+}
+.cap-desc { color: var(--muted); font-size: 18px; margin: 0; max-width: 52ch; }
+.cap-stack { font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--mint); margin: 0; }
+/* process lives on the dark field — thread, node, active-row light */
+.st-proc { padding: 30vh 8vw 32vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
+.proc-line { position: absolute; left: calc(8vw + 114px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
+.proc-line span { display: block; width: 100%; height: 100%; background: var(--mint); transform: scaleY(0); transform-origin: top; }
+.proc-stub { position: absolute; top: 0; left: 1px; width: calc(50vw - 8vw - 115px); height: 1px; background: var(--mint); transform: scaleX(0); transform-origin: right center; }
+.thread-node {
+  position: absolute; left: 50%; top: 34vh; width: 8px; height: 8px;
+  margin: -4px 0 0 -4px; border-radius: 50%;
+  background: var(--ember); box-shadow: 0 0 12px 2px rgba(255, 77, 46, 0.55);
+  transform: scale(0); z-index: 3; pointer-events: none;
+}
+.st-proc .proc-row { will-change: transform, opacity; }
+/* worlds teaser: gradient thumbs, no imagery */
+.st-work { padding: 20vh 8vw 24vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s48); }
+.tease-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s24); }
+.tease-card { display: flex; flex-direction: column; gap: var(--s12); will-change: transform, opacity; }
+.tease-thumb {
+  display: block; aspect-ratio: 16/10; border-radius: 4px;
+  transition: transform 300ms ease;
+}
+.tease-ember { background: radial-gradient(90% 100% at 20% 10%, rgba(255, 77, 46, 0.5), transparent 60%), linear-gradient(160deg, #140a06, #06090f); }
+.tease-mint { background: radial-gradient(90% 100% at 20% 10%, rgba(156, 245, 211, 0.4), transparent 60%), linear-gradient(160deg, #0b1418, #06090f); }
+.tease-bone { background: radial-gradient(90% 100% at 20% 10%, rgba(232, 237, 238, 0.32), transparent 60%), linear-gradient(160deg, #10161c, #06090f); }
+.tease-card:hover .tease-thumb { transform: scale(1.02); }
+.tease-card b { font-family: var(--disp); font-size: 28px; font-weight: 400; }
+.tease-card i { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; color: var(--muted); }
+/* departure finale */
+.st-fin { padding: 30vh 6vw 20vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
+.st-fin h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; letter-spacing: -0.02em; }
+.st-fin a { position: relative; font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; color: var(--mint); min-height: 44px; display: inline-flex; align-items: center; }
+.st-fin a::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1px;
+  background: var(--mint); transform: scaleX(0); transform-origin: right center;
+  transition: transform 240ms ease;
+}
+.st-fin a:hover::after { transform: scaleX(1); transform-origin: left center; }
+.foot-time { margin: 0; opacity: 0.8; }
+
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
   .tb-center { display: none; }
@@ -355,6 +416,11 @@
   .tb-right { margin-left: auto; }
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
   .proc-row { grid-template-columns: 44px 1fr; }
+  /* index sections reclaim the rail gutter where the ruler hides */
+  .st-caps, .st-proc, .st-work { padding-left: 8vw; }
+  .proc-line { left: calc(8vw + 22px); }
+  .proc-stub { width: calc(50vw - 8vw - 23px); }
+  .tease-grid { grid-template-columns: 1fr; }
 }
 
 /* coarse pointers: no hover-only affordances depend on precision here. */
@@ -367,5 +433,8 @@
   .mani-ember { color: var(--ember); }
   .stat-rule { transform: scaleX(1); }
   .st-cue b { transform: scaleX(1); }
+  .proc-line span { transform: scaleY(1); }
+  .proc-stub { transform: scaleX(1); }
+  .thread-node { display: none; }
   .proc-row::after, .proc-row h3 { transition: none; }
 }
