@@ -36,11 +36,27 @@ export default function App() {
 
   useEffect(() => {
     xs.reduced = reduced
-    if (reduced) return
+    if (reduced) {
+      // no Lenis under reduced motion: section links jump natively
+      scrollBus.scrollTo = (target: string | number) => {
+        if (typeof target === 'number') window.scrollTo(0, target)
+        else document.querySelector(target)?.scrollIntoView()
+      }
+      return () => {
+        scrollBus.scrollTo = undefined
+      }
+    }
     const l = new Lenis({ lerp: 0.09, wheelMultiplier: 1.0, anchors: true })
     lenis.current = l
     scrollBus.stop = () => l.stop()
     scrollBus.start = () => l.start()
+    scrollBus.scrollTo = (target: string | number) => {
+      if (typeof target === 'number') l.scrollTo(target)
+      else {
+        const el = document.querySelector(target)
+        if (el) l.scrollTo(el as HTMLElement)
+      }
+    }
     l.on('scroll', ScrollTrigger.update)
     const tick = (time: number) => l.raf(time * 1000)
     gsap.ticker.add(tick)
@@ -51,6 +67,7 @@ export default function App() {
       lenis.current = null
       scrollBus.stop = undefined
       scrollBus.start = undefined
+      scrollBus.scrollTo = undefined
     }
   }, [reduced])
 

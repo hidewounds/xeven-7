@@ -22,11 +22,20 @@ try { await page.click('.intro', { timeout: 4000 }); } catch {}
 try { await page.waitForSelector('.intro', { state: 'detached', timeout: 20000 }); } catch { M.introStuck = true; }
 await page.waitForTimeout(1000);
 
-// one nav model drives topbar, ruler, menu, footer
+// one nav model drives topbar, menu, footer; the rail is index-only
 M.nav = await page.evaluate(() => ({
   top: Array.from(document.querySelectorAll('.tb-center .tb-link')).map((b) => b.textContent),
-  ruler: Array.from(document.querySelectorAll('.ruler-inch')).map((b) => b.getAttribute('aria-label')),
+  railIndex: Array.from(document.querySelectorAll('.ruler-inch')).map((b) => b.getAttribute('aria-label')),
   foot: Array.from(document.querySelectorAll('.sitefoot-link')).map((b) => b.textContent),
+  mega: !!document.querySelector('.sitefoot-mega'),
+}));
+
+// rail click jumps to the instruments section + marks it active
+await page.click('.ruler-inch >> nth=2');
+await page.waitForTimeout(1800);
+M.rail = await page.evaluate(() => ({
+  y: Math.round(window.scrollY),
+  active: document.querySelector('.ruler-inch.ruler-on')?.getAttribute('aria-label'),
 }));
 
 // index journey: telemetry → instruments → proof → trial, then footer
@@ -67,6 +76,7 @@ for (const r of ['about', 'features', 'pricing', 'demo']) {
   M['route_' + r] = await page.evaluate(() => ({
     title: document.querySelector('.page-title')?.textContent,
     footer: !!document.querySelector('.sitefoot'),
+    rail: document.querySelectorAll('.ruler').length,
   }));
 }
 for (const bad of ['#/worlds', '#/worlds/reactor', '#/vision', '#/services', '#/contact']) {

@@ -127,22 +127,22 @@
   .xload-fast { animation: none; }
 }
 
-/* ---------- ruler: fake left-edge survey ruler, global ---------- */
+/* ---------- ruler: slim index-only section navigator ---------- */
 .ruler {
-  position: fixed; left: 14px; top: 12vh; bottom: 12vh; width: 132px;
-  z-index: 20; opacity: 0.92; pointer-events: none;
+  position: fixed; left: 10px; top: 14vh; bottom: 14vh; width: 96px;
+  z-index: 20; opacity: 0.85; pointer-events: none;
 }
 /* subdivisions: exactly two cm ticks + one big mid-inch per gap */
 .ruler-subs { position: absolute; inset: 0; }
 .ruler-gap { position: absolute; left: 0; right: 0; }
 .ruler-gap .ruler-cm {
-  position: absolute; left: 44px; width: 7px; height: 1px;
+  position: absolute; left: 32px; width: 6px; height: 1px;
   background: var(--line-strong); opacity: 0.55;
 }
 .ruler-gap .ruler-cm:first-child { top: 25%; }
 .ruler-gap .ruler-cm:last-child { top: 75%; }
 .ruler-mid {
-  position: absolute; left: 44px; top: 50%; width: 16px; height: 1px;
+  position: absolute; left: 32px; top: 50%; width: 12px; height: 1px;
   background: var(--muted); opacity: 0.8;
 }
 /* inches: the main points, spread top→bottom; sole interactive children */
@@ -151,26 +151,26 @@
   display: flex; flex-direction: column; justify-content: space-between;
 }
 .ruler-inch {
-  display: flex; align-items: center; gap: 8px; padding: 0;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-  color: var(--faint); min-height: 34px; background: none; border: none;
+  display: flex; align-items: center; gap: 6px; padding: 0;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  color: var(--faint); min-height: 30px; background: none; border: none;
   pointer-events: auto; cursor: pointer;
   transition: color 150ms ease;
 }
 .ruler-inch:hover { color: var(--bone); }
-.ruler-inch:hover .ruler-tick { width: 20px; background: var(--bone); }
+.ruler-inch:hover .ruler-tick { width: 22px; background: var(--bone); }
 .ruler-inch:focus-visible { outline: 1px solid var(--mint); outline-offset: 2px; color: var(--bone); }
-.ruler-n { min-width: 18px; text-align: right; font-size: 10px; }
-.ruler-tick { display: block; width: 26px; height: 1px; background: var(--line-strong); transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease; }
+.ruler-n { min-width: 15px; text-align: right; font-size: 9px; }
+.ruler-tick { display: block; width: 18px; height: 1px; background: var(--line-strong); transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease; }
 .ruler-inch.ruler-on { color: var(--bone); }
 .ruler-inch.ruler-on .ruler-n { color: var(--mint); }
-.ruler-inch.ruler-on .ruler-tick { width: 34px; background: var(--mint); box-shadow: 0 0 8px rgba(156, 245, 211, 0.8); }
-.ruler-tag { color: var(--faint); font-size: 10px; letter-spacing: 0.14em; transition: color 150ms ease; }
+.ruler-inch.ruler-on .ruler-tick { width: 26px; background: var(--mint); box-shadow: 0 0 8px rgba(156, 245, 211, 0.8); }
+.ruler-tag { color: var(--faint); font-size: 9px; letter-spacing: 0.12em; transition: color 150ms ease; }
 .ruler-inch.ruler-on .ruler-tag, .ruler-inch:hover .ruler-tag { color: var(--bone); }
 /* needle: rides page scroll top→bottom across the cm ticks (sole writer:
    the rAF scroll hook — transform-only, direct set, no animation) */
 .ruler-needle {
-  position: absolute; left: 36px; top: 0; width: 24px; height: 1px;
+  position: absolute; left: 26px; top: 0; width: 18px; height: 1px;
   background: var(--mint); box-shadow: 0 0 8px rgba(156, 245, 211, 0.8);
   will-change: transform;
 }
@@ -372,6 +372,11 @@
 }
 .cap-desc { color: var(--muted); font-size: 18px; margin: 0; max-width: 52ch; }
 .cap-stack { font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--mint); margin: 0; }
+/* editorial rhythm: even stations mirror — ghost numeral swaps side,
+   copy right-aligns. Pure layout, no motion involved. */
+.cap-station:nth-of-type(even) { align-items: flex-end; text-align: right; }
+.cap-station:nth-of-type(even) .cap-ghost { right: auto; left: 0; }
+.cap-station:nth-of-type(even) .cap-desc { margin-left: auto; }
 /* process lives on the dark field — thread, node, active-row light */
 .st-proc { padding: 30vh 8vw 32vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s48); position: relative; background: transparent; }
 .proc-line { position: absolute; left: calc(8vw + 114px); top: 34vh; bottom: 18vh; width: 1px; background: var(--line); }
@@ -413,6 +418,12 @@
   background: rgba(6, 9, 15, 0.72);
 }
 .sitefoot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--s32); max-width: 1200px; width: 100%; margin: 0 auto; }
+.sitefoot-mega {
+  font-family: var(--disp); font-size: clamp(80px, 16vw, 240px); line-height: 0.9;
+  letter-spacing: -0.02em; text-align: center; color: transparent;
+  -webkit-text-stroke: 1px rgba(232, 237, 238, 0.12);
+  user-select: none; margin: 0 auto; max-width: 1200px;
+}
 .sitefoot-grid > div, .sitefoot-grid > nav { display: flex; flex-direction: column; gap: var(--s12); align-items: flex-start; }
 .sitefoot-tag { font-family: var(--disp); font-size: 28px; margin: 0; max-width: 16ch; line-height: 1.05; }
 .sitefoot-link {

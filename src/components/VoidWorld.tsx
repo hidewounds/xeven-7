@@ -540,6 +540,29 @@ export default function VoidWorld() {
       group.rotation.y = progress * Math.PI * 0.35
       rim.position.x = -7 + Math.sin(t * 0.3) * 3
       rim.position.z = -4 + Math.cos(t * 0.22) * 2
+      // section-aware grade: key light and haze follow the journey —
+      // brighter through telemetry/instruments, deeper past proof.
+      // Lerped per frame, calm by construction.
+      const fog = scene.fog as THREE.FogExp2 | null
+      if (onIndex && fog) {
+        const g1 = fracs[1] ?? -1
+        const g3 = fracs[3] ?? -1
+        const g5 = fracs[5] ?? -1
+        let kT = 1.15
+        let fogT = 0.05
+        if (g1 >= 0 && progress >= g1 && !(g3 >= 0 && progress >= g3)) {
+          kT = 1.4
+          fogT = 0.056
+        } else if (g3 >= 0 && progress >= g3 && !(g5 >= 0 && progress >= g5)) {
+          kT = 1.0
+          fogT = 0.062
+        } else if (g5 >= 0 && progress >= g5) {
+          kT = 1.2
+          fogT = 0.05
+        }
+        key.intensity += (kT - key.intensity) * 0.04
+        fog.density += (fogT - fog.density) * 0.04
+      }
       stars.rotation.y = t * 0.008 + progress * 0.4
       for (const child of group.children) {
         const mm = child as Floater

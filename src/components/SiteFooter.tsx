@@ -11,6 +11,9 @@ export default function SiteFooter({ route }: { route: Route }) {
   const [year] = useState(() => new Date().getFullYear())
   return (
     <footer className="sitefoot">
+      <div className="sitefoot-mega" aria-hidden="true">
+        XEVEN
+      </div>
       <div className="sitefoot-grid">
         <div>
           <p className="mono">XEVEN — FORMERLY NOVA</p>

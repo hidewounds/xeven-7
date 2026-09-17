@@ -26,9 +26,10 @@ export const xs: XStore = {
 /** Animated navigation bus — App registers the curtain-wipe version. */
 export const navBus: { go?: (to: Route, query?: string) => void } = {}
 
-/** Scroll bus — App registers Lenis stop/start so overlays (menu) can
-   lock page scroll without touching the Lenis instance directly. */
-export const scrollBus: { stop?: () => void; start?: () => void } = {}
+/** Scroll bus — App registers Lenis stop/start/scrollTo so overlays and
+   section links (menu, ruler) can drive page scroll without touching the
+   Lenis instance directly. */
+export const scrollBus: { stop?: () => void; start?: () => void; scrollTo?: (target: string | number) => void } = {}
 
 export function navigate(to: Route, query?: string): void {
   const hash = query ? `#/${to}?${query}` : `#/${to}`
