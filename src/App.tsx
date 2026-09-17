@@ -5,7 +5,7 @@ import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
 import XLoader, { XMark } from './components/XLoader'
-import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
+import { navBus, projectFromHash, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
 /* Route-level code splitting: three.js / gsap SplitText ride in async
@@ -17,6 +17,7 @@ const Vision = lazy(() => import('./pages/Vision'))
 const Services = lazy(() => import('./pages/Services'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const Contact = lazy(() => import('./pages/Contact'))
+const WorldDetail = lazy(() => import('./pages/WorldDetail'))
 // VOIDWORLD unifies field + objects + cursor presence in one canvas, one
 // ticker, one journey — first paint never waits for three.js.
 const VoidWorld = lazy(() => import('./components/VoidWorld'))
@@ -28,6 +29,9 @@ export default function App() {
   // the cinematic intro plays only over a fresh index load — every other
   // route boots behind a revolving X instead
   const [route, setRoute] = useState<Route>(() => routeFromHash())
+  // study slug for `#/worlds/<slug>` — same route, sub-view. Tracked
+  // separately so index↔study swaps render without a route transition.
+  const [slug, setSlug] = useState<string | null>(() => projectFromHash())
   const [intro, setIntro] = useState(() => routeFromHash() === 'enter')
   const [booted, setBooted] = useState(() => routeFromHash() === 'enter')
   const [switching, setSwitching] = useState(false)
@@ -67,6 +71,7 @@ export default function App() {
       const r = routeFromHash()
       xs.route = r
       setRoute(r)
+      setSlug(projectFromHash())
     }
     settle()
     window.addEventListener('hashchange', settle)
@@ -95,9 +100,12 @@ export default function App() {
     if (document.fonts) {
       void document.fonts.ready.then(() => ScrollTrigger.refresh())
     }
+    // worlds index ↔ study manage their own scroll (restore-or-top and
+    // top respectively) — a blanket scroll-to-top here would clobber Back
+    if (route === 'worlds') return
     if (reduced) window.scrollTo(0, 0)
     else lenis.current?.scrollTo(0, { immediate: true })
-  }, [route, reduced])
+  }, [route, slug, reduced])
 
   const finishIntro = useCallback(() => {
     xs.entered = true
@@ -133,7 +141,7 @@ export default function App() {
       <main id="main" key={route}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
-          {route === 'worlds' && <Worlds />}
+          {route === 'worlds' && (slug ? <WorldDetail slug={slug} /> : <Worlds />)}
           {route === 'vision' && <Vision />}
           {route === 'services' && <Services />}
           {route === 'pricing' && <Pricing />}

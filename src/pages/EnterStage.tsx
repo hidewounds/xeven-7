@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
-import { xs } from '../app/store'
+import { navigate, xs } from '../app/store'
+import type { Route } from '../app/store'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
 /* Index v3 — full site: hero, capabilities, process, worlds, finale.
@@ -62,10 +63,10 @@ const STEPS = [
   },
 ]
 
-const TEASE = [
-  { t: 'Worlds', d: 'Built locations, not pages.', c: 'tease-ember' },
-  { t: 'Vision', d: 'Why the static web is over.', c: 'tease-mint' },
-  { t: 'Services', d: 'Four disciplines, one world.', c: 'tease-bone' },
+const TEASE: Array<{ t: string; d: string; c: string; to: Route }> = [
+  { t: 'Worlds', d: 'Built locations, not pages.', c: 'tease-ember', to: 'worlds' },
+  { t: 'Vision', d: 'Why the static web is over.', c: 'tease-mint', to: 'vision' },
+  { t: 'Services', d: 'Four disciplines, one world.', c: 'tease-bone', to: 'services' },
 ]
 
 /* Departure clock: local time, per-minute tick (one interval, one text
@@ -325,11 +326,11 @@ export default function EnterStage() {
         <p className="mono">03 — WORLDS</p>
         <div className="tease-grid">
           {TEASE.map((w) => (
-            <a key={w.t} className="tease-card" href={`#/${w.t.toLowerCase()}`}>
+            <button key={w.t} className="tease-card" onClick={() => navigate(w.to)} data-cursor aria-label={`Go to ${w.t}`}>
               <span className={`tease-thumb ${w.c}`} aria-hidden="true" />
               <b>{w.t}</b>
               <i>{w.d}</i>
-            </a>
+            </button>
           ))}
         </div>
       </section>

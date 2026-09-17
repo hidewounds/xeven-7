@@ -12,7 +12,7 @@ export const PH = {
   metal: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
 }
 
-export default function VideoCard({ src, title, sub }: { src: string; title: string; sub?: string }) {
+export default function VideoCard({ src, title, sub, poster }: { src: string; title: string; sub?: string; poster?: string }) {
   const vref = useRef<HTMLVideoElement>(null!)
   const wrap = useRef<HTMLDivElement>(null!)
   const seeing = useRef(false)
@@ -48,7 +48,7 @@ export default function VideoCard({ src, title, sub }: { src: string; title: str
   return (
     <div ref={wrap} className="vid" data-cursor>
       <div className="vid-fallback" aria-hidden="true" />
-      {!reduced && <video ref={vref} src={src} muted loop playsInline preload="none" />}
+      {!reduced && <video ref={vref} src={src} poster={poster} muted loop playsInline preload="none" />}
       <div className="vid-meta">
         <p>{title}</p>
         {sub ? <span>{sub}</span> : null}

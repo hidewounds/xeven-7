@@ -307,6 +307,15 @@
    filter animation is a main-thread/GPU sink, same rule as the cap cards */
 .work-cell { transition: transform 300ms ease; }
 .work-cell:hover { transform: scale(1.02); filter: saturate(1.25) brightness(1.08); }
+/* index cards are real links: inherit type color, no underline */
+a.work-cell { color: inherit; text-decoration: none; display: block; }
+.tease-card {
+  appearance: none; background: none; border: none; padding: 0;
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+/* study detail: back + prev/next share one row, wrap on narrow screens */
+.study-nav { display: flex; gap: var(--s12); flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.study-steps { display: flex; gap: var(--s12); flex-wrap: wrap; }
 .rows { display: flex; flex-direction: column; }
 /* principle rows (Vision) reuse the process grid but sit in a plain stack —
    give each row its own breathing room so display titles never collide */
