@@ -5,7 +5,7 @@ import { SplitText } from 'gsap/SplitText'
 import { navigate, xs } from '../app/store'
 import type { Route } from '../app/store'
 import { T } from '../motion'
-import { INSTRUMENTS, PRODUCT, SETUP } from '../data/product'
+import { INSTRUMENTS, PRODUCT, TELEMETRY } from '../data/product'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
 /* Index — XEVEN, the AI employee SaaS: hero, five instruments, three-step
@@ -15,12 +15,12 @@ gsap.registerPlugin(ScrollTrigger, SplitText)
 
 const CAPS = INSTRUMENTS
 
-const STEPS = SETUP
+const STEPS = TELEMETRY
 
 const TEASE: Array<{ t: string; d: string; c: string; to: Route }> = [
   { t: 'Worlds', d: 'Three live demo worlds: Reactor, Helm, Melt.', c: 'tease-ember', to: 'worlds' },
-  { t: 'Vision', d: 'Why the static website is over.', c: 'tease-mint', to: 'vision' },
-  { t: 'Services', d: 'Platform, booking, voice, knowledge.', c: 'tease-bone', to: 'services' },
+  { t: 'Vision', d: 'An employee, not a widget.', c: 'tease-mint', to: 'vision' },
+  { t: 'Services', d: 'Conversation, memory, booking, voice, knowledge.', c: 'tease-bone', to: 'services' },
 ]
 
 /* X console — matching HTML controls for the procedural mechanism.
@@ -385,7 +385,7 @@ export default function EnterStage() {
       </section>
 
       <section className="st-proc">
-        <p className="mono">02 — SETUP · LIVE IN A DAY</p>
+        <p className="mono">02 — TELEMETRY</p>
         <i className="thread-node" aria-hidden="true" />
         <div className="proc-line" aria-hidden="true">
           <i className="proc-stub" />
@@ -397,11 +397,6 @@ export default function EnterStage() {
             <h3>{s.t}</h3>
             <p>{s.d}</p>
             <p className="proc-meta">{s.meta}</p>
-            <ul className="proc-points">
-              {s.points.map((pt) => (
-                <li key={pt}>{pt}</li>
-              ))}
-            </ul>
           </div>
         ))}
       </section>

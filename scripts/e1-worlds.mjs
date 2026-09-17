@@ -78,7 +78,13 @@ for (const [route, sel] of [['services', '.team-chip'], ['pricing', '.tier'], ['
     count: document.querySelectorAll(s).length,
   }), sel);
 }
-M.vision = await page.evaluate(() => document.querySelectorAll('.proc-row').length);
+M.vision = await page.evaluate(() => ({}));
+await page.goto(`${URL}#/vision`, { waitUntil: 'load' });
+await page.waitForTimeout(900);
+M.vision = await page.evaluate(() => ({
+  title: document.querySelector('.page-title')?.textContent,
+  rows: document.querySelectorAll('.proc-row').length,
+}));
 
 M.errors = errors;
 console.log(JSON.stringify(M, null, 2));

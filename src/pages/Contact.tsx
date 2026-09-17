@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
-import { DEMO_FOCUS, DEMO_SLOTS, SHOWROOM } from '../data/product'
+import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS } from '../data/product'
 
 /* /contact — the briefing room. The demo booking flow: pick a focus,
    a focus, leave a name and work email, hold a slot the way Chrono does.
@@ -66,7 +66,7 @@ export default function Contact() {
     <div className="page">
       <p className="mono">CONTACT — BRIEFING ROOM</p>
       <h1 className="page-title">Book a demo.</h1>
-      <p className="page-lede">Thirty seconds. Then we talk shop. {SHOWROOM}</p>
+      <p className="page-lede">Thirty seconds. Then we talk shop. {DEMO_NOTE}</p>
       <div ref={card} className="form-card">
         {status === 'sent' ? (
           <div className="form-done">
@@ -75,7 +75,7 @@ export default function Contact() {
             </div>
             <h3>Demo requested, {name.split(' ')[0]}.</h3>
             <p>
-              {focus} — {slot}. Confirmed by the server; we reply within two working days.
+              {focus} — {slot}. We’ll reach out in hours to train XEVEN.
             </p>
           </div>
         ) : (

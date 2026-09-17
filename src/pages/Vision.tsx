@@ -1,8 +1,7 @@
-import { MISSION, PRINCIPLES } from '../data/product'
+import { BOLT, MISSION, PRINCIPLES } from '../data/product'
 
-/* /vision — mission + principles. Sourced from the platform repo and
-   marketing site (see src/data/product.ts). No roster is published in either
-   source, so none is claimed here. */
+/* /vision — mission, measured stats, principles. All sourced from the
+   marketing site (see src/data/product.ts). */
 
 export default function Vision() {
   return (
@@ -10,6 +9,16 @@ export default function Vision() {
       <p className="mono">{MISSION.kicker}</p>
       <h1 className="page-title">{MISSION.title}</h1>
       <p className="page-lede">{MISSION.lede}</p>
+      <div className="rows">
+        {BOLT.map((p) => (
+          <div key={p.n} className="proc-row">
+            <span className="proc-n">{p.n}</span>
+            <h3>{p.t}</h3>
+            <p>{p.d}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mono">PRINCIPLES</p>
       <div className="rows">
         {PRINCIPLES.map((p) => (
           <div key={p.n} className="proc-row">
