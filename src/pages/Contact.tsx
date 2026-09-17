@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
-import { DEMO_FOCUS, DEMO_SLOTS, SHOWROOM } from '../data/nova'
+import { DEMO_FOCUS, DEMO_SLOTS, SHOWROOM } from '../data/product'
 
-/* /contact — the briefing room. Mirrors the NOVA demo booking flow: pick
+/* /contact — the briefing room. The demo booking flow: pick a focus,
    a focus, leave a name and work email, hold a slot the way Chrono does.
    POSTs to the studio inbox; success renders only after the server
    confirms. Values survive failure; retry reuses them. A direct mailto

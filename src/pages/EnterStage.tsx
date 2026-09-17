@@ -5,13 +5,13 @@ import { SplitText } from 'gsap/SplitText'
 import { navigate, xs } from '../app/store'
 import type { Route } from '../app/store'
 import { T } from '../motion'
-import { INSTRUMENTS, PRODUCT, SETUP } from '../data/nova'
+import { INSTRUMENTS, PRODUCT, SETUP } from '../data/product'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
-/* Index — NOVA, built by Xeven: hero, five instruments, three-step setup,
-   worlds teaser, mechanism lab, finale. Frameless stations, one timeline
-   per property, transform/opacity only. All copy sourced from the NOVA
-   platform repo and marketing site (see src/data/nova.ts). */
+/* Index — XEVEN, the AI employee SaaS: hero, five instruments, three-step
+   setup, worlds teaser, mechanism lab, finale. Frameless stations, one
+   timeline per property, transform/opacity only. All copy sourced from
+   the platform repo and marketing site (see src/data/product.ts). */
 
 const CAPS = INSTRUMENTS
 

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { ROLES, SERVICES } from '../data/nova'
+import { ROLES, SERVICES } from '../data/product'
 
-/* /services — what Xeven delivers around NOVA, plus the nine agent roles
-   the platform ships with. All copy sourced (see src/data/nova.ts). */
+/* /services — what Xeven delivers, plus the nine agent roles the platform
+   ships with. All copy sourced (see src/data/product.ts). */
 
 export default function Services() {
   const [open, setOpen] = useState<number | null>(0)

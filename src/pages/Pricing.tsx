@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { navigate } from '../app/store'
-import { ADDONS, FAQ, PLANS, PRODUCT } from '../data/nova'
+import { ADDONS, FAQ, PLANS, PRODUCT } from '../data/product'
 
-/* /pricing — the four NOVA plans plus add-ons and the sourced FAQ.
-   Prices follow pricing-config.js (see src/data/nova.ts). */
+/* /pricing — the four XEVEN plans plus add-ons and the sourced FAQ.
+   Prices follow pricing-config.js (see src/data/product.ts). */
 
 export default function Pricing() {
   const [open, setOpen] = useState<number | null>(null)

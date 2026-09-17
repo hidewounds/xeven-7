@@ -1,7 +1,7 @@
-import { MISSION, PRINCIPLES } from '../data/nova'
+import { MISSION, PRINCIPLES } from '../data/product'
 
-/* /vision — mission + principles. Sourced from the NOVA platform and
-   marketing site (see src/data/nova.ts). No roster is published in either
+/* /vision — mission + principles. Sourced from the platform repo and
+   marketing site (see src/data/product.ts). No roster is published in either
    source, so none is claimed here. */
 
 export default function Vision() {

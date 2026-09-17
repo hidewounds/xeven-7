@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import VideoCard from '../components/VideoCard'
 import { FILTERS, WORLDS, loadWorldsMemory, saveWorldsMemory, workFilter } from '../data/works'
 
-/* /worlds — the three live NOVA demo worlds. Cards are real links to
+/* /worlds — the three live XEVEN demo worlds. Cards are real links to
    stable study routes (`#/worlds/<slug>`), so keyboard, touch, and
    screen-reader users get the same index as pointer users. Activating a
    card stores filter + scroll + identity so Back restores the exact grid
@@ -45,7 +45,7 @@ export default function Worlds() {
       <p className="mono">WORLDS — LIVE DEMOS</p>
       <h1 className="page-title">Three live worlds.</h1>
       <p className="page-lede">
-        Interactive builds running on the NOVA site — sound optional, everything works silent.
+        Interactive builds — sound optional, everything works silent.
       </p>
       <div className="pills" role="group" aria-label="Filter worlds">
         {FILTERS.map((p) => (

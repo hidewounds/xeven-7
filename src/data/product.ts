@@ -1,17 +1,17 @@
-/* NOVA — single source of truth for every customer-facing fact on this
-   site. All copy is sourced from the NOVA platform repo (D:\nova ai:
-   README, business knowledge base) and the NOVA marketing site
-   (D:\nova web: index, features, pricing + pricing-config.js, worlds).
+/* XEVEN — single source of truth for every customer-facing fact on this
+   site. Xeven is the SaaS, previously known as Nova; all copy is sourced
+   from the platform repo (D:\nova ai: README, business knowledge base)
+   and the marketing site (D:\nova web: index, features, pricing +
+   pricing-config.js, worlds), rebranded.
    Pricing follows pricing-config.js (Launch/Growth/Scale/Custom, yearly
    −20%) where it conflicts with the older knowledge entry. Nothing here
    is invented: no clients, metrics, testimonials, or team members. */
 
 export const PRODUCT = {
-  name: 'NOVA',
-  byline: 'XEVEN BUILDS NOVA',
+  name: 'XEVEN',
+  byline: 'XEVEN — FORMERLY NOVA',
   hero: 'THE AI EMPLOYEE FOR BUSINESS WEBSITES',
   sub: 'Chats 24/7, remembers shoppers, recovers carts, books with Chrono and talks with Echo. One snippet.',
-  footer: 'The intelligence layer for your business.',
   trial: '14-day free trial, cancel anytime.',
 }
 
@@ -45,7 +45,7 @@ export const INSTRUMENTS: Instrument[] = [
   },
   {
     t: 'Verified Knowledge',
-    d: 'Products and policies, searchable by keyword and meaning. NOVA answers only from what it can verify.',
+    d: 'Products and policies, searchable by keyword and meaning. XEVEN answers only from what it can verify.',
     s: 'KEYWORD + MEANING · VERIFIED OR SILENT',
   },
 ]
@@ -58,7 +58,7 @@ export interface SetupStep {
   points: string[]
 }
 
-/* Setup: live within one day (knowledge: “How NOVA works”). */
+/* Setup: live within one day (knowledge: “How XEVEN works”). */
 export const SETUP: SetupStep[] = [
   {
     n: '01',
@@ -157,8 +157,8 @@ export const ADDONS: Array<{ n: string; d: string; p: string }> = [
   { n: 'Custom Behaviour Pack', d: '+5 rules on any plan', p: 'from $12/mo' },
 ]
 
-/* The three live demo worlds (nova-web/worlds). Captions are the worlds'
-   own words. These are external interactive builds — cards link out. */
+/* The three live demo worlds. Captions are the worlds'
+   own words. These are external interactive builds; cards link out. */
 export interface World {
   slug: string
   title: string
@@ -206,10 +206,10 @@ export const WORLDS: World[] = [
 
 export const SLUGS = new Set(WORLDS.map((w) => w.slug))
 
-/* Services: the four things Xeven delivers around NOVA (all sourced). */
+/* Services: the four things Xeven delivers (all sourced). */
 export const SERVICES: Array<{ t: string; d: string }> = [
   {
-    t: 'NOVA Platform',
+    t: 'Xeven Platform',
     d: 'Widget plus dashboard: nine roles, multi-agent stacking, knowledge you edit, analytics from day one. One snippet to install.',
   },
   {
@@ -232,11 +232,11 @@ export const MISSION = {
   kicker: 'VISION — WHY WE EXIST',
   title: 'The static website is over.',
   lede:
-    'Attention is a place. NOVA turns business websites into locations where an AI employee chats, remembers, books and talks — and where visitors become customers.',
+    'Attention is a place. XEVEN turns business websites into locations where an AI employee chats, remembers, books and talks — and where visitors become customers.',
 }
 
 export const PRINCIPLES: Array<{ n: string; t: string; d: string }> = [
-  { n: '01', t: 'Verified or silent', d: 'Every reply passes a grounding guard. If it is not in your knowledge, NOVA says so and offers a human.' },
+  { n: '01', t: 'Verified or silent', d: 'Every reply passes a grounding guard. If it is not in your knowledge, XEVEN says so and offers a human.' },
   { n: '02', t: 'Your address, your server', d: 'Follow-up emails send from your SMTP, signed as your team. Local-first hosting, one-click erasure.' },
   { n: '03', t: 'Live in a day', d: 'One snippet, a training call, a test-drive. Politeness is engineered: proactive at most once per visit.' },
 ]
@@ -245,7 +245,7 @@ export const PRINCIPLES: Array<{ n: string; t: string; d: string }> = [
 export const FAQ: Array<{ q: string; a: string }> = [
   {
     q: 'Will it make things up?',
-    a: 'No — every reply passes a grounding guard against your knowledge. If the answer is not there, NOVA says it does not know and offers a human.',
+    a: 'No — every reply passes a grounding guard against your knowledge. If the answer is not there, XEVEN says it does not know and offers a human.',
   },
   {
     q: 'Do emails come from a robot address?',
@@ -253,7 +253,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: 'What about data privacy?',
-    a: 'Local-first: NOVA can run on your own server, and every customer record supports one-click erasure.',
+    a: 'Local-first: XEVEN can run on your own server, and every customer record supports one-click erasure.',
   },
   {
     q: 'How fast is setup?',
@@ -269,7 +269,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
 ]
 
-/* Demo booking (mirrors the nova-web briefing room). Slots are illustrative
+/* Demo booking (the classic briefing-room flow). Slots are illustrative
    request labels — confirmation happens with the team, like Chrono holds. */
 export const DEMO_FOCUS = ['Revenue + bookings', 'Support at scale', 'Something bespoke']
 

@@ -1,13 +1,13 @@
-import { WORLDS } from './nova'
+import { WORLDS } from './product'
 
-/* Worlds project model — the three live NOVA demo worlds. These are real
-   external interactive builds (nova-web/worlds); cards link out, and the
-   internal study route carries the worlds' own captions plus the open
-   link. No clients, metrics, or testimonials are claimed anywhere. */
+/* Worlds project model — the three live XEVEN demo worlds. These are real
+   external interactive builds; cards link out, and the internal study
+   route carries the worlds' own captions plus the open link. No clients,
+   metrics, or testimonials are claimed anywhere. */
 
 export { WORLDS }
-export type { World } from './nova'
-import type { World } from './nova'
+export type { World } from './product'
+import type { World } from './product'
 
 export const SLUGS = new Set(WORLDS.map((w) => w.slug))
 
