@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { INSTRUMENTS, SKILLS } from '../data/product'
 
-/* /services — the five instruments up close plus the six assistant skills
+/* /features — the five instruments up close plus the six assistant skills
    shown on the site. All copy sourced (see src/data/product.ts). */
 
-export default function Services() {
+export default function Features() {
   const [open, setOpen] = useState<number | null>(0)
   return (
     <div className="page">
-      <p className="mono">SERVICES — WHAT WE DO</p>
+      <p className="mono">FEATURES — WHAT IT DOES</p>
       <h1 className="page-title">Don’t read features. Play them.</h1>
       <div className="rows">
         {INSTRUMENTS.map((r, i) => (

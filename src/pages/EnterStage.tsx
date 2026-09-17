@@ -7,124 +7,14 @@ import { T } from '../motion'
 import { INSTRUMENTS, PRODUCT, TELEMETRY, TRIAL, TRUSTLINE, BOLT } from '../data/product'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
-/* Index — XEVEN, the AI employee SaaS: hero, five instruments, three-step
-   setup, worlds teaser, mechanism lab, finale. Frameless stations, one
-   timeline per property, transform/opacity only. All copy sourced from
-   the platform repo and marketing site (see src/data/product.ts). */
+/* Index — XEVEN home: hero, telemetry, instruments, measured play, trial
+   commission. Frameless stations, one timeline per property,
+   transform/opacity only. All copy sourced from the platform repo and
+   marketing site (see src/data/product.ts). */
 
 const CAPS = INSTRUMENTS
 
 const STEPS = TELEMETRY
-
-/* X console — matching HTML controls for the procedural mechanism.
-   Config + material are instant state writes the scene loop reads (never
-   React state in the hot path); the drag strip writes a bounded offset
-   (±0.9 rad) with keyboard parity. Reduced motion: all writes apply on
-   the next frame with no travel animation. */
-function XConsole() {
-  const [cfg, setCfg] = useState(xs.xcfg)
-  const [mat, setMat] = useState(xs.xmat)
-  const [deg, setDeg] = useState(() => Math.round((xs.xspin * 180) / Math.PI))
-  const drag = useRef<{ x: number; s: number } | null>(null)
-  const clampSpin = (v: number) => Math.min(0.9, Math.max(-0.9, v))
-  const applySpin = (v: number) => {
-    xs.xspin = clampSpin(v)
-    setDeg(Math.round((xs.xspin * 180) / Math.PI))
-  }
-
-  return (
-    <div className="x-console">
-      <div className="pills" role="group" aria-label="Mechanism configuration">
-        {(['auto', 'arrival', 'display', 'capability'] as const).map((c) => (
-          <button
-            key={c}
-            className={cfg === c ? 'pill' : 'pill pill-ghost'}
-            aria-pressed={cfg === c}
-            data-cursor
-            onClick={() => {
-              xs.xcfg = c
-              setCfg(c)
-            }}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-      <div className="pills" role="group" aria-label="Mechanism material">
-        {(['matte', 'metal', 'glass'] as const).map((m) => (
-          <button
-            key={m}
-            className={mat === m ? 'pill' : 'pill pill-ghost'}
-            aria-pressed={mat === m}
-            data-cursor
-            onClick={() => {
-              xs.xmat = m
-              setMat(m)
-            }}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
-      <div
-        className="x-stage"
-        role="slider"
-        tabIndex={0}
-        aria-label="Rotate the mechanism"
-        aria-valuemin={-51}
-        aria-valuemax={51}
-        aria-valuenow={deg}
-        aria-valuetext={`${deg} degrees`}
-        data-cursor
-        onPointerDown={(e) => {
-          try {
-            e.currentTarget.setPointerCapture(e.pointerId)
-          } catch {
-            /* synthetic / already-released pointers: drag still tracks */
-          }
-          drag.current = { x: e.clientX, s: xs.xspin }
-        }}
-        onPointerMove={(e) => {
-          if (!drag.current) return
-          applySpin(drag.current.s + (e.clientX - drag.current.x) / 220)
-        }}
-        onPointerUp={() => {
-          drag.current = null
-        }}
-        onPointerCancel={() => {
-          drag.current = null
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            e.preventDefault()
-            applySpin(xs.xspin + (e.key === 'ArrowLeft' ? -0.1 : 0.1))
-          }
-        }}
-      >
-        <span aria-hidden="true">DRAG ⟷ TO ROTATE</span>
-        <b>{deg}°</b>
-      </div>
-      <button className="pill pill-ghost" data-cursor onClick={() => applySpin(0)}>
-        Reset spin
-      </button>
-    </div>
-  )
-}
-
-/* Departure clock: local time, per-minute tick (one interval, one text
-   node — zero scroll-path cost). */
-function FootTime() {
-  const [now, setNow] = useState(() => new Date())
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30000)
-    return () => clearInterval(id)
-  }, [])
-  return (
-    <p className="mono foot-time">
-      {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} — LOCAL
-    </p>
-  )
-}
 
 export default function EnterStage() {
   const root = useRef<HTMLDivElement>(null!)
@@ -187,7 +77,7 @@ export default function EnterStage() {
         },
       )
 
-      // wordmark yields while the field owns the page, returns for departure
+      // wordmark yields while the field owns the page, returns at the trial
       const tbLogo = document.querySelector('.tb-logo')
       if (tbLogo) {
         gsap.to(tbLogo, {
@@ -198,7 +88,7 @@ export default function EnterStage() {
         gsap.to(tbLogo, {
           opacity: 1,
           ease: 'none',
-          scrollTrigger: { trigger: '.st-fin', start: 'top 95%', end: 'top 55%', scrub: 1.2 },
+          scrollTrigger: { trigger: '.st-trial', start: 'top 95%', end: 'top 55%', scrub: 1.2 },
         })
       }
 
@@ -298,31 +188,6 @@ export default function EnterStage() {
         },
       )
 
-      // mechanism lab rises as one sheet
-      gsap.fromTo(
-        '.x-console',
-        { y: 70, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: { trigger: '.st-xlab', start: 'top 80%', end: 'top 50%', scrub: 1.2 },
-        },
-      )
-
-      // finale title rises
-      gsap.fromTo(
-        '.st-fin h2',
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: { trigger: '.st-fin', start: 'top 85%', end: 'top 60%', scrub: 1.2 },
-        },
-      )
     }, root)
 
     // active process row: IntersectionObserver toggles a class (discrete —
@@ -429,7 +294,7 @@ export default function EnterStage() {
           <h2>{TRIAL.title}</h2>
           <p className="cap-desc">{TRIAL.lede}</p>
           <div className="pills">
-            <button className="pill" onClick={() => navigate('contact')} data-cursor>
+            <button className="pill" onClick={() => navigate('demo')} data-cursor>
               Start free trial →
             </button>
             <button className="pill pill-ghost" onClick={() => navigate('pricing')} data-cursor>
@@ -438,25 +303,6 @@ export default function EnterStage() {
           </div>
         </div>
       </section>
-
-      <section className="st-xlab">
-        <p className="mono">05 — MECHANISM</p>
-        <h2>ONE OBJECT, THREE STATES.</h2>
-        <p className="cap-desc">
-          The X behind this page is procedural — arrival holds the hero, display steps aside for
-          projects, capability tilts into the lattice. Drive it: configuration, material, spin.
-        </p>
-        <XConsole />
-      </section>
-
-      <footer className="st-fin">
-        <p className="mono">06 — DEPARTURE</p>
-        <h2>STEP INSIDE</h2>
-        <a href="mailto:hello@xeven.world" data-cursor>
-          hello@xeven.world
-        </a>
-        <FootTime />
-      </footer>
     </div>
   )
 }

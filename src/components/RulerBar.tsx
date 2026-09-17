@@ -1,19 +1,14 @@
 import { useEffect, useRef } from 'react'
-import { navigate, type Route } from '../app/store'
+import { navigate } from '../app/store'
+import type { Route } from '../app/store'
+import { NAV_LINKS } from '../nav'
 
 /* RulerBar: a fake left-edge ruler, mounted globally. Inch marks are the
-   main points (routes); cm ticks subdivide the travel between; a needle
-   rides page scroll top→bottom — cm by cm until the next inch. Clicking
-   an inch navigates. Hidden on small screens; scroll-linked (no animation)
-   so it stands down cleanly under reduced motion. */
-
-const INCHES: Array<{ n: string; label: string; to: Route }> = [
-  { n: '00', label: 'TOP', to: 'enter' },
-  { n: '01', label: 'VISION', to: 'vision' },
-  { n: '02', label: 'SERVICES', to: 'services' },
-  { n: '03', label: 'PRICING', to: 'pricing' },
-  { n: '04', label: 'CONTACT', to: 'contact' },
-]
+   main points (routes, from the single nav model); cm ticks subdivide the
+   travel between; a needle rides page scroll top→bottom — cm by cm until
+   the next inch. Clicking an inch navigates. Hidden on small screens;
+   scroll-linked (no animation) so it stands down cleanly under reduced
+   motion. */
 
 export default function RulerBar({ route }: { route: Route }) {
   const needle = useRef<HTMLDivElement>(null!)
@@ -45,11 +40,11 @@ export default function RulerBar({ route }: { route: Route }) {
       {/* subdivisions: exactly two cm ticks + one big mid-inch per gap,
           positioned at quarters so every gap reads identically */}
       <div className="ruler-subs" aria-hidden="true">
-        {INCHES.slice(0, -1).map((s, i) => (
+        {NAV_LINKS.slice(0, -1).map((s, i) => (
           <div
-            key={s.n}
+            key={s.to}
             className="ruler-gap"
-            style={{ top: `${(i / (INCHES.length - 1)) * 100}%`, height: `${100 / (INCHES.length - 1)}%` }}
+            style={{ top: `${(i / (NAV_LINKS.length - 1)) * 100}%`, height: `${100 / (NAV_LINKS.length - 1)}%` }}
           >
             <i className="ruler-cm" />
             <i className="ruler-mid" />
@@ -58,17 +53,17 @@ export default function RulerBar({ route }: { route: Route }) {
         ))}
       </div>
       <div className="ruler-inches" ref={track}>
-        {INCHES.map((s) => (
+        {NAV_LINKS.map((s, i) => (
           <button
-            key={s.n}
+            key={s.to}
             className={route === s.to ? 'ruler-inch ruler-on' : 'ruler-inch'}
             onClick={() => navigate(s.to)}
-            aria-label={`${s.n} — ${s.label}`}
+            aria-label={`0${i} — ${s.label}`}
             aria-current={route === s.to ? 'page' : undefined}
           >
-            <span className="ruler-n">{s.n}</span>
+            <span className="ruler-n">0{i}</span>
             <i className="ruler-tick" aria-hidden="true" />
-            <span className="ruler-tag">{s.label}</span>
+            <span className="ruler-tag">{s.short.toUpperCase()}</span>
           </button>
         ))}
       </div>

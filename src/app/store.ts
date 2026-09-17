@@ -1,6 +1,6 @@
 /* Shared mutable experience store. Plain object — never React state in hot paths. */
 
-export type Route = 'enter' | 'vision' | 'services' | 'pricing' | 'contact'
+export type Route = 'enter' | 'about' | 'features' | 'pricing' | 'demo'
 
 export interface XStore {
   route: Route
@@ -12,12 +12,6 @@ export interface XStore {
   scrollV: number
   /** smoothed scroll velocity 0..1 */
   vel: number
-  /** X mechanism: manual configuration override ('auto' follows route/scroll) */
-  xcfg: 'auto' | 'arrival' | 'display' | 'capability'
-  /** X mechanism: material preset */
-  xmat: 'matte' | 'metal' | 'glass'
-  /** X mechanism: bounded drag rotation offset, radians, clamped ±0.9 */
-  xspin: number
 }
 
 export const xs: XStore = {
@@ -27,24 +21,29 @@ export const xs: XStore = {
   entered: false,
   scrollV: 0,
   vel: 0,
-  xcfg: 'auto',
-  xmat: 'metal',
-  xspin: 0,
 }
 
 /** Animated navigation bus — App registers the curtain-wipe version. */
-export const navBus: { go?: (to: Route) => void } = {}
+export const navBus: { go?: (to: Route, query?: string) => void } = {}
 
 /** Scroll bus — App registers Lenis stop/start so overlays (menu) can
    lock page scroll without touching the Lenis instance directly. */
 export const scrollBus: { stop?: () => void; start?: () => void } = {}
 
-export function navigate(to: Route): void {
-  if (navBus.go) navBus.go(to)
-  else window.location.hash = `#/${to}`
+export function navigate(to: Route, query?: string): void {
+  const hash = query ? `#/${to}?${query}` : `#/${to}`
+  if (navBus.go) navBus.go(to, query)
+  else window.location.hash = hash
 }
 
-const KNOWN: Route[] = ['enter', 'vision', 'services', 'pricing', 'contact']
+/** Query value from hashes like `#/demo?plan=growth`. */
+export function hashQuery(key: string): string | null {
+  const q = window.location.hash.split('?')[1]
+  if (!q) return null
+  return new URLSearchParams(q.split('#')[0]).get(key)
+}
+
+const KNOWN: Route[] = ['enter', 'about', 'features', 'pricing', 'demo']
 
 export function routeFromHash(): Route {
   const h = window.location.hash.replace(/^#\/?/, '').split('?')[0]

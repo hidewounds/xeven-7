@@ -1,9 +1,9 @@
 import { BOLT, MISSION, PRINCIPLES } from '../data/product'
 
-/* /vision — mission, measured stats, principles. All sourced from the
+/* /about — mission, measured stats, principles. All sourced from the
    marketing site (see src/data/product.ts). */
 
-export default function Vision() {
+export default function About() {
   return (
     <div className="page">
       <p className="mono">{MISSION.kicker}</p>

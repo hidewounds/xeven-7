@@ -3,17 +3,12 @@ import gsap from 'gsap'
 import { navigate, scrollBus } from '../app/store'
 import { T } from '../motion'
 import type { Route } from '../app/store'
+import { MENU_LINKS } from '../nav'
 import { useMagnetic } from '../useMagnetic'
 
 /* TopBar: fixed, mix-blend-difference. Logotype, center index,
-   mobile fullscreen staggered overlay menu. Hidden on the gate. */
-
-const LINKS: { label: string; to: Route }[] = [
-  { label: 'Vision', to: 'vision' },
-  { label: 'Services', to: 'services' },
-  { label: 'Pricing', to: 'pricing' },
-  { label: 'Contact', to: 'contact' },
-]
+   mobile fullscreen staggered overlay menu. Links come from the single
+   nav model (see src/nav.ts). */
 
 export default function TopBar({ route }: { route: Route }) {
   const [open, setOpen] = useState(false)
@@ -100,7 +95,7 @@ export default function TopBar({ route }: { route: Route }) {
           XEVEN
         </button>
         <nav className="tb-center" aria-label="Primary">
-          {LINKS.map((l) => (
+          {MENU_LINKS.map((l) => (
             <button
               key={l.to}
               className={route === l.to ? 'tb-link is-here' : 'tb-link'}
@@ -138,12 +133,12 @@ export default function TopBar({ route }: { route: Route }) {
           <button ref={closeBtn} className="mnav-x" onClick={() => setOpen(false)} aria-label="Close menu" data-cursor>
             ×
           </button>
-          {LINKS.map((l) => (
+          {MENU_LINKS.map((l) => (
             <button key={l.to} className="mnav-link" onClick={() => { navigate(l.to); setOpen(false) }} data-cursor>
               {l.label}
             </button>
           ))}
-          <p className="mnav-foot">STEP BEYOND THE STATIC WEB</p>
+          <p className="mnav-foot">AI EMPLOYEE THAT CHANGES BUSINESS</p>
         </div>
       </div>
     </>

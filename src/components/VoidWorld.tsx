@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -45,19 +45,17 @@ const SECTIONS = [
   '.st-caps',
   '.st-bolt',
   '.st-trial',
-  '.st-xlab',
-  '.st-fin',
+  '.sitefoot',
 ]
 // camera journey: one stop per index section [x, y, z] — a descent that
-// dips closest at telemetry, drifts past instruments and proof, pauses at
-// the mechanism lab, then releases to departure
+// dips closest at telemetry, drifts past instruments and proof, then
+// releases through trial to the footer
 const WAYPOINTS: Array<[number, number, number]> = [
   [0, 0.4, 10],
   [-0.5, -0.2, 7.6],
   [0.5, 0, 8.6],
   [0, 0, 8.8],
   [-0.4, 0.2, 9.2],
-  [0.4, 0.1, 9.4],
   [0, 0.8, 11],
 ]
 interface Floater extends THREE.Mesh {
@@ -66,14 +64,6 @@ interface Floater extends THREE.Mesh {
 
 export default function VoidWorld() {
   const ref = useRef<HTMLCanvasElement>(null!)
-  // dev-only light/stage controls — `?tune` flag, never linked in UI.
-  // Hash routes carry the query inside the fragment (`#/enter?tune`), so
-  // flags are read from both search and hash (value or bare).
-  const hasFlag = (k: string) =>
-    new URLSearchParams(window.location.search).has(k) ||
-    new URLSearchParams((window.location.hash.split('?')[1] || '').split('#')[0]).has(k)
-  const [tune] = useState(() => hasFlag('tune'))
-  const tuneRef = useRef({ key: 1.15, rim: 14, spin: 1 })
 
   useEffect(() => {
     const canvas = ref.current
@@ -81,9 +71,13 @@ export default function VoidWorld() {
     const coarse =
       window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    // deterministic no-WebGL path for verification (`?nowebgl=1`) — same
-    // road as a real renderer failure: hide canvas, announce, content stands
-    const forceNoGL = hasFlag('nowebgl')
+    // deterministic no-WebGL path for verification (`?nowebgl=1`, in
+    // search or hash) — same road as a real renderer failure: hide
+    // canvas, announce, content stands
+    const hashQuery = (window.location.hash.split('?')[1] || '').split('#')[0]
+    const forceNoGL =
+      new URLSearchParams(window.location.search).has('nowebgl') ||
+      new URLSearchParams(hashQuery).has('nowebgl')
     const failGL = (reason: string) => {
       canvas.style.display = 'none'
       canvas.dataset.webgl = reason
@@ -446,50 +440,6 @@ export default function VoidWorld() {
       group.add(mesh)
     }
 
-    // ---- X mechanism: one procedural object, three authored states ----
-    // Two crossed bars in the existing lights. Arrival holds center behind
-    // the hero, display steps aside for project views, capability tilts
-    // into the lattice diagonal. Auto mode follows route + scroll; the
-    // console (matching HTML controls) overrides config, material, and a
-    // bounded drag rotation. One mesh pair, standard materials only.
-    const barGeo = new THREE.BoxGeometry(3.4, 0.55, 0.5)
-    const xMats = {
-      matte: new THREE.MeshStandardMaterial({ color: 0xe8edee, roughness: 0.92, metalness: 0 }),
-      metal: new THREE.MeshStandardMaterial({ color: 0xdfe7ea, roughness: 0.28, metalness: 1 }),
-      glass: new THREE.MeshStandardMaterial({
-        color: 0x9cf5d3, roughness: 0.12, metalness: 0.1,
-        transparent: true, opacity: 0.35,
-        emissive: 0x0b2b22, emissiveIntensity: 0.6,
-      }),
-    }
-    const xGroup = new THREE.Group()
-    const barA = new THREE.Mesh(barGeo, xMats[xs.xmat])
-    const barB = new THREE.Mesh(barGeo, xMats[xs.xmat])
-    barA.rotation.z = Math.PI / 4
-    barB.rotation.z = -Math.PI / 4
-    xGroup.add(barA, barB)
-    scene.add(xGroup)
-    const XCFG: Record<string, { p: [number, number, number]; rz: number; s: number }> = {
-      arrival: { p: [0, 0.3, -2.5], rz: 0, s: 1 },
-      display: { p: [3.6, -0.2, -4.5], rz: 0, s: 0.72 },
-      capability: { p: [-3.4, -0.6, -3.2], rz: 0.5, s: 0.85 },
-    }
-    let xMatNow = xs.xmat
-    let xSpinBase = 0
-    const xTarget = new THREE.Vector3(...XCFG.arrival.p)
-    const resolveXCfg = (onIndex: boolean): string => {
-      if (xs.xcfg !== 'auto') return xs.xcfg
-      if (!routeIsEnter()) return 'arrival'
-      if (!onIndex) return 'arrival'
-      const f = (n: number) => (n < fracs.length && fracs[n] >= 0 ? fracs[n] : -1)
-      // hero → arrival · telemetry/instruments → capability · proof/trial
-      // → display · console → capability · departure → arrival
-      if (f(1) >= 0 && progress >= f(1) && !(f(3) >= 0 && progress >= f(3))) return 'capability'
-      if (f(3) >= 0 && progress >= f(3) && !(f(5) >= 0 && progress >= f(5))) return 'display'
-      if (f(5) >= 0 && progress >= f(5) && !(f(6) >= 0 && progress >= f(6))) return 'capability'
-      return 'arrival'
-    }
-
     // ---- fingertip air feed: eased pointer + a short decaying trail.
     // Samples drop every ~40ms while inside; strengths drain per frame,
     // so the trail evaporates behind motion and vanishes at rest.
@@ -633,26 +583,6 @@ export default function VoidWorld() {
       quadUniforms.uTime.value = t
       quadUniforms.uVel.value = vBoost
 
-      // X mechanism: eased toward its authored state (lerped body =
-      // interruptible by scroll, route, or console), material swaps
-      // instantly, drag offset adds directly on top of the slow spin
-      const cfgName = resolveXCfg(onIndex)
-      const C = XCFG[cfgName] ?? XCFG.arrival
-      xTarget.set(C.p[0], C.p[1], C.p[2])
-      xGroup.position.lerp(xTarget, 0.06)
-      xGroup.rotation.z += (C.rz - xGroup.rotation.z) * 0.06
-      const sNow = xGroup.scale.x + (C.s - xGroup.scale.x) * 0.06
-      xGroup.scale.set(sNow, sNow, sNow)
-      if (xMatNow !== xs.xmat) {
-        xMatNow = xs.xmat
-        barA.material = xMats[xMatNow]
-        barB.material = xMats[xMatNow]
-      }
-      xSpinBase += dt * 0.12 * tuneRef.current.spin
-      xGroup.rotation.y = xSpinBase + xs.xspin
-      key.intensity = tuneRef.current.key
-      rim.intensity = tuneRef.current.rim
-
       renderer.render(scene, camera)
     }
 
@@ -735,24 +665,10 @@ export default function VoidWorld() {
       renderer.dispose()
     }
 
-    // place the X once for the static frame (auto config at load —
-    // same resolver the loop uses, no ticker needed)
-    const placeXStatic = () => {
-      const name = resolveXCfg(routeIsEnter() && fracs.some((f) => f >= 0))
-      const C = XCFG[name] ?? XCFG.arrival
-      xGroup.position.set(C.p[0], C.p[1], C.p[2])
-      xGroup.rotation.set(0, xs.xspin, C.rz)
-      xGroup.scale.set(C.s, C.s, C.s)
-      xMatNow = xs.xmat
-      barA.material = xMats[xMatNow]
-      barB.material = xMats[xMatNow]
-    }
-
     if (reduced) {
       // one clean static frame, zero ticker burn. Resize must explicitly
       // redraw (no ticker runs to do it) and unmount must run the full
       // disposal — the old branch leaked the ScrollTrigger + GPU objects.
-      placeXStatic()
       renderer.render(scene, camera)
       const onReducedResize = () => {
         camera.aspect = window.innerWidth / window.innerHeight
@@ -783,12 +699,6 @@ export default function VoidWorld() {
       setQuads: (v: boolean) => { quads.visible = v },
       setSolids: (v: boolean) => { group.visible = v },
       setStars: (v: boolean) => { stars.visible = v },
-      setX: (v: boolean) => { xGroup.visible = v },
-      setXCfg: (c: 'auto' | 'arrival' | 'display' | 'capability') => { xs.xcfg = c },
-      setXMat: (m: 'matte' | 'metal' | 'glass') => { xs.xmat = m },
-      setKey: (v: number) => { tuneRef.current.key = v },
-      setRim: (v: number) => { tuneRef.current.rim = v },
-      xState: () => ({ cfg: resolveXCfg(routeIsEnter() && fracs.some((f) => f >= 0)), mat: xMatNow, progress, fracs: [...fracs] }),
     }
 
     ticking = true
@@ -818,32 +728,5 @@ export default function VoidWorld() {
     }
   }, [])
 
-  const [tuneVals, setTuneVals] = useState({ key: 1.15, rim: 14, spin: 1 })
-  const setTune = (k: 'key' | 'rim' | 'spin', v: number) => {
-    tuneRef.current[k] = v
-    setTuneVals((t) => ({ ...t, [k]: v }))
-  }
-
-  return (
-    <>
-      <canvas ref={ref} className="world-fixed" aria-hidden="true" />
-      {tune && (
-        <div className="tune" role="group" aria-label="Development light controls">
-          <p className="mono">TUNE — DEV ONLY (?tune)</p>
-          <label>
-            KEY {tuneVals.key.toFixed(2)}
-            <input type="range" min={0} max={3} step={0.05} value={tuneVals.key} onChange={(e) => setTune('key', Number(e.target.value))} />
-          </label>
-          <label>
-            RIM {tuneVals.rim.toFixed(0)}
-            <input type="range" min={0} max={30} step={0.5} value={tuneVals.rim} onChange={(e) => setTune('rim', Number(e.target.value))} />
-          </label>
-          <label>
-            SPIN {tuneVals.spin.toFixed(2)}
-            <input type="range" min={0} max={3} step={0.05} value={tuneVals.spin} onChange={(e) => setTune('spin', Number(e.target.value))} />
-          </label>
-        </div>
-      )}
-    </>
-  )
+  return <canvas ref={ref} className="world-fixed" aria-hidden="true" />
 }

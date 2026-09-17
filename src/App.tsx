@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
+import SiteFooter from './components/SiteFooter'
 import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
@@ -12,10 +13,10 @@ import type { Route } from './app/store'
    chunks so the first paint is shell + copy only. */
 const Gate = lazy(() => import('./pages/Gate'))
 const EnterStage = lazy(() => import('./pages/EnterStage'))
-const Vision = lazy(() => import('./pages/Vision'))
-const Services = lazy(() => import('./pages/Services'))
+const About = lazy(() => import('./pages/About'))
+const Features = lazy(() => import('./pages/Features'))
 const Pricing = lazy(() => import('./pages/Pricing'))
-const Contact = lazy(() => import('./pages/Contact'))
+const Demo = lazy(() => import('./pages/Demo'))
 // VOIDWORLD unifies field + objects + cursor presence in one canvas, one
 // ticker, one journey — first paint never waits for three.js.
 const VoidWorld = lazy(() => import('./components/VoidWorld'))
@@ -74,14 +75,15 @@ export default function App() {
 
   useEffect(() => {
     let pending = 0
-    navBus.go = (to: Route) => {
-      if (to === xs.route && window.location.hash === `#/${to}`) return
+    navBus.go = (to: Route, query?: string) => {
+      const hash = query ? `#/${to}?${query}` : `#/${to}`
+      if (to === xs.route && window.location.hash === hash) return
       // interruptible: a second navigation retargets the pending switch
       // instead of queuing behind it
       window.clearTimeout(pending)
       setSwitching(true)
       pending = window.setTimeout(() => {
-        window.location.hash = `#/${to}`
+        window.location.hash = hash
       }, 450)
     }
     return () => {
@@ -136,12 +138,15 @@ export default function App() {
       <main id="main" key={route}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
-          {route === 'vision' && <Vision />}
-          {route === 'services' && <Services />}
+          {route === 'about' && <About />}
+          {route === 'features' && <Features />}
           {route === 'pricing' && <Pricing />}
-          {route === 'contact' && <Contact />}
+          {route === 'demo' && <Demo />}
         </Suspense>
       </main>
+      <Suspense fallback={null}>
+        <SiteFooter route={route} />
+      </Suspense>
       {intro && <Gate onEnter={finishIntro} />}
       {!booted && <XLoader onDone={finishBoot} />}
       {switching && (

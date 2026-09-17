@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
-/* Video slot with procedural fallback. Placeholder motion files are public
-   Google sample assets — replace src with licensed footage per slot.
-   preload="none", plays only in view, poster-only under reduced motion.
-   src is optional: without it the card is a poster study (used by the
-   worlds index, whose pieces are external interactive builds). */
+/* Video slot with procedural fallback. src is optional: without it the
+   card is a poster study. preload="none", plays only in view,
+   poster-only under reduced motion. */
 
 export const PH = {
   ink: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',

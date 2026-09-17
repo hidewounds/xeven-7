@@ -1,7 +1,7 @@
 /* XEVEN — single source of truth for every customer-facing fact on this
    site. Xeven is the SaaS, previously known as Nova. Every line below is
    shown on the NOVA marketing site (index, features, pricing + its
-   pricing-config.js single source of truth, checkout, worlds). Nothing
+   pricing-config.js single source of truth, checkout). Nothing
    from outside that site is claimed here: no clients, metrics beyond the
    site's own counters, testimonials, or team members. */
 
@@ -148,7 +148,7 @@ export const ADDONS: Array<{ n: string; d: string; p: string }> = [
 
 /* Vision (home footer + bolt stats). */
 export const MISSION = {
-  kicker: 'VISION — WHY WE EXIST',
+  kicker: 'ABOUT — WHY WE EXIST',
   title: 'Not just a widget.',
   lede:
     'AI employee that changes business — not just a widget. Chats 24/7, remembers every shopper, recovers carts, books with Chrono and talks with Echo.',

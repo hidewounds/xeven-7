@@ -12,7 +12,7 @@ export default function Pricing() {
   const [cycle, setCycle] = useState<Cycle>('m')
   return (
     <div className="page">
-      <p className="mono">PRICING — ENGAGE</p>
+      <p className="mono">PRICING — PLANS</p>
       <h1 className="page-title">Pay for intelligence, not seats.</h1>
       <p className="page-lede">
         {PRODUCT.trial} {cycle === 'y' ? 'Yearly billing saves 20% — setup free.' : 'Switch to yearly and save 20% — setup free.'}
@@ -45,7 +45,7 @@ export default function Pricing() {
                 <li key={f}>{f}</li>
               ))}
             </ul>
-            <button className="tier-go" onClick={() => navigate('contact')} data-cursor>
+            <button className="tier-go" onClick={() => navigate('demo', `plan=${t.n.toLowerCase()}`)} data-cursor>
               Begin with {t.n} →
             </button>
           </div>

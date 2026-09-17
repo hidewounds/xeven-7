@@ -1,19 +1,27 @@
 import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
-import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS } from '../data/product'
+import { hashQuery } from '../app/store'
+import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS, PLANS } from '../data/product'
 
-/* /contact — the briefing room. The demo booking flow: pick a focus,
-   a focus, leave a name and work email, hold a slot the way Chrono does.
-   POSTs to the studio inbox; success renders only after the server
-   confirms. Values survive failure; retry reuses them. A direct mailto
-   stays available throughout. */
+/* /demo — the briefing room. The demo booking flow: pick a focus, leave
+   a name and work email, hold a slot the way Chrono does. Arriving with
+   `?plan=<slug>` (e.g. from pricing) preselects that plan and attaches
+   it to the request. POSTs to the studio inbox; success renders only
+   after the server confirms. Values survive failure; retry reuses them.
+   A direct mailto stays available throughout. */
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export default function Contact() {
+const planSlug = (n: string) => n.toLowerCase()
+
+export default function Demo() {
+  const [plan] = useState(() => {
+    const q = (hashQuery('plan') || '').toLowerCase()
+    return PLANS.some((p) => planSlug(p.n) === q) ? q : null
+  })
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [focus, setFocus] = useState(DEMO_FOCUS[0])
@@ -46,6 +54,7 @@ export default function Contact() {
           email: email.trim(),
           focus,
           slot: `${slot} — held, like Chrono does`,
+          ...(plan ? { plan } : {}),
         }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -64,9 +73,14 @@ export default function Contact() {
 
   return (
     <div className="page">
-      <p className="mono">CONTACT — BRIEFING ROOM</p>
+      <p className="mono">DEMO — BRIEFING ROOM</p>
       <h1 className="page-title">Book a demo.</h1>
       <p className="page-lede">Thirty seconds. Then we talk shop. {DEMO_NOTE}</p>
+      {plan && (
+        <p className="pill pill-ghost" style={{ alignSelf: 'flex-start' }} aria-live="polite">
+          {plan[0].toUpperCase() + plan.slice(1)} plan selected — switch anytime
+        </p>
+      )}
       <div ref={card} className="form-card">
         {status === 'sent' ? (
           <div className="form-done">
