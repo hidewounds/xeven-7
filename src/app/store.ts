@@ -26,6 +26,10 @@ export const xs: XStore = {
 /** Animated navigation bus — App registers the curtain-wipe version. */
 export const navBus: { go?: (to: Route) => void } = {}
 
+/** Scroll bus — App registers Lenis stop/start so overlays (menu) can
+   lock page scroll without touching the Lenis instance directly. */
+export const scrollBus: { stop?: () => void; start?: () => void } = {}
+
 export function navigate(to: Route): void {
   if (navBus.go) navBus.go(to)
   else window.location.hash = `#/${to}`

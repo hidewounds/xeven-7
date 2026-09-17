@@ -5,7 +5,7 @@ import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
 import XLoader, { XMark } from './components/XLoader'
-import { navBus, routeFromHash, unknownHash, xs } from './app/store'
+import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
 /* Route-level code splitting: three.js / gsap SplitText ride in async
@@ -39,6 +39,8 @@ export default function App() {
     if (reduced) return
     const l = new Lenis({ lerp: 0.09, wheelMultiplier: 1.0, anchors: true })
     lenis.current = l
+    scrollBus.stop = () => l.stop()
+    scrollBus.start = () => l.start()
     l.on('scroll', ScrollTrigger.update)
     const tick = (time: number) => l.raf(time * 1000)
     gsap.ticker.add(tick)
@@ -47,6 +49,8 @@ export default function App() {
       gsap.ticker.remove(tick)
       l.destroy()
       lenis.current = null
+      scrollBus.stop = undefined
+      scrollBus.start = undefined
     }
   }, [reduced])
 

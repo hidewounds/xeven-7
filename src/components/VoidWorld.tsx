@@ -64,16 +64,28 @@ export default function VoidWorld() {
 
   useEffect(() => {
     const canvas = ref.current
+    if (!canvas) return
     const coarse =
       window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: !coarse,
-      powerPreference: 'low-power',
-    })
+    // WebGL setup failure must never take the content down: the canvas is
+    // a fixed decorative layer (aria-hidden) and every route renders
+    // semantic DOM independently of it. On failure hide the canvas and
+    // leave the page fully usable.
+    let renderer: THREE.WebGLRenderer
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: !coarse,
+        powerPreference: 'low-power',
+      })
+    } catch {
+      canvas.style.display = 'none'
+      canvas.dataset.webgl = 'failed'
+      return
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5))
     renderer.setSize(window.innerWidth, window.innerHeight)
 
@@ -596,11 +608,69 @@ export default function VoidWorld() {
       }
     }
 
+    // Explicit context-loss handling: an error boundary cannot catch GPU
+    // loss. On loss, stop the loop and hide the canvas so content stays
+    // readable; on restore, re-show and render one frame (full loop in
+    // the motion path via wake()).
+    const onLost = (e: Event) => {
+      e.preventDefault()
+      canvas.dataset.webgl = 'lost'
+      canvas.style.visibility = 'hidden'
+      if (ticking) {
+        ticking = false
+        gsap.ticker.remove(loop)
+      }
+    }
+    const onRestored = () => {
+      delete canvas.dataset.webgl
+      canvas.style.visibility = ''
+      if (reduced) {
+        renderer.render(scene, camera)
+      } else {
+        wake()
+      }
+    }
+    canvas.addEventListener('webglcontextlost', onLost, false)
+    canvas.addEventListener('webglcontextrestored', onRestored, false)
+
+    const disposeAll = () => {
+      canvas.removeEventListener('webglcontextlost', onLost, false)
+      canvas.removeEventListener('webglcontextrestored', onRestored, false)
+      gsap.ticker.remove(loop)
+      st.kill()
+      scene.traverse((o) => {
+        const mesh = o as THREE.Mesh
+        if (mesh.geometry) mesh.geometry.dispose()
+        const mat = mesh.material as THREE.Material | THREE.Material[] | undefined
+        if (Array.isArray(mat)) mat.forEach((mm) => mm.dispose())
+        else if (mat) mat.dispose()
+      })
+      renderer.dispose()
+    }
+
     if (reduced) {
-      // one clean static frame, zero ticker burn
+      // one clean static frame, zero ticker burn. Resize must explicitly
+      // redraw (no ticker runs to do it) and unmount must run the full
+      // disposal — the old branch leaked the ScrollTrigger + GPU objects.
       renderer.render(scene, camera)
-      window.addEventListener('resize', onResize)
-      return () => window.removeEventListener('resize', onResize)
+      const onReducedResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        computeWaypoints()
+        renderer.render(scene, camera)
+      }
+      const onReducedHash = () => {
+        onHash()
+        renderer.render(scene, camera)
+      }
+      window.addEventListener('resize', onReducedResize)
+      window.addEventListener('hashchange', onReducedHash)
+      return () => {
+        window.removeEventListener('resize', onReducedResize)
+        window.removeEventListener('hashchange', onReducedHash)
+        disposeAll()
+      }
     }
 
     computeWaypoints()
@@ -637,16 +707,7 @@ export default function VoidWorld() {
       window.removeEventListener('resize', onResize)
       window.removeEventListener('hashchange', onHash)
       document.removeEventListener('visibilitychange', onVis)
-      gsap.ticker.remove(loop)
-      st.kill()
-      scene.traverse((o) => {
-        const mesh = o as THREE.Mesh
-        if (mesh.geometry) mesh.geometry.dispose()
-        const mat = mesh.material as THREE.Material | THREE.Material[] | undefined
-        if (Array.isArray(mat)) mat.forEach((mm) => mm.dispose())
-        else if (mat) mat.dispose()
-      })
-      renderer.dispose()
+      disposeAll()
     }
   }, [])
 
