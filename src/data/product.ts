@@ -94,35 +94,42 @@ export interface Plan {
   m: number | null
   /** one-time setup; null = bespoke (yearly billing makes setup free) */
   setup: number | null
-  f: string[]
+  /** included, exactly as the pricing stage lists them */
+  inc: string[]
+  /** explicitly excluded on the pricing stage */
+  exc: string[]
 }
 
-/* Plans (pricing-config.js single source of truth + checkout plan
-   options). Yearly = 20% off monthly, setup free. */
+/* Plans (pricing-config.js single source of truth + the pricing stage's
+   own include/exclude lists). Yearly = 20% off monthly, setup free. */
 export const PLANS: Plan[] = [
   {
     n: 'Launch',
     m: 29,
     setup: 99,
-    f: ['1k chats · 50 knowledge items', 'Start free — $0 today', 'Cancel in one click'],
+    inc: ['1k conversations', '50 knowledge items', 'Widget + tracker', 'Memory + behavior'],
+    exc: ['Chrono booking', 'Echo voice', 'Custom rules'],
   },
   {
     n: 'Growth',
     m: 79,
     setup: 199,
-    f: ['10k conversations · 200 knowledge items', 'Chrono booking + Echo voice', 'Start free — $0 today'],
+    inc: ['10k conversations', '200 knowledge items', 'Chrono booking', 'Echo English voice'],
+    exc: ['Voice channel', 'Multilanguage', 'Custom rules'],
   },
   {
     n: 'Scale',
     m: 199,
     setup: 499,
-    f: ['50k chats · 500 knowledge items', 'All add-ons included', 'Start free — $0 today'],
+    inc: ['50k conversations', '500 knowledge items', 'Chrono + Echo + Voice', 'Multilanguage', '10 custom rules'],
+    exc: [],
   },
   {
     n: 'Custom',
     m: null,
     setup: null,
-    f: ['Bespoke · unlimited', 'Talk to us', 'Start free — $0 today'],
+    inc: ['Unlimited everything', 'All add-ons included', 'Bespoke setup', 'Full analysis'],
+    exc: [],
   },
 ]
 
@@ -137,6 +144,24 @@ export const TRIAL = {
   title: 'Fourteen days. $0 today.',
   lede: 'Live in one day. Cancel in one click.',
 }
+
+/* Live knowledge index (features page demo). Entries exactly as shown;
+   the empty state is the site's own guardrail line, rebranded. */
+export interface KBEntry {
+  t: string
+  c: string
+  k: string
+}
+
+export const KB: KBEntry[] = [
+  { t: 'Returns', c: '30-day returns, unused, receipt in email.', k: 'returns refund exchange' },
+  { t: 'Shipping', c: 'Free over the threshold at checkout; tracked 2–5 days.', k: 'shipping delivery tracked' },
+  { t: 'Booking', c: 'Ranked slots inside business hours; 5-minute holds; two-tap confirm.', k: 'booking appointment slot demo' },
+  { t: 'Trial', c: '14 days, $0 today, cancel in one click.', k: 'trial price plan cancel' },
+  { t: 'Voice', c: 'Widget mic plus phone handoff; transcription and natural voices.', k: 'voice call phone echo' },
+]
+
+export const KB_EMPTY = 'No verified answer — XEVEN hands off instead of inventing.'
 
 export const TRUSTLINE = ['ONE SNIPPET TO INSTALL', 'GROUNDED ANSWERS ONLY', 'AUDITED ACTIONS', 'CANCEL IN ONE CLICK']
 

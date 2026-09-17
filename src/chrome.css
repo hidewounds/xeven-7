@@ -324,6 +324,17 @@
 .team-chip { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; border: 1px solid var(--line); border-radius: 999px; padding: var(--s8) var(--s16); color: var(--muted); }
 .tier-price { font-family: var(--disp); font-size: 40px; color: var(--mint); margin: var(--s8) 0; }
 .tier ul { margin: var(--s16) 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; display: flex; flex-direction: column; gap: var(--s8); }
+.tier-na { color: var(--faint); }
+/* knowledge index demo (features): question in, verified answer out */
+.kb-demo { display: flex; flex-direction: column; gap: var(--s16); max-width: 640px; }
+.kb-demo input {
+  font: 16px var(--cond); color: var(--bone);
+  background: transparent; border: none; border-bottom: 1px solid var(--line-strong);
+  padding: var(--s12) 0; outline: none;
+}
+.kb-demo input:focus { border-color: var(--mint); }
+.kb-hit { font-size: 15px; color: var(--muted); margin: 0; }
+.kb-hit b { color: var(--bone); font-weight: 400; }
 
 .form-card { background: rgba(10, 15, 21, 0.88); border: 1px solid var(--line); border-radius: 24px; padding: var(--s32); max-width: 640px; }
 .form-card label { display: flex; flex-direction: column; gap: var(--s8); font-family: var(--mono); font-size: 11px; letter-spacing: 0.26em; color: var(--muted); margin-bottom: var(--s24); }

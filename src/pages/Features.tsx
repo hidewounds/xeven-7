@@ -1,8 +1,39 @@
 import { useState } from 'react'
-import { INSTRUMENTS, SKILLS } from '../data/product'
+import { INSTRUMENTS, KB, KB_EMPTY, SKILLS } from '../data/product'
 
-/* /features — the five instruments up close plus the six assistant skills
-   shown on the site. All copy sourced (see src/data/product.ts). */
+/* /features — the five instruments up close, the six assistant skills,
+   and the live knowledge index (ask, get a verified answer or an honest
+   handoff — exactly the site's own demo). All copy sourced. */
+
+/* Knowledge index demo: static client-side filter over the published
+   entries, mirroring the site's own index behavior. */
+function KBDemo() {
+  const [q, setQ] = useState('')
+  const f = q.toLowerCase().trim()
+  const hits = KB.filter((k) => !f || `${k.t} ${k.c} ${k.k}`.toLowerCase().includes(f))
+  return (
+    <div className="kb-demo">
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Try: returns, shipping, booking…"
+        autoComplete="off"
+        aria-label="Search the knowledge index"
+      />
+      <div role="status">
+        {hits.length ? (
+          hits.map((k) => (
+            <p key={k.t} className="kb-hit">
+              <b>{k.t}</b> · verified — {k.c}
+            </p>
+          ))
+        ) : (
+          <p className="kb-hit">{KB_EMPTY}</p>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function Features() {
   const [open, setOpen] = useState<number | null>(0)
@@ -34,6 +65,8 @@ export default function Features() {
           </span>
         ))}
       </div>
+      <p className="mono">KNOWLEDGE — VERIFIED OR SILENT</p>
+      <KBDemo />
     </div>
   )
 }

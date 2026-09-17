@@ -78,7 +78,7 @@ export default function Demo() {
       <p className="page-lede">Thirty seconds. Then we talk shop. {DEMO_NOTE}</p>
       {plan && (
         <p className="pill pill-ghost" style={{ alignSelf: 'flex-start' }} aria-live="polite">
-          {plan[0].toUpperCase() + plan.slice(1)} plan selected — switch anytime
+          {plan[0].toUpperCase() + plan.slice(1)} plan selected
         </p>
       )}
       <div ref={card} className="form-card">
@@ -94,6 +94,7 @@ export default function Demo() {
           </div>
         ) : (
           <form onSubmit={submit} noValidate>
+            <p className="mono" style={{ margin: '0 0 var(--s12)' }}>What should we focus on?</p>
             <div className="pills" role="group" aria-label="Demo focus" style={{ marginBottom: 'var(--s24)' }}>
               {DEMO_FOCUS.map((d) => (
                 <button

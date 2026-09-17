@@ -41,12 +41,21 @@ export default function Pricing() {
               {t.setup === null ? 'bespoke setup' : cycle === 'm' ? `+ $${t.setup} setup` : 'setup free ✓'}
             </p>
             <ul>
-              {t.f.map((f) => (
-                <li key={f}>{f}</li>
+              {t.inc.map((f) => (
+                <li key={f}>✓ {f}</li>
+              ))}
+              {t.exc.map((f) => (
+                <li key={f} className="tier-na">
+                  — {f}
+                </li>
               ))}
             </ul>
-            <button className="tier-go" onClick={() => navigate('demo', `plan=${t.n.toLowerCase()}`)} data-cursor>
-              Begin with {t.n} →
+            <button
+              className="tier-go"
+              onClick={() => navigate('demo', t.m === null ? undefined : `plan=${t.n.toLowerCase()}`)}
+              data-cursor
+            >
+              {t.m === null ? 'Book a call' : cycle === 'm' ? 'Start trial →' : 'Start yearly →'}
             </button>
           </div>
         ))}

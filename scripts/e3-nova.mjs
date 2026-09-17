@@ -60,6 +60,9 @@ M.pricingY = await page.evaluate(() => ({
   setup: document.querySelectorAll('.tier')[1]?.querySelector('.mono')?.textContent,
   launch: document.querySelectorAll('.tier')[0]?.querySelector('.tier-price')?.textContent,
   custom: document.querySelectorAll('.tier')[3]?.querySelector('.tier-price')?.textContent,
+  growthExc: Array.from(document.querySelectorAll('.tier')[1]?.querySelectorAll('.tier-na') ?? []).map((li) => li.textContent),
+  ctaTrial: document.querySelectorAll('.tier')[0]?.querySelector('.tier-go')?.textContent,
+  ctaCustom: document.querySelectorAll('.tier')[3]?.querySelector('.tier-go')?.textContent,
 }));
 M.footerPricing = await page.evaluate(() => !!document.querySelector('.sitefoot'));
 await page.click('.tier >> nth=2 >> .tier-go');
@@ -79,6 +82,15 @@ for (const r of ['about', 'features', 'pricing', 'demo']) {
     rail: document.querySelectorAll('.ruler').length,
   }));
 }
+// knowledge index: filters entries, honest on no match
+await page.goto(`${URL}#/features`, { waitUntil: 'load' });
+await page.waitForTimeout(800);
+await page.fill('.kb-demo input', 'shipping');
+await page.waitForTimeout(300);
+M.kbHit = await page.evaluate(() => document.querySelector('.kb-hit')?.textContent);
+await page.fill('.kb-demo input', 'zzz-no-such-thing');
+await page.waitForTimeout(300);
+M.kbMiss = await page.evaluate(() => document.querySelector('.kb-hit')?.textContent);
 for (const bad of ['#/worlds', '#/worlds/reactor', '#/vision', '#/services', '#/contact']) {
   await page.goto(`${URL}${bad}`, { waitUntil: 'load' });
   await page.waitForTimeout(700);
