@@ -1,22 +1,17 @@
 import { useState } from 'react'
+import { ROLES, SERVICES } from '../data/nova'
 
-/* /services — expanding rows. */
-
-const ROWS = [
-  { t: 'Living 3D Worlds', d: 'Real-time scenes with law and weather: product films, configurators, explorable brand space. Three.js + R3F, procedural-first, Draco-compressed delivery.' },
-  { t: 'Cinematic Motion', d: 'Scroll choreography, GSAP systems, SplitText typography, pinned sequences cut like film and timed to the frame.' },
-  { t: 'Interactive Systems', d: 'Cursor physics, magnetic controls, hover fields, shockwaves — interfaces that answer back, with reduced-motion parity.' },
-  { t: 'Realtime Systems', d: 'State, data and interaction wired live — configurators, dashboards, worlds that update in real time.' },
-]
+/* /services — what Xeven delivers around NOVA, plus the nine agent roles
+   the platform ships with. All copy sourced (see src/data/nova.ts). */
 
 export default function Services() {
   const [open, setOpen] = useState<number | null>(0)
   return (
     <div className="page">
       <p className="mono">SERVICES — WHAT WE DO</p>
-      <h1 className="page-title">Four disciplines. One world.</h1>
+      <h1 className="page-title">One employee, fully staffed.</h1>
       <div className="rows">
-        {ROWS.map((r, i) => (
+        {SERVICES.map((r, i) => (
           <div key={r.t} className={open === i ? 'row open' : 'row'}>
             <button className="row-head" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i} data-cursor>
               <span className="row-n">0{i + 1}</span>
@@ -29,6 +24,14 @@ export default function Services() {
               <p>{r.d}</p>
             </div>
           </div>
+        ))}
+      </div>
+      <p className="mono">NINE ROLES — ONE CLICK RE-STAFFS YOUR SITE</p>
+      <div className="team">
+        {ROLES.map((r) => (
+          <span key={r.n} className="team-chip" data-cursor title={r.d}>
+            {r.n}
+          </span>
         ))}
       </div>
     </div>

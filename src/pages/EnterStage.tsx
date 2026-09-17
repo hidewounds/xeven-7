@@ -5,69 +5,22 @@ import { SplitText } from 'gsap/SplitText'
 import { navigate, xs } from '../app/store'
 import type { Route } from '../app/store'
 import { T } from '../motion'
+import { INSTRUMENTS, PRODUCT, SETUP } from '../data/nova'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
-/* Index v3 — full site: hero, capabilities, process, worlds, finale.
-   Frameless stations, one timeline per property, transform/opacity only. */
+/* Index — NOVA, built by Xeven: hero, five instruments, three-step setup,
+   worlds teaser, mechanism lab, finale. Frameless stations, one timeline
+   per property, transform/opacity only. All copy sourced from the NOVA
+   platform repo and marketing site (see src/data/nova.ts). */
 
-const CAPS = [
-  { t: 'Living 3D Worlds', d: 'Real-time scenes that breathe, react and remember.', s: 'WebGL · GLSL · 60fps' },
-  { t: 'Cinematic Motion', d: 'Scroll-choreographed camera, cut like film.', s: 'GSAP · Scroll · Lenis' },
-  { t: 'Interactive Systems', d: 'Every pixel answers the pointer.', s: 'Pointer · State · Realtime' },
-  { t: 'Reactive Systems', d: 'Interfaces that sense, respond and adapt.', s: 'Sensors · Motion · Adapt' },
-]
+const CAPS = INSTRUMENTS
 
-const STEPS = [
-  {
-    n: '01',
-    t: 'Signal',
-    d: 'We listen first. Every world starts as a frequency.',
-    meta: 'PHASE 01 · LISTEN — WEEK 1',
-    points: [
-      'Deep-dive call — goals, audience, taboos.',
-      'Signal map: what the world must feel like.',
-      'One metric that decides launch.',
-    ],
-  },
-  {
-    n: '02',
-    t: 'Worldbuild',
-    d: 'Geometry, light and law — the physics of the place.',
-    meta: 'PHASE 02 · BUILD — WEEKS 2–3',
-    points: [
-      'Scene architecture and art direction.',
-      'Light, physics and layout laws.',
-      'Playable grey-box draft in your hands.',
-    ],
-  },
-  {
-    n: '03',
-    t: 'Ignite',
-    d: 'Motion and interaction switch on together.',
-    meta: 'PHASE 03 · MOTION — WEEK 4',
-    points: [
-      'Scroll choreography pass, cut like film.',
-      'Interaction and sound hooks wired.',
-      '60fps budget enforced on real hardware.',
-    ],
-  },
-  {
-    n: '04',
-    t: 'Live',
-    d: 'Ship it breathing. Tune it forever.',
-    meta: 'PHASE 04 · SHIP — ONGOING',
-    points: [
-      'Deploy, then measure the one metric.',
-      'Weekly tuning loop with your team.',
-      'You own everything — no hostages.',
-    ],
-  },
-]
+const STEPS = SETUP
 
 const TEASE: Array<{ t: string; d: string; c: string; to: Route }> = [
-  { t: 'Worlds', d: 'Built locations, not pages.', c: 'tease-ember', to: 'worlds' },
-  { t: 'Vision', d: 'Why the static web is over.', c: 'tease-mint', to: 'vision' },
-  { t: 'Services', d: 'Four disciplines, one world.', c: 'tease-bone', to: 'services' },
+  { t: 'Worlds', d: 'Three live demo worlds: Reactor, Helm, Melt.', c: 'tease-ember', to: 'worlds' },
+  { t: 'Vision', d: 'Why the static website is over.', c: 'tease-mint', to: 'vision' },
+  { t: 'Services', d: 'Platform, booking, voice, knowledge.', c: 'tease-bone', to: 'services' },
 ]
 
 /* X console — matching HTML controls for the procedural mechanism.
@@ -403,9 +356,9 @@ export default function EnterStage() {
             <line x1="152" y1="48" x2="48" y2="152" stroke="#9cf5d3" strokeWidth="16" />
           </svg>
         )}
-        <p className="mono st-fade">00 — TOP</p>
-        <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
-        <p className="st-sub st-fade">Experience engine. Living systems. Nothing static survives.</p>
+        <p className="mono st-fade">{PRODUCT.byline} — 00 TOP</p>
+        <h1 className="st-hero-title">{PRODUCT.hero}</h1>
+        <p className="st-sub st-fade">{PRODUCT.sub}</p>
         <p className="st-hint">
           <span>scroll to explore →</span>
           <i className="st-cue" aria-hidden="true">
@@ -415,7 +368,7 @@ export default function EnterStage() {
       </section>
 
       <section className="st-caps">
-        <p className="mono">01 — CAPABILITIES</p>
+        <p className="mono">01 — INSTRUMENTS</p>
         {CAPS.map((c, i) => (
           <article key={c.t} className="cap-station" aria-label={`${c.t}, capability ${i + 1} of ${CAPS.length}`}>
             <span className="cap-ghost" aria-hidden="true">
@@ -432,7 +385,7 @@ export default function EnterStage() {
       </section>
 
       <section className="st-proc">
-        <p className="mono">02 — PROCESS</p>
+        <p className="mono">02 — SETUP · LIVE IN A DAY</p>
         <i className="thread-node" aria-hidden="true" />
         <div className="proc-line" aria-hidden="true">
           <i className="proc-stub" />

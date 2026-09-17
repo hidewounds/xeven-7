@@ -1,18 +1,18 @@
 import { useEffect } from 'react'
 import VideoCard from '../components/VideoCard'
-import { WORKS } from '../data/works'
+import { WORLDS } from '../data/works'
 
-/* /worlds/<slug> — single motion-study view. Content is limited to what
-   the study actually is (discipline + focus + the piece itself): no
-   clients, metrics, or testimonials are claimed. Prev/next walk the
-   index order; Back returns to the grid, which restores filter, scroll,
-   and focus from session memory. */
+/* /worlds/<slug> — single demo-world view. Copy is limited to the worlds'
+   own published captions: no clients, metrics, or testimonials are
+   claimed. The piece itself is an external interactive build — this page
+   presents it and hands off. Prev/next walk the index order; Back returns
+   to the grid, which restores filter, scroll, and focus from memory. */
 
 export default function WorldDetail({ slug }: { slug: string }) {
-  const i = WORKS.findIndex((w) => w.slug === slug)
-  const work = i >= 0 ? WORKS[i] : null
-  const prev = i > 0 ? WORKS[i - 1] : null
-  const next = i >= 0 && i < WORKS.length - 1 ? WORKS[i + 1] : null
+  const i = WORLDS.findIndex((w) => w.slug === slug)
+  const work = i >= 0 ? WORLDS[i] : null
+  const prev = i > 0 ? WORLDS[i - 1] : null
+  const next = i >= 0 && i < WORLDS.length - 1 ? WORLDS[i + 1] : null
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -42,19 +42,22 @@ export default function WorldDetail({ slug }: { slug: string }) {
   return (
     <div className="page">
       <p className="mono">
-        WORLDS — STUDY {String(i + 1).padStart(2, '0')} / {String(WORKS.length).padStart(2, '0')}
+        WORLDS — STUDY {String(i + 1).padStart(2, '0')} / {String(WORLDS.length).padStart(2, '0')}
       </p>
       <h1 className="page-title" tabIndex={-1} id="study-title">
         {work.title}
       </h1>
-      <p className="page-lede">
-        {work.tag} — {work.sub}. A studio motion study: technique and feel, not client work.
-      </p>
-      <VideoCard src={work.src} title={work.title} sub={`${work.tag} — ${work.sub}`} poster={work.poster} />
+      <p className="page-lede">{work.caption}</p>
+      <VideoCard title={work.title} sub={`${work.tag} — ${work.sub}`} poster={work.poster} />
       <div className="study-nav">
-        <a className="pill" href="#/worlds" data-cursor aria-label="Back to all worlds">
-          ← All worlds
-        </a>
+        <span className="study-steps">
+          <a className="pill" href="#/worlds" data-cursor aria-label="Back to all worlds">
+            ← All worlds
+          </a>
+          <a className="pill pill-ghost" href={work.href} target="_blank" rel="noreferrer" data-cursor>
+            Open the live world ↗
+          </a>
+        </span>
         <span className="study-steps">
           {prev && (
             <a className="pill pill-ghost" href={`#/worlds/${prev.slug}`} data-cursor aria-label={`Previous study: ${prev.title}`}>

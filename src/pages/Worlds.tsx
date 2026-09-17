@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
 import VideoCard from '../components/VideoCard'
-import { FILTERS, WORKS, loadWorldsMemory, saveWorldsMemory } from '../data/works'
+import { FILTERS, WORLDS, loadWorldsMemory, saveWorldsMemory, workFilter } from '../data/works'
 
-/* /worlds — grid of study cards with filter pills. Cards are real links
-   to stable study routes (`#/worlds/<slug>`, shareable, titled), so
-   keyboard, touch, and screen-reader users get the same index as pointer
-   users. Activating a card stores filter + scroll + identity so Back
-   restores the exact grid position and focus. */
+/* /worlds — the three live NOVA demo worlds. Cards are real links to
+   stable study routes (`#/worlds/<slug>`), so keyboard, touch, and
+   screen-reader users get the same index as pointer users. Activating a
+   card stores filter + scroll + identity so Back restores the exact grid
+   position and focus. */
 
 export default function Worlds() {
   const [mem] = useState(loadWorldsMemory)
   const [f, setF] = useState(mem && FILTERS.includes(mem.f) ? mem.f : 'All')
-  const list = WORKS.filter((w) => f === 'All' || w.tag === f)
+  const list = WORLDS.filter((w) => workFilter(w, f))
 
   // restore scroll + focus after returning from a study; otherwise start
   // at the top (fresh visit). Focus restores even when there was no
@@ -42,8 +42,11 @@ export default function Worlds() {
 
   return (
     <div className="page">
-      <p className="mono">WORLDS — SELECTED SYSTEMS</p>
-      <h1 className="page-title">Built worlds.</h1>
+      <p className="mono">WORLDS — LIVE DEMOS</p>
+      <h1 className="page-title">Three live worlds.</h1>
+      <p className="page-lede">
+        Interactive builds running on the NOVA site — sound optional, everything works silent.
+      </p>
       <div className="pills" role="group" aria-label="Filter worlds">
         {FILTERS.map((p) => (
           <button key={p} className={f === p ? 'pill' : 'pill pill-ghost'} onClick={() => pick(p)} data-cursor aria-pressed={f === p}>
@@ -62,7 +65,7 @@ export default function Worlds() {
             data-cursor
             aria-label={`${w.title}, ${w.tag}, ${w.sub} — open study`}
           >
-            <VideoCard src={w.src} title={w.title} sub={`${w.tag} — ${w.sub}`} poster={w.poster} />
+            <VideoCard title={w.title} sub={`${w.tag} — ${w.sub}`} poster={w.poster} />
           </a>
         ))}
       </div>

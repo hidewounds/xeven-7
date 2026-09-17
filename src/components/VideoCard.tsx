@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 
 /* Video slot with procedural fallback. Placeholder motion files are public
    Google sample assets — replace src with licensed footage per slot.
-   preload="none", plays only in view, poster-only under reduced motion. */
+   preload="none", plays only in view, poster-only under reduced motion.
+   src is optional: without it the card is a poster study (used by the
+   worlds index, whose pieces are external interactive builds). */
 
 export const PH = {
   ink: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
@@ -12,7 +14,7 @@ export const PH = {
   metal: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
 }
 
-export default function VideoCard({ src, title, sub, poster }: { src: string; title: string; sub?: string; poster?: string }) {
+export default function VideoCard({ src, title, sub, poster }: { src?: string; title: string; sub?: string; poster?: string }) {
   const vref = useRef<HTMLVideoElement>(null!)
   const wrap = useRef<HTMLDivElement>(null!)
   const seeing = useRef(false)
@@ -48,7 +50,8 @@ export default function VideoCard({ src, title, sub, poster }: { src: string; ti
   return (
     <div ref={wrap} className="vid" data-cursor>
       <div className="vid-fallback" aria-hidden="true" />
-      {!reduced && <video ref={vref} src={src} poster={poster} muted loop playsInline preload="none" />}
+      {poster && <img className="vid-poster" src={poster} alt="" aria-hidden="true" loading="lazy" />}
+      {src && !reduced && <video ref={vref} src={src} poster={poster} muted loop playsInline preload="none" />}
       <div className="vid-meta">
         <p>{title}</p>
         {sub ? <span>{sub}</span> : null}

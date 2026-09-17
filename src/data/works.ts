@@ -1,30 +1,21 @@
-import { PH } from '../components/VideoCard'
+import { WORLDS } from './nova'
 
-/* Worlds project model — one record per motion study. These are studio
-   technique pieces (discipline + study focus), not client case work:
-   no clients, metrics, or testimonials are claimed anywhere. */
+/* Worlds project model — the three live NOVA demo worlds. These are real
+   external interactive builds (nova-web/worlds); cards link out, and the
+   internal study route carries the worlds' own captions plus the open
+   link. No clients, metrics, or testimonials are claimed anywhere. */
 
-export interface Work {
-  slug: string
-  title: string
-  tag: string
-  sub: string
-  src: string
-  poster: string
+export { WORLDS }
+export type { World } from './nova'
+import type { World } from './nova'
+
+export const SLUGS = new Set(WORLDS.map((w) => w.slug))
+
+export const FILTERS = ['All', 'GLSL', 'Console', 'Shader']
+
+export function workFilter(w: World, f: string): boolean {
+  return f === 'All' || w.tag === f
 }
-
-export const WORKS: Work[] = [
-  { slug: 'ink-study', title: 'Ink Study', tag: '3D', sub: 'fluid system', src: PH.ink, poster: '/posters/ink.svg' },
-  { slug: 'night-passage', title: 'Night Passage', tag: 'Motion', sub: 'aerial drift', src: PH.aerial, poster: '/posters/aerial.svg' },
-  { slug: 'chrome-drift', title: 'Chrome Drift', tag: '3D', sub: 'metal study', src: PH.chrome, poster: '/posters/chrome.svg' },
-  { slug: 'signal-head', title: 'Signal Head', tag: 'System', sub: 'particle identity', src: PH.head, poster: '/posters/head.svg' },
-  { slug: 'melt-04', title: 'Melt 04', tag: 'Motion', sub: 'heat study', src: PH.metal, poster: '/posters/metal.svg' },
-  { slug: 'undertow', title: 'Undertow', tag: 'System', sub: 'current logic', src: PH.ink, poster: '/posters/undertow.svg' },
-]
-
-export const SLUGS = new Set(WORKS.map((w) => w.slug))
-
-export const FILTERS = ['All', '3D', 'Motion', 'System']
 
 /* Persisted index state so Back from a study restores filter, scroll,
    and focus instead of resetting the grid. */
