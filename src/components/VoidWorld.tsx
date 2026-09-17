@@ -208,26 +208,14 @@ export default function VoidWorld() {
         varying float vSeed;
         varying float vQI;
         varying float vQJ;
-        uniform vec3 uTrail[5];
-        uniform vec2 uWakeVel;
         void main() {
           vUv = uv;
           vSeed = aSeed;
           vQI = aQI;
           vQJ = aQJ;
+          // diamonds never move — the cursor bends no geometry. All
+          // liquid lives in the glass (fragment), positions stay parked.
           vec4 wp = modelMatrix * instanceMatrix * vec4(position, 1.0);
-          // fingertip air: the head + its short trail bend the medium at
-          // touch scale (σ≈0.8u), gated by damped speed — dead at rest.
-          // No body, no glow, no trail geometry; only the bend reads.
-          float wspd = min(1.0, length(uWakeVel) * 0.35);
-          vec2 bend = vec2(0.0);
-          for (int i = 0; i < 5; i++) {
-            vec2 tdir = wp.xy - uTrail[i].xy;
-            float td = length(tdir);
-            float tfall = exp(-td * td / 1.3);
-            bend -= (tdir / max(td, 1e-3)) * (tfall * uTrail[i].z * 0.25);
-          }
-          wp.xy += bend * wspd;
           vWorld = wp.xyz;
           gl_Position = projectionMatrix * viewMatrix * wp;
         }
@@ -268,9 +256,24 @@ export default function VoidWorld() {
           // presence where the medium bends — alive with a slow shimmer,
           // visible, never prominent
           float wspd = min(1.0, length(uWakeVel) * 0.35);
-          float air = 0.0;
+          // liquid glass: a rotational + radial ripple around each trail
+          // tap warps the glass lookups below — the diamonds stay parked,
+          // only the tint and air flow. Gated by speed: dead at rest.
+          vec2 flow = vec2(0.0);
           for (int i = 0; i < 5; i++) {
-            vec2 adp = vWorld.xy - uTrail[i].xy;
+            vec2 ldp = vWorld.xy - uTrail[i].xy;
+            float ld = length(ldp);
+            float lfall = exp(-ld * ld / 2.6) * uTrail[i].z;
+            vec2 ldir = ldp / max(ld, 1e-3);
+            vec2 swirl = vec2(-ldir.y, ldir.x);
+            float ripple = sin(ld * 6.0 - uTime * 7.0) * 0.5 + 0.5;
+            flow += (swirl * 0.35 + ldir * (ripple - 0.5) * 0.3) * lfall;
+          }
+          flow *= wspd;
+          float air = 0.0;
+          vec2 wpos = vWorld.xy + flow * 0.5;
+          for (int i = 0; i < 5; i++) {
+            vec2 adp = wpos - uTrail[i].xy;
             air += exp(-dot(adp, adp) / 1.3) * uTrail[i].z;
           }
           float breathe = 0.85 + 0.15 * sin(uTime * 6.0 + vWorld.x * 8.0 + vWorld.y * 6.0);
@@ -280,10 +283,11 @@ export default function VoidWorld() {
           // motion), stirred brighter under the pointer. Never white,
           // never loud: visible but not prominent.
           float tt = uTime * uDrift;
+          vec2 gpos = vWorld.xy * 0.35 + flow;
           vec3 theme = vec3(
-            0.5 + 0.5 * sin(vQI * 0.45 + tt * 0.15),
-            0.5 + 0.5 * sin(vQJ * 0.45 + tt * 0.12 + 2.1),
-            0.5 + 0.5 * sin((vQI + vQJ) * 0.3 + tt * 0.1 + 4.2));
+            0.5 + 0.5 * sin(gpos.x * 2.1 + tt * 0.15),
+            0.5 + 0.5 * sin(gpos.y * 2.3 + tt * 0.12 + 2.1),
+            0.5 + 0.5 * sin((gpos.x + gpos.y) * 1.6 + tt * 0.1 + 4.2));
           theme = mix(vec3(0.35), theme, 0.55);
           col += theme * uThemeAmt * (0.6 + air * 1.6) * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
