@@ -9,11 +9,10 @@ import { navigate, type Route } from '../app/store'
 
 const INCHES: Array<{ n: string; label: string; to: Route }> = [
   { n: '00', label: 'TOP', to: 'enter' },
-  { n: '01', label: 'WORLDS', to: 'worlds' },
-  { n: '02', label: 'VISION', to: 'vision' },
-  { n: '03', label: 'SERVICES', to: 'services' },
-  { n: '04', label: 'PRICING', to: 'pricing' },
-  { n: '05', label: 'CONTACT', to: 'contact' },
+  { n: '01', label: 'VISION', to: 'vision' },
+  { n: '02', label: 'SERVICES', to: 'services' },
+  { n: '03', label: 'PRICING', to: 'pricing' },
+  { n: '04', label: 'CONTACT', to: 'contact' },
 ]
 
 export default function RulerBar({ route }: { route: Route }) {

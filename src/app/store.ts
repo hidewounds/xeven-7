@@ -1,8 +1,6 @@
-import { SLUGS } from '../data/works'
-
 /* Shared mutable experience store. Plain object — never React state in hot paths. */
 
-export type Route = 'enter' | 'worlds' | 'vision' | 'services' | 'pricing' | 'contact'
+export type Route = 'enter' | 'vision' | 'services' | 'pricing' | 'contact'
 
 export interface XStore {
   route: Route
@@ -46,36 +44,19 @@ export function navigate(to: Route): void {
   else window.location.hash = `#/${to}`
 }
 
-const KNOWN: Route[] = ['enter', 'worlds', 'vision', 'services', 'pricing', 'contact']
+const KNOWN: Route[] = ['enter', 'vision', 'services', 'pricing', 'contact']
 
 export function routeFromHash(): Route {
   const h = window.location.hash.replace(/^#\/?/, '').split('?')[0]
-  // study routes (#/worlds/<slug>) render inside the worlds index
-  if (h === 'worlds' || h.startsWith('worlds/')) return 'worlds'
   return (KNOWN.includes(h as Route) ? h : 'enter') as Route
-}
-
-/** Study slug from `#/worlds/<slug>`, or null on the index / elsewhere. */
-export function projectFromHash(): string | null {
-  const h = window.location.hash.replace(/^#\/?/, '').split('?')[0]
-  if (!h.startsWith('worlds/')) return null
-  const slug = h.slice('worlds/'.length).split('/')[0]
-  return slug ? slug : null
 }
 
 /** True for non-empty unknown `#/route` hashes — the 404 case.
  * Bare fragments (`#main`, `#cursor-debug`) are in-page anchors, never
- * routes: stomping them would break the skip link and debug flags.
- * `#/worlds/<slug>` is valid only for known study slugs. */
+ * routes: stomping them would break the skip link and debug flags. */
 export function unknownHash(): boolean {
   const hash = window.location.hash
   if (!hash.startsWith('#/')) return false
   const h = hash.replace(/^#\/?/, '').split('?')[0]
-  if (h === '') return false
-  if (h === 'worlds' || KNOWN.includes(h as Route)) return false
-  if (h.startsWith('worlds/')) {
-    const slug = h.slice('worlds/'.length).split('/')[0]
-    return !SLUGS.has(slug)
-  }
-  return true
+  return h !== '' && !KNOWN.includes(h as Route)
 }

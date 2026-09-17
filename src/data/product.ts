@@ -90,94 +90,61 @@ export const SKILLS = ['Support', 'Sales', 'Shopping', 'Advisor', 'Booking', 'Le
 
 export interface Plan {
   n: string
-  p: string
-  setup: string
+  /** monthly price; null = bespoke */
+  m: number | null
+  /** one-time setup; null = bespoke (yearly billing makes setup free) */
+  setup: number | null
   f: string[]
 }
 
-/* Plans (pricing-config.js + checkout plan options). Yearly saves 20% off
-   monthly, per the pricing toggle and config. */
+/* Plans (pricing-config.js single source of truth + checkout plan
+   options). Yearly = 20% off monthly, setup free. */
 export const PLANS: Plan[] = [
   {
     n: 'Launch',
-    p: '$29/mo',
-    setup: '+ $99 setup',
+    m: 29,
+    setup: 99,
     f: ['1k chats · 50 knowledge items', 'Start free — $0 today', 'Cancel in one click'],
   },
   {
     n: 'Growth',
-    p: '$79/mo',
-    setup: '+ $199 setup',
+    m: 79,
+    setup: 199,
     f: ['10k conversations · 200 knowledge items', 'Chrono booking + Echo voice', 'Start free — $0 today'],
   },
   {
     n: 'Scale',
-    p: '$199/mo',
-    setup: '+ $499 setup',
+    m: 199,
+    setup: 499,
     f: ['50k chats · 500 knowledge items', 'All add-ons included', 'Start free — $0 today'],
   },
   {
     n: 'Custom',
-    p: 'from $499',
-    setup: 'bespoke setup',
+    m: null,
+    setup: null,
     f: ['Bespoke · unlimited', 'Talk to us', 'Start free — $0 today'],
   },
 ]
+
+/** Yearly total: 20% off monthly, billed annually. */
+export function yearlyTotal(m: number): number {
+  return Math.round(m * 0.8 * 12)
+}
+
+/* Trial commission (home commission section). */
+export const TRIAL = {
+  kicker: 'NEW GAME+ — FINAL BOSS: MISSED REVENUE',
+  title: 'Fourteen days. $0 today.',
+  lede: 'Live in one day. Cancel in one click.',
+}
+
+export const TRUSTLINE = ['ONE SNIPPET TO INSTALL', 'GROUNDED ANSWERS ONLY', 'AUDITED ACTIONS', 'CANCEL IN ONE CLICK']
 
 export const ADDONS: Array<{ n: string; d: string; p: string }> = [
   { n: 'Voice Channel', d: 'Phone calls + widget mic', p: 'from $19/mo' },
   { n: 'Multi-Language', d: 'Auto-detect chat; voice varies by provider', p: 'from $12/mo' },
   { n: 'Custom Behaviour Pack', d: '+5 rules on any plan', p: 'from $12/mo' },
 ]
-
-/* The three live demo worlds. Captions are the worlds' own words. These
-   are external interactive builds; cards link out. */
-export interface World {
-  slug: string
-  title: string
-  tag: string
-  sub: string
-  caption: string
-  href: string
-  poster: string
-}
-
-const WORLD_BASE = 'https://nova-web.vercel.app/worlds'
-
-export const WORLDS: World[] = [
-  {
-    slug: 'reactor',
-    title: 'Reactor',
-    tag: 'GLSL',
-    sub: 'particle core',
-    caption:
-      'GLSL core, 2000 particles. Move to stir, press and hold anywhere to charge the core — release to detonate. Scroll to travel.',
-    href: `${WORLD_BASE}/w1-reactor.html`,
-    poster: '/posters/reactor.svg',
-  },
-  {
-    slug: 'helm',
-    title: 'Helm',
-    tag: 'Console',
-    sub: 'mission control',
-    caption:
-      'A working mission console — switches, telemetry, and a countdown launch. Every control live.',
-    href: `${WORLD_BASE}/w2-helm.html`,
-    poster: '/posters/helm.svg',
-  },
-  {
-    slug: 'melt',
-    title: 'Melt',
-    tag: 'Shader',
-    sub: 'liquid metal',
-    caption:
-      'Liquid-metal shader. Cursor disturbs, drag smears, scroll morphs. Sound optional — everything works silent.',
-    href: `${WORLD_BASE}/w3-melt.html`,
-    poster: '/posters/melt.svg',
-  },
-]
-
-export const SLUGS = new Set(WORLDS.map((w) => w.slug))
 
 /* Vision (home footer + bolt stats). */
 export const MISSION = {

@@ -3,9 +3,8 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import { navigate, xs } from '../app/store'
-import type { Route } from '../app/store'
 import { T } from '../motion'
-import { INSTRUMENTS, PRODUCT, TELEMETRY } from '../data/product'
+import { INSTRUMENTS, PRODUCT, TELEMETRY, TRIAL, TRUSTLINE, BOLT } from '../data/product'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
 /* Index — XEVEN, the AI employee SaaS: hero, five instruments, three-step
@@ -16,12 +15,6 @@ gsap.registerPlugin(ScrollTrigger, SplitText)
 const CAPS = INSTRUMENTS
 
 const STEPS = TELEMETRY
-
-const TEASE: Array<{ t: string; d: string; c: string; to: Route }> = [
-  { t: 'Worlds', d: 'Three live demo worlds: Reactor, Helm, Melt.', c: 'tease-ember', to: 'worlds' },
-  { t: 'Vision', d: 'An employee, not a widget.', c: 'tease-mint', to: 'vision' },
-  { t: 'Services', d: 'Conversation, memory, booking, voice, knowledge.', c: 'tease-bone', to: 'services' },
-]
 
 /* X console — matching HTML controls for the procedural mechanism.
    Config + material are instant state writes the scene loop reads (never
@@ -280,9 +273,9 @@ export default function EnterStage() {
         )
       })
 
-      // worlds teaser lands in stagger
+      // measured play + trial commission rise as sheets
       gsap.fromTo(
-        '.tease-card',
+        '.bolt-stat',
         { y: 70, opacity: 0 },
         {
           y: 0,
@@ -290,7 +283,18 @@ export default function EnterStage() {
           ease: 'none',
           stagger: 0.08,
           immediateRender: false,
-          scrollTrigger: { trigger: '.tease-grid', start: 'top 85%', end: 'top 45%', scrub: 1.2 },
+          scrollTrigger: { trigger: '.st-bolt', start: 'top 80%', end: 'top 45%', scrub: T.scrub },
+        },
+      )
+      gsap.fromTo(
+        '.st-trial .trial-card',
+        { y: 70, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: { trigger: '.st-trial', start: 'top 80%', end: 'top 50%', scrub: T.scrub },
         },
       )
 
@@ -367,25 +371,8 @@ export default function EnterStage() {
         </p>
       </section>
 
-      <section className="st-caps">
-        <p className="mono">01 — INSTRUMENTS</p>
-        {CAPS.map((c, i) => (
-          <article key={c.t} className="cap-station" aria-label={`${c.t}, capability ${i + 1} of ${CAPS.length}`}>
-            <span className="cap-ghost" aria-hidden="true">
-              {`0${i + 1}`}
-            </span>
-            <p className="mono cap-kicker">
-              CAPABILITY {`0${i + 1}`} / {`0${CAPS.length}`}
-            </p>
-            <h3>{c.t}</h3>
-            <p className="cap-desc">{c.d}</p>
-            <p className="cap-stack">{c.s}</p>
-          </article>
-        ))}
-      </section>
-
       <section className="st-proc">
-        <p className="mono">02 — TELEMETRY</p>
+        <p className="mono">01 — TELEMETRY</p>
         <i className="thread-node" aria-hidden="true" />
         <div className="proc-line" aria-hidden="true">
           <i className="proc-stub" />
@@ -401,21 +388,59 @@ export default function EnterStage() {
         ))}
       </section>
 
-      <section className="st-work">
-        <p className="mono">03 — WORLDS</p>
-        <div className="tease-grid">
-          {TEASE.map((w) => (
-            <button key={w.t} className="tease-card" onClick={() => navigate(w.to)} data-cursor aria-label={`Go to ${w.t}`}>
-              <span className={`tease-thumb ${w.c}`} aria-hidden="true" />
-              <b>{w.t}</b>
-              <i>{w.d}</i>
-            </button>
+      <section className="st-caps">
+        <p className="mono">02 — INSTRUMENTS</p>
+        {CAPS.map((c, i) => (
+          <article key={c.t} className="cap-station" aria-label={`${c.t}, instrument ${i + 1} of ${CAPS.length}`}>
+            <span className="cap-ghost" aria-hidden="true">
+              {`0${i + 1}`}
+            </span>
+            <p className="mono cap-kicker">
+              INSTRUMENT {`0${i + 1}`} / {`0${CAPS.length}`}
+            </p>
+            <h3>{c.t}</h3>
+            <p className="cap-desc">{c.d}</p>
+            <p className="cap-stack">{c.s}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="st-bolt">
+        <p className="mono">03 — MEASURED PLAY</p>
+        <h2>
+          More conversations. <em>More customers.</em>
+        </h2>
+        <div className="bolt-grid">
+          {BOLT.map((b) => (
+            <div key={b.n} className="bolt-stat">
+              <b>{b.n}</b>
+              <h3>{b.t}</h3>
+              <p>{b.d}</p>
+            </div>
           ))}
+        </div>
+        <p className="mono trustline">{TRUSTLINE.join(' · ')}</p>
+      </section>
+
+      <section className="st-trial">
+        <p className="mono">04 — START</p>
+        <div className="trial-card">
+          <p className="mono">{TRIAL.kicker}</p>
+          <h2>{TRIAL.title}</h2>
+          <p className="cap-desc">{TRIAL.lede}</p>
+          <div className="pills">
+            <button className="pill" onClick={() => navigate('contact')} data-cursor>
+              Start free trial →
+            </button>
+            <button className="pill pill-ghost" onClick={() => navigate('pricing')} data-cursor>
+              See pricing
+            </button>
+          </div>
         </div>
       </section>
 
       <section className="st-xlab">
-        <p className="mono">04 — MECHANISM</p>
+        <p className="mono">05 — MECHANISM</p>
         <h2>ONE OBJECT, THREE STATES.</h2>
         <p className="cap-desc">
           The X behind this page is procedural — arrival holds the hero, display steps aside for
@@ -425,7 +450,7 @@ export default function EnterStage() {
       </section>
 
       <footer className="st-fin">
-        <p className="mono">05 — DEPARTURE</p>
+        <p className="mono">06 — DEPARTURE</p>
         <h2>STEP INSIDE</h2>
         <a href="mailto:hello@xeven.world" data-cursor>
           hello@xeven.world

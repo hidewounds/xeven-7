@@ -41,19 +41,22 @@ const IDLE_MS = 6000
 
 const SECTIONS = [
   '.st-hero',
-  '.st-caps',
   '.st-proc',
-  '.st-work',
+  '.st-caps',
+  '.st-bolt',
+  '.st-trial',
   '.st-xlab',
   '.st-fin',
 ]
 // camera journey: one stop per index section [x, y, z] — a descent that
-// dips closest at process, pauses at the mechanism lab, releases to departure
+// dips closest at telemetry, drifts past instruments and proof, pauses at
+// the mechanism lab, then releases to departure
 const WAYPOINTS: Array<[number, number, number]> = [
   [0, 0.4, 10],
-  [0.5, 0, 8.6],
   [-0.5, -0.2, 7.6],
+  [0.5, 0, 8.6],
   [0, 0, 8.8],
+  [-0.4, 0.2, 9.2],
   [0.4, 0.1, 9.4],
   [0, 0.8, 11],
 ]
@@ -476,14 +479,14 @@ export default function VoidWorld() {
     const xTarget = new THREE.Vector3(...XCFG.arrival.p)
     const resolveXCfg = (onIndex: boolean): string => {
       if (xs.xcfg !== 'auto') return xs.xcfg
-      if (!routeIsEnter()) return showcase ? 'arrival' : 'display'
+      if (!routeIsEnter()) return 'arrival'
       if (!onIndex) return 'arrival'
       const f = (n: number) => (n < fracs.length && fracs[n] >= 0 ? fracs[n] : -1)
-      // hero → arrival · caps/proc → capability · work → display ·
-      // console → capability · departure → arrival
+      // hero → arrival · telemetry/instruments → capability · proof/trial
+      // → display · console → capability · departure → arrival
       if (f(1) >= 0 && progress >= f(1) && !(f(3) >= 0 && progress >= f(3))) return 'capability'
-      if (f(3) >= 0 && progress >= f(3) && !(f(4) >= 0 && progress >= f(4))) return 'display'
-      if (f(4) >= 0 && progress >= f(4) && !(f(5) >= 0 && progress >= f(5))) return 'capability'
+      if (f(3) >= 0 && progress >= f(3) && !(f(5) >= 0 && progress >= f(5))) return 'display'
+      if (f(5) >= 0 && progress >= f(5) && !(f(6) >= 0 && progress >= f(6))) return 'capability'
       return 'arrival'
     }
 

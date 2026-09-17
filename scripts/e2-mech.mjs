@@ -71,7 +71,7 @@ M.visOk = await page.evaluate(() => !!document.querySelector('canvas.world-fixed
 // rapid navigation: two veil navs back-to-back land on the second
 await page.evaluate(() => window.scrollTo(0, 0));
 await page.waitForTimeout(600);
-await page.click('button.tease-card:nth-child(1)');
+await page.click('.trial-card .pill');
 await page.click('.tb-logo');
 await page.waitForTimeout(1500);
 M.rapid = await page.evaluate(() => window.location.hash);
@@ -117,14 +117,16 @@ await t4.waitForTimeout(400);
 M.reduced.clickOk = true;
 await rctx.close();
 
-// touch: menu + study card via taps at 390px
+// touch: burger menu + tap through to services at 390px
 const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 const t5 = await mctx.newPage();
 t5.on('pageerror', (e) => errors.push('touch:' + String(e)));
-await t5.goto(`${URL}#/worlds`, { waitUntil: 'load' });
+await t5.goto(`${URL}#/enter`, { waitUntil: 'load' });
 await t5.waitForTimeout(1500);
-await t5.tap('a.work-cell >> nth=0');
-await t5.waitForTimeout(1200);
+await t5.tap('.tb-burger');
+await t5.waitForTimeout(800);
+await t5.tap('.mnav-link >> nth=1');
+await t5.waitForTimeout(1500);
 M.touch = await t5.evaluate(() => ({ hash: window.location.hash, title: document.querySelector('.page-title')?.textContent }));
 await mctx.close();
 

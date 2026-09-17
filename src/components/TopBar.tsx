@@ -9,7 +9,6 @@ import { useMagnetic } from '../useMagnetic'
    mobile fullscreen staggered overlay menu. Hidden on the gate. */
 
 const LINKS: { label: string; to: Route }[] = [
-  { label: 'Worlds', to: 'worlds' },
   { label: 'Vision', to: 'vision' },
   { label: 'Services', to: 'services' },
   { label: 'Pricing', to: 'pricing' },
