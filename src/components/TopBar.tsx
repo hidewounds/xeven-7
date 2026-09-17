@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { navigate, scrollBus } from '../app/store'
+import { T } from '../motion'
 import type { Route } from '../app/store'
 import { useMagnetic } from '../useMagnetic'
 
@@ -58,7 +59,7 @@ export default function TopBar({ route }: { route: Route }) {
       gsap.fromTo(
         '.mnav-link',
         { y: 44, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: 0.06, delay: 0.15, overwrite: true },
+        { y: 0, opacity: 1, duration: T.panel, ease: T.expo, stagger: 0.06, delay: 0.15, overwrite: true },
       )
     }
   }, [open ])

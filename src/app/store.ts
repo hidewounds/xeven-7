@@ -14,6 +14,12 @@ export interface XStore {
   scrollV: number
   /** smoothed scroll velocity 0..1 */
   vel: number
+  /** X mechanism: manual configuration override ('auto' follows route/scroll) */
+  xcfg: 'auto' | 'arrival' | 'display' | 'capability'
+  /** X mechanism: material preset */
+  xmat: 'matte' | 'metal' | 'glass'
+  /** X mechanism: bounded drag rotation offset, radians, clamped ±0.9 */
+  xspin: number
 }
 
 export const xs: XStore = {
@@ -23,6 +29,9 @@ export const xs: XStore = {
   entered: false,
   scrollV: 0,
   vel: 0,
+  xcfg: 'auto',
+  xmat: 'metal',
+  xspin: 0,
 }
 
 /** Animated navigation bus — App registers the curtain-wipe version. */

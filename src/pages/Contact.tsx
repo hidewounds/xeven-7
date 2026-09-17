@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import gsap from 'gsap'
+import { T } from '../motion'
 
 /* /contact — name / email / mission with real submission.
    POSTs to the studio inbox; success renders only after the server
@@ -44,7 +45,7 @@ export default function Contact() {
       gsap.fromTo(
         card.current,
         { scale: 0.98 },
-        { scale: 1, duration: 0.35, ease: 'expo.out' },
+        { scale: 1, duration: T.panel, ease: T.expo },
       )
       setStatus('sent')
     } catch {

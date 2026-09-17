@@ -79,15 +79,19 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    let pending = 0
     navBus.go = (to: Route) => {
-      if (to === xs.route) return
-      // page switch runs behind the revolving X, not the ember curtain
+      if (to === xs.route && window.location.hash === `#/${to}`) return
+      // interruptible: a second navigation retargets the pending switch
+      // instead of queuing behind it
+      window.clearTimeout(pending)
       setSwitching(true)
-      window.setTimeout(() => {
+      pending = window.setTimeout(() => {
         window.location.hash = `#/${to}`
       }, 450)
     }
     return () => {
+      window.clearTimeout(pending)
       navBus.go = undefined
     }
   }, [])

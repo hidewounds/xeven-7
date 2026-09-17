@@ -305,7 +305,7 @@
 .works-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s24); }
 /* hover filter applies instantly (one repaint) — never transitioned: per-frame
    filter animation is a main-thread/GPU sink, same rule as the cap cards */
-.work-cell { transition: transform 300ms ease; }
+.work-cell { transition: transform 200ms ease; }
 .work-cell:hover { transform: scale(1.02); filter: saturate(1.25) brightness(1.08); }
 /* index cards are real links: inherit type color, no underline */
 a.work-cell { color: inherit; text-decoration: none; display: block; }
@@ -358,7 +358,7 @@ a.work-cell { color: inherit; text-decoration: none; display: block; }
   width: 72px; height: 72px; border-radius: 50%; border: 1px solid var(--mint);
   display: flex; align-items: center; justify-content: center;
   font-size: 30px; color: var(--mint);
-  animation: pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+  animation: pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 @keyframes pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
@@ -403,7 +403,7 @@ a.work-cell { color: inherit; text-decoration: none; display: block; }
 .tease-card { display: flex; flex-direction: column; gap: var(--s12); will-change: transform, opacity; }
 .tease-thumb {
   display: block; aspect-ratio: 16/10; border-radius: 4px;
-  transition: transform 300ms ease;
+  transition: transform 200ms ease;
 }
 .tease-ember { background: radial-gradient(90% 100% at 20% 10%, rgba(255, 77, 46, 0.5), transparent 60%), linear-gradient(160deg, #140a06, #06090f); }
 .tease-mint { background: radial-gradient(90% 100% at 20% 10%, rgba(156, 245, 211, 0.4), transparent 60%), linear-gradient(160deg, #0b1418, #06090f); }
@@ -411,6 +411,35 @@ a.work-cell { color: inherit; text-decoration: none; display: block; }
 .tease-card:hover .tease-thumb { transform: scale(1.02); }
 .tease-card b { font-family: var(--disp); font-size: 28px; font-weight: 400; }
 .tease-card i { font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; color: var(--muted); }
+/* mechanism lab: console for the procedural X (config + material + spin) */
+.st-xlab { padding: 20vh 8vw 24vh calc(8vw + 92px); display: flex; flex-direction: column; gap: var(--s24); }
+.st-xlab h2 { font-family: var(--disp); font-size: clamp(40px, 7vw, 104px); line-height: 0.95; letter-spacing: -0.02em; margin: 0; max-width: 14ch; }
+.x-console {
+  display: flex; flex-direction: column; gap: var(--s16); max-width: 640px;
+  border: 1px solid var(--line); border-radius: 24px; padding: var(--s24);
+  background: rgba(10, 15, 21, 0.88); will-change: transform, opacity;
+}
+.x-stage {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s16);
+  border: 1px dashed var(--line-strong); border-radius: 16px;
+  padding: var(--s24); min-height: 96px; cursor: ew-resize;
+  touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--muted);
+}
+.x-stage b { color: var(--mint); font-weight: 400; min-width: 4ch; text-align: right; }
+/* static emblem: the mechanism as content when WebGL is unavailable */
+.x-emblem { width: min(36vmin, 300px); height: auto; margin: var(--s16) auto; }
+/* dev-only light controls (?tune): never linked, tiny, out of the way */
+.tune {
+  position: fixed; right: 12px; bottom: 12px; z-index: 200;
+  display: flex; flex-direction: column; gap: 8px;
+  background: rgba(6, 9, 15, 0.92); border: 1px solid var(--line-strong);
+  border-radius: 12px; padding: 12px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; color: var(--muted); max-width: 220px;
+}
+.tune p { margin: 0; }
+.tune label { display: flex; flex-direction: column; gap: 4px; }
+.tune input { width: 100%; }
 /* departure finale */
 .st-fin { padding: 30vh 6vw 20vh; text-align: center; display: flex; flex-direction: column; gap: var(--s24); align-items: center; }
 .st-fin h2 { font-family: var(--disp); font-size: var(--disp-l); margin: 0; line-height: 0.95; letter-spacing: -0.02em; }
@@ -431,7 +460,7 @@ a.work-cell { color: inherit; text-decoration: none; display: block; }
   .works-grid, .tier-grid, .stats-grid { grid-template-columns: 1fr; }
   .proc-row { grid-template-columns: 44px 1fr; }
   /* index sections reclaim the rail gutter where the ruler hides */
-  .st-caps, .st-proc, .st-work { padding-left: 8vw; }
+  .st-caps, .st-proc, .st-work, .st-xlab { padding-left: 8vw; }
   .proc-line { left: calc(8vw + 22px); }
   .proc-stub { width: calc(50vw - 8vw - 23px); }
   .tease-grid { grid-template-columns: 1fr; }

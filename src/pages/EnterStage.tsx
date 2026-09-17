@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import { navigate, xs } from '../app/store'
 import type { Route } from '../app/store'
+import { T } from '../motion'
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
 /* Index v3 — full site: hero, capabilities, process, worlds, finale.
@@ -69,6 +70,101 @@ const TEASE: Array<{ t: string; d: string; c: string; to: Route }> = [
   { t: 'Services', d: 'Four disciplines, one world.', c: 'tease-bone', to: 'services' },
 ]
 
+/* X console — matching HTML controls for the procedural mechanism.
+   Config + material are instant state writes the scene loop reads (never
+   React state in the hot path); the drag strip writes a bounded offset
+   (±0.9 rad) with keyboard parity. Reduced motion: all writes apply on
+   the next frame with no travel animation. */
+function XConsole() {
+  const [cfg, setCfg] = useState(xs.xcfg)
+  const [mat, setMat] = useState(xs.xmat)
+  const [deg, setDeg] = useState(() => Math.round((xs.xspin * 180) / Math.PI))
+  const drag = useRef<{ x: number; s: number } | null>(null)
+  const clampSpin = (v: number) => Math.min(0.9, Math.max(-0.9, v))
+  const applySpin = (v: number) => {
+    xs.xspin = clampSpin(v)
+    setDeg(Math.round((xs.xspin * 180) / Math.PI))
+  }
+
+  return (
+    <div className="x-console">
+      <div className="pills" role="group" aria-label="Mechanism configuration">
+        {(['auto', 'arrival', 'display', 'capability'] as const).map((c) => (
+          <button
+            key={c}
+            className={cfg === c ? 'pill' : 'pill pill-ghost'}
+            aria-pressed={cfg === c}
+            data-cursor
+            onClick={() => {
+              xs.xcfg = c
+              setCfg(c)
+            }}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+      <div className="pills" role="group" aria-label="Mechanism material">
+        {(['matte', 'metal', 'glass'] as const).map((m) => (
+          <button
+            key={m}
+            className={mat === m ? 'pill' : 'pill pill-ghost'}
+            aria-pressed={mat === m}
+            data-cursor
+            onClick={() => {
+              xs.xmat = m
+              setMat(m)
+            }}
+          >
+            {m}
+          </button>
+        ))}
+      </div>
+      <div
+        className="x-stage"
+        role="slider"
+        tabIndex={0}
+        aria-label="Rotate the mechanism"
+        aria-valuemin={-51}
+        aria-valuemax={51}
+        aria-valuenow={deg}
+        aria-valuetext={`${deg} degrees`}
+        data-cursor
+        onPointerDown={(e) => {
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId)
+          } catch {
+            /* synthetic / already-released pointers: drag still tracks */
+          }
+          drag.current = { x: e.clientX, s: xs.xspin }
+        }}
+        onPointerMove={(e) => {
+          if (!drag.current) return
+          applySpin(drag.current.s + (e.clientX - drag.current.x) / 220)
+        }}
+        onPointerUp={() => {
+          drag.current = null
+        }}
+        onPointerCancel={() => {
+          drag.current = null
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            e.preventDefault()
+            applySpin(xs.xspin + (e.key === 'ArrowLeft' ? -0.1 : 0.1))
+          }
+        }}
+      >
+        <span aria-hidden="true">DRAG ⟷ TO ROTATE</span>
+        <b>{deg}°</b>
+      </div>
+      <button className="pill pill-ghost" data-cursor onClick={() => applySpin(0)}>
+        Reset spin
+      </button>
+    </div>
+  )
+}
+
 /* Departure clock: local time, per-minute tick (one interval, one text
    node — zero scroll-path cost). */
 function FootTime() {
@@ -91,6 +187,22 @@ export default function EnterStage() {
   const [reduced] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
+  // no-WebGL presentation: when the scene cannot start (or the context is
+  // lost), it announces itself and the hero shows a static X emblem —
+  // the mechanism as content, not a missing canvas.
+  const [noGL, setNoGL] = useState(
+    () => !!document.querySelector<HTMLCanvasElement>('canvas.world-fixed')?.dataset.webgl,
+  )
+  useEffect(() => {
+    const on = () => setNoGL(true)
+    const off = () => setNoGL(false)
+    window.addEventListener('xeven:nowebgl', on)
+    window.addEventListener('xeven:webgl', off)
+    return () => {
+      window.removeEventListener('xeven:nowebgl', on)
+      window.removeEventListener('xeven:webgl', off)
+    }
+  }, [])
 
   useLayoutEffect(() => {
     // reduced motion: no SplitText, pins, or scrubs — no ticker burn.
@@ -99,7 +211,7 @@ export default function EnterStage() {
     const ctx = gsap.context(() => {
       // headline reveal
       const split = new SplitText('.st-hero-title', { type: 'lines,words,chars', mask: 'lines', autoSplit: true })
-      gsap.from(split.chars, { yPercent: 120, duration: 1.1, ease: 'expo.out', stagger: 0.02, delay: 0.3 })
+      gsap.from(split.chars, { yPercent: 120, duration: T.scene, ease: T.expo, stagger: 0.02, delay: 0.3 })
       gsap.to('.st-fade', { opacity: 0, y: -50, ease: 'none', scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 30%', scrub: 1.2 } })
       // dolly through space: the title pushes toward the camera and drifts
       // up as the hero exits (parent scale — the SplitText chars own their
@@ -229,6 +341,19 @@ export default function EnterStage() {
         },
       )
 
+      // mechanism lab rises as one sheet
+      gsap.fromTo(
+        '.x-console',
+        { y: 70, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: { trigger: '.st-xlab', start: 'top 80%', end: 'top 50%', scrub: 1.2 },
+        },
+      )
+
       // finale title rises
       gsap.fromTo(
         '.st-fin h2',
@@ -272,6 +397,12 @@ export default function EnterStage() {
         <div className="hero-echo" aria-hidden="true">
           XEVEN
         </div>
+        {noGL && (
+          <svg className="x-emblem" viewBox="0 0 200 200" role="img" aria-label="Xeven mechanism, static preview">
+            <line x1="48" y1="48" x2="152" y2="152" stroke="#e8edee" strokeWidth="16" />
+            <line x1="152" y1="48" x2="48" y2="152" stroke="#9cf5d3" strokeWidth="16" />
+          </svg>
+        )}
         <p className="mono st-fade">00 — TOP</p>
         <h1 className="st-hero-title">WHAT IS XEVEN?</h1>
         <p className="st-sub st-fade">Experience engine. Living systems. Nothing static survives.</p>
@@ -335,8 +466,18 @@ export default function EnterStage() {
         </div>
       </section>
 
+      <section className="st-xlab">
+        <p className="mono">04 — MECHANISM</p>
+        <h2>ONE OBJECT, THREE STATES.</h2>
+        <p className="cap-desc">
+          The X behind this page is procedural — arrival holds the hero, display steps aside for
+          projects, capability tilts into the lattice. Drive it: configuration, material, spin.
+        </p>
+        <XConsole />
+      </section>
+
       <footer className="st-fin">
-        <p className="mono">04 — DEPARTURE</p>
+        <p className="mono">05 — DEPARTURE</p>
         <h2>STEP INSIDE</h2>
         <a href="mailto:hello@xeven.world" data-cursor>
           hello@xeven.world
