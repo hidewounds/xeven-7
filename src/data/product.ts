@@ -1,13 +1,12 @@
 /* XEVEN — single source of truth for every customer-facing fact on this
-   site. Xeven is the SaaS, previously known as Nova. Every line below is
-   shown on the NOVA marketing site (index, features, pricing + its
-   pricing-config.js single source of truth, checkout). Nothing
-   from outside that site is claimed here: no clients, metrics beyond the
-   site's own counters, testimonials, or team members. */
+   site. Every line below is shown on the product marketing site (index,
+   features, pricing + its pricing-config.js single source of truth,
+   checkout). Nothing from outside that site is claimed here: no clients,
+   metrics beyond the site's own counters, testimonials, or team members. */
 
 export const PRODUCT = {
   name: 'XEVEN',
-  byline: 'XEVEN — FORMERLY NOVA',
+  byline: 'XEVEN',
   hero: 'THE AI EMPLOYEE FOR BUSINESS WEBSITES',
   sub: 'Chats 24/7, remembers shoppers, recovers carts, books with Chrono and talks with Echo. One snippet.',
   trial: '14-day free trial, cancel anytime.',

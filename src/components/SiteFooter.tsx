@@ -16,7 +16,7 @@ export default function SiteFooter({ route }: { route: Route }) {
       </div>
       <div className="sitefoot-grid">
         <div>
-          <p className="mono">XEVEN — FORMERLY NOVA</p>
+          <p className="mono">XEVEN</p>
           <p className="sitefoot-tag">AI employee that changes business.</p>
           <button className="pill" onClick={() => navigate('demo')} data-cursor>
             Start free trial →
