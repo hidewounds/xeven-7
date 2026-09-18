@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { INSTRUMENTS, KB, KB_EMPTY, SKILLS } from '../data/product'
 
 /* /features — the five instruments up close, the six assistant skills,
-   and the live knowledge index (ask, get a verified answer or an honest
-   handoff — exactly the site's own demo). All copy sourced. */
+   the live knowledge index, and a copilot that operates this very page.
+   All copy sourced (see src/data/product.ts). */
+
+const CopilotDemo = lazy(() => import('../components/CopilotDemo'))
 
 /* Knowledge index demo: static client-side filter over the published
    entries, mirroring the site's own index behavior. */
@@ -67,6 +69,14 @@ export default function Features() {
       </div>
       <p className="mono">KNOWLEDGE — VERIFIED OR SILENT</p>
       <KBDemo />
+      <p className="mono">COPILOT — COMMAND THIS PAGE</p>
+      <p className="page-lede">
+        One script gives this page its own AI operator. Bring any OpenAI-compatible key — or a local
+        Ollama endpoint — and drive the site in plain words. The key never leaves this browser.
+      </p>
+      <Suspense fallback={<p className="kb-hit">Loading the copilot…</p>}>
+        <CopilotDemo />
+      </Suspense>
     </div>
   )
 }

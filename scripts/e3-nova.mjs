@@ -6,13 +6,23 @@ import { chromium } from 'playwright-core';
 const EDGE = process.env.EDGE_BIN || 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const URL = process.env.XEVEN_URL || 'http://127.0.0.1:5500/';
 const errors = [];
+const noise = [];
 const browser = await chromium.launch({
   executablePath: EDGE,
   headless: true,
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
-page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+// Uncaught exceptions are always fatal. Console resource/fetch noise is
+// recorded separately: the copilot probe deliberately points the agent at
+// a dead endpoint, so its failed fetches are the expected, UI-surfaced
+// failure path — not app bugs.
+page.on('console', (m) => {
+  if (m.type() !== 'error') return
+  const t = m.text()
+  if (/Failed to load resource|Failed to fetch|ERR_UNSAFE_PORT|InvokeError: Network request failed/.test(t)) noise.push(t.slice(0, 120))
+  else errors.push(t)
+});
 page.on('pageerror', (e) => errors.push(String(e)));
 const M = {};
 
@@ -82,15 +92,40 @@ for (const r of ['about', 'features', 'pricing', 'demo']) {
     rail: document.querySelectorAll('.ruler').length,
   }));
 }
-// knowledge index: filters entries, honest on no match
+// copilot demo: renders, gates honestly without a key, surfaces errors
 await page.goto(`${URL}#/features`, { waitUntil: 'load' });
 await page.waitForTimeout(800);
+M.copilot = await page.evaluate(() => ({
+  section: !!document.querySelector('[data-testid="copilot-demo"]'),
+  kb: document.querySelectorAll('.kb-hit').length > 0,
+}));
+await page.click('[data-testid="copilot-demo"] .pill:has-text("Enable")');
+await page.waitForTimeout(600);
+M.copilotSetup = await page.evaluate(() => ({
+  status: document.querySelector('[data-testid="copilot-demo"] [role="status"]')?.textContent?.slice(0, 60),
+  inputs: document.querySelectorAll('[data-testid="copilot-demo"] input').length,
+}));
+// point at a dead-local endpoint and connect: must fail honestly, fast
+await page.fill('[data-testid="copilot-demo"] [aria-label="Model endpoint"]', 'http://127.0.0.1:9/v1');
+await page.click('[data-testid="copilot-demo"] .pill:has-text("Connect")');
+await page.waitForTimeout(2500);
+M.copilotReady = await page.evaluate(() => ({
+  status: document.querySelector('[data-testid="copilot-demo"] [role="status"]')?.textContent?.slice(0, 80),
+  suggestions: document.querySelectorAll('[data-testid="copilot-demo"] [aria-label="Suggested commands"] button').length,
+}));
+// a command against the dead endpoint must surface failure, not hang
+await page.click('[data-testid="copilot-demo"] [aria-label="Suggested commands"] button >> nth=3');
+await page.waitForTimeout(20000);
+M.copilotFail = await page.evaluate(() => ({
+  status: document.querySelector('[data-testid="copilot-demo"] [role="status"]')?.textContent?.slice(0, 120),
+}));
+// knowledge index: filters entries, honest on no match
 await page.fill('.kb-demo input', 'shipping');
 await page.waitForTimeout(300);
-M.kbHit = await page.evaluate(() => document.querySelector('.kb-hit')?.textContent);
+M.kbHit = await page.evaluate(() => document.querySelector('.kb-demo .kb-hit')?.textContent);
 await page.fill('.kb-demo input', 'zzz-no-such-thing');
 await page.waitForTimeout(300);
-M.kbMiss = await page.evaluate(() => document.querySelector('.kb-hit')?.textContent);
+M.kbMiss = await page.evaluate(() => document.querySelector('.kb-demo .kb-hit')?.textContent);
 for (const bad of ['#/worlds', '#/worlds/reactor', '#/vision', '#/services', '#/contact']) {
   await page.goto(`${URL}${bad}`, { waitUntil: 'load' });
   await page.waitForTimeout(700);
@@ -131,6 +166,7 @@ M.reduced = await t4.evaluate(() => ({
 await rctx.close();
 
 M.errors = errors;
+M.expectedFetchNoise = noise.length;
 console.log(JSON.stringify(M, null, 2));
 await browser.close();
 if (errors.length) process.exitCode = 1;
