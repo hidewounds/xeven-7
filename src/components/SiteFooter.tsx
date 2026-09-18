@@ -34,6 +34,9 @@ export default function SiteFooter({ route }: { route: Route }) {
               {l.label}
             </button>
           ))}
+          <a className="sitefoot-link" href="/architecture.html" data-cursor>
+            Architecture
+          </a>
         </nav>
         <div>
           <p className="mono">START</p>
