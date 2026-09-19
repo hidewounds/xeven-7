@@ -1,0 +1,48 @@
+/* ShineBorder — plain-CSS companion for ShineBorder.tsx (Magic UI pattern, MIT).
+ * Uses XEVEN tokens; falls back to a static border where @property is unsupported. */
+
+@property --sb-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.shine-border {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--sb-r, 14px);
+  padding: var(--sb-w, 1px);
+  background: transparent;
+}
+
+.shine-border-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  animation: sb-spin var(--sb-duration, 14s) linear infinite;
+}
+
+.shine-border-content {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(var(--sb-r, 14px) - var(--sb-w, 1px));
+  background: transparent;
+}
+
+/* form-card brings its own veil; the shine ring replaces its 1px border */
+.shine-border-content.form-card {
+  border: none;
+}
+
+@keyframes sb-spin {
+  to {
+    --sb-angle: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shine-border-glow {
+    animation: none;
+  }
+}

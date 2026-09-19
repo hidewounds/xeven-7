@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
 import { hashQuery } from '../app/store'
+import ShineBorder from '../components/magicui/ShineBorder'
 import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS, PLANS } from '../data/product'
 
 /* /demo — the briefing room. The demo booking flow: pick a focus, leave
@@ -81,7 +82,7 @@ export default function Demo() {
           {plan[0].toUpperCase() + plan.slice(1)} plan selected
         </p>
       )}
-      <div ref={card} className="form-card">
+      <ShineBorder ref={card} contentClassName="form-card" radius={24} duration={16} shineColor={['#9cf5d3', '#ff4d2e']}>
         {status === 'sent' ? (
           <div className="form-done">
             <div className="form-check" aria-hidden="true">
@@ -151,7 +152,7 @@ export default function Demo() {
             </p>
           </form>
         )}
-      </div>
+      </ShineBorder>
     </div>
   )
 }
