@@ -1,0 +1,13 @@
+{
+  "url": "https://xeven-7.vercel.app",
+  "about": {
+    "canvas": true,
+    "overflowX": 0
+  },
+  "demo": {
+    "shine": true,
+    "inputs": 2,
+    "overflowX": 0
+  },
+  "errors": []
+}
