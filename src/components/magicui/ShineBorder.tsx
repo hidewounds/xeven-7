@@ -16,7 +16,7 @@ type Props = {
  * Decorative, pointer-transparent, still under reduced motion. */
 export default function ShineBorder({
   duration = 14,
-  shineColor = ['#9cf5d3', '#ff4d2e'],
+  shineColor = ['#4df3ff', '#ff6fae'],
   thickness = 1,
   className = '',
   style,

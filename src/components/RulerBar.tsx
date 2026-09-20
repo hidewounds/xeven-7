@@ -1,23 +1,48 @@
-import { NAV_LINKS } from '../nav'
-import { navBus } from '../app/store'
+import { useEffect, useState } from 'react'
+import { scrollBus } from '../app/store'
 import type { Route } from '../app/store'
 
-/* RulerBar — route survey instrument. Seven stops, glowing active tick,
-   click-to-travel. Hidden on small screens and (via CSS) never animated
-   under reduced motion. */
+/* RulerBar — index ONLY. Tracks the index sections (scroll-spy), jumps on
+   tap. Renders nothing on any other route. */
+
+const STOPS = [
+  { id: 'top', short: '00', label: 'Top' },
+  { id: 'caps', short: '01', label: 'Capabilities' },
+  { id: 'worlds', short: '02', label: 'Worlds' },
+  { id: 'process', short: '03', label: 'Process' },
+  { id: 'departure', short: '04', label: 'Departure' },
+]
 
 export default function RulerBar({ route }: { route: Route }) {
+  const [active, setActive] = useState('top')
+  useEffect(() => {
+    if (route !== 'enter') return
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActive(e.target.id)
+        }
+      },
+      { rootMargin: '-40% 0px -55% 0px' },
+    )
+    STOPS.forEach((s) => {
+      const el = document.getElementById(s.id)
+      if (el) io.observe(el)
+    })
+    return () => io.disconnect()
+  }, [route])
+
+  if (route !== 'enter') return null
   return (
-    <ol className="ruler" aria-label="Sections">
-      {NAV_LINKS.map((l) => (
-        <li key={l.to}>
+    <ol className="ruler" aria-label="Index sections">
+      {STOPS.map((s) => (
+        <li key={s.id}>
           <button
-            className={`ruler-stop${route === l.to ? ' on' : ''}`}
-            aria-label={l.label}
-            aria-current={route === l.to ? 'page' : undefined}
-            onClick={() => navBus.go?.(l.to)}
+            className={`ruler-stop${active === s.id ? ' on' : ''}`}
+            aria-label={s.label}
+            onClick={() => scrollBus.scrollTo?.(`#${s.id}`)}
           >
-            {l.short}
+            {s.short}
           </button>
         </li>
       ))}

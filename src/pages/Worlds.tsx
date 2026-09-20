@@ -1,15 +1,12 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger)
 
-/* WORLDS — three rooms, same employee. Each station is a business XEVEN
-   already runs at night: the rush, the desk, the graveyard shift. One lazy
-   R3F vignette opens the tour; the rooms themselves are pure CSS light. */
-
-const R3FDemo = lazy(() => import('../components/R3FDemo'))
+/* WORLDS — three rooms, same employee. Café rush, clinic desk, store night
+   shift. Pure CSS light; the field behind does the glowing. */
 
 const STATIONS = [
   {
@@ -37,7 +34,6 @@ const STATIONS = [
 
 export default function Worlds() {
   const root = useRef<HTMLDivElement>(null!)
-  const [reduced] = useState(() => xs.reduced)
 
   useEffect(() => {
     if (xs.reduced) return
@@ -65,17 +61,6 @@ export default function Worlds() {
       <h1 className="page-title">One employee, every kind of shop.</h1>
       <p className="page-lede">Walk the rooms. Each one is a real shift, running right now.</p>
 
-      <figure className="field-study landed">
-        {reduced ? (
-          <div className="field-study-still" aria-hidden="true" />
-        ) : (
-          <Suspense fallback={<div className="field-study-still" aria-hidden="true" />}>
-            <R3FDemo />
-          </Suspense>
-        )}
-        <figcaption className="mono">FIELD STUDY — THE SHIFT, PROCEDURAL</figcaption>
-      </figure>
-
       <div className="world-grid">
         {STATIONS.map((s) => (
           <article className="station rv" key={s.num}>
@@ -90,8 +75,8 @@ export default function Worlds() {
                   <span key={c}>{c}</span>
                 ))}
               </div>
-              <button className="pill pill-ghost" data-cursor onClick={() => navigate('playground')}>
-                Work this room →
+              <button className="pill pill-ghost" data-cursor onClick={() => navigate('demo')}>
+                Staff my shop →
               </button>
             </div>
           </article>

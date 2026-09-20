@@ -23,9 +23,8 @@ page.on('response', (r) => { if (r.status() >= 400) errors.push(`${r.status()} $
 
 const checks = {
   enter: { sel: ['.ledger-row', '.tease', '.t-row'], shot: 's-enter.png' },
-  worlds: { sel: ['.station', '.field-study', '.station-chips span'], shot: 's-worlds.png' },
-  playground: { sel: ['.pg-transcript .msg.bot', '.pg-composer input', '.pg-card'], shot: 's-playground.png' },
-  about: { sel: ['.field-study', '.proc-row h3'], shot: 's-about.png' },
+  worlds: { sel: ['.station', '.station-chips span'], shot: 's-worlds.png' },
+  about: { sel: ['.proc-row h3'], shot: 's-about.png' },
   features: { sel: ['.kb-demo input', '.team-chip'], shot: 's-features.png' },
   pricing: { sel: ['.tier', '.bill-toggle'], shot: 's-pricing.png' },
   demo: { sel: ['.form-card-shine .shine-ring', '.form-card input'], shot: 's-demo.png' },
@@ -44,18 +43,17 @@ for (const [route, c] of Object.entries(checks)) {
 }
 await page.close();
 
-// reduced motion pass: enter + playground (no canvas loops, transcript static)
+// reduced motion pass: enter hero static, no loops
 const red = await browser.newPage({ viewport: { width: 1600, height: 900 }, reducedMotion: 'reduce' });
 red.on('console', (m) => { if (m.type() === 'error') errors.push(`[reduced] ${m.text()}`); });
 red.on('pageerror', (e) => errors.push(`[reduced] ${String(e)}`));
-await red.goto(`${URL}/#/playground`, { waitUntil: 'load' });
+await red.goto(`${URL}/#/enter`, { waitUntil: 'load' });
 await red.waitForTimeout(2000);
 M.reduced = await red.evaluate(() => ({
-  bot: !!document.querySelector('.pg-transcript .msg.bot'),
-  typing: !!document.querySelector('.msg.typing'),
+  hero: !!document.querySelector('.hero-mark'),
   overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 }));
-await red.screenshot({ path: `${OUT}/s-playground-reduced.png` });
+await red.screenshot({ path: `${OUT}/s-enter-reduced.png` });
 
 M.errors = errors;
 writeFileSync(`${OUT}/e5-shift.json`, JSON.stringify(M, null, 2));

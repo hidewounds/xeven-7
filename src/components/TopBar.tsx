@@ -3,9 +3,7 @@ import { NAV_LINKS } from '../nav'
 import { navBus } from '../app/store'
 import type { Route } from '../app/store'
 
-/* TopBar — floating chrome. Desktop: mark left, route nav center-right,
-   demo CTA. Mobile: mark + burger, full-takeover staggered menu. Tapping any
-   link (even the current route) closes the overlay. */
+/* TopBar — mark left ONLY, everything else right: nav, CTA, burger. */
 
 export default function TopBar({ route }: { route: Route }) {
   const [open, setOpen] = useState(false)
@@ -27,23 +25,23 @@ export default function TopBar({ route }: { route: Route }) {
         >
           XEVEN
         </a>
-        <nav className="tb-nav" aria-label="Primary">
-          {NAV_LINKS.filter((l) => l.to !== 'enter' && l.to !== 'demo').map((l) => (
-            <a
-              key={l.to}
-              href={`#/${l.to}`}
-              className={route === l.to ? 'active' : ''}
-              aria-current={route === l.to ? 'page' : undefined}
-              onClick={(e) => {
-                e.preventDefault()
-                go(l.to)
-              }}
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
         <div className="tb-right">
+          <nav className="tb-nav" aria-label="Primary">
+            {NAV_LINKS.filter((l) => l.to !== 'enter' && l.to !== 'demo').map((l) => (
+              <a
+                key={l.to}
+                href={`#/${l.to}`}
+                className={route === l.to ? 'active' : ''}
+                aria-current={route === l.to ? 'page' : undefined}
+                onClick={(e) => {
+                  e.preventDefault()
+                  go(l.to)
+                }}
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
           <a
             className="tb-cta"
             href="#/demo"

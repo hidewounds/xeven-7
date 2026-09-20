@@ -1,13 +1,12 @@
 import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
-import { hashQuery, navigate } from '../app/store'
+import { hashQuery } from '../app/store'
 import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS, PLANS } from '../data/product'
 import ShineBorder from '../components/magicui/ShineBorder'
 
-/* DEMO — the briefing room, rebuilt. Talk it through with the playground
-   employee first, or book straight: pick a focus, leave a name and work
-   email, hold a slot the way Chrono does. `?plan=<slug>` preselects. */
+/* DEMO — the briefing room. Pick a focus, leave a name and work email,
+   hold a slot the way Chrono does. `?plan=<slug>` preselects. */
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -74,16 +73,7 @@ export default function Demo() {
       <p className="mono">DEMO — BRIEFING ROOM</p>
       <h1 className="page-title">Book a demo.</h1>
       <p className="page-lede">
-        Thirty seconds. Then we talk shop. {DEMO_NOTE} Or skip the form — talk it through with the
-        employee first:{' '}
-        <button
-          className="pill pill-ghost"
-          data-cursor
-          onClick={() => navigate('playground')}
-          style={{ minHeight: 36 }}
-        >
-          Open the playground →
-        </button>
+        Thirty seconds. Then we talk shop. {DEMO_NOTE}
       </p>
       {plan && (
         <p className="pill pill-ghost" style={{ alignSelf: 'flex-start' }} aria-live="polite">
@@ -91,7 +81,7 @@ export default function Demo() {
         </p>
       )}
       <div ref={card} className="form-card form-card-shine">
-        <ShineBorder duration={16} shineColor={['#9cf5d3', '#ff4d2e']} />
+        <ShineBorder duration={16} shineColor={['#4df3ff', '#ff6fae']} />
         {status === 'sent' ? (
           <div className="form-done">
             <div className="form-check" aria-hidden="true">

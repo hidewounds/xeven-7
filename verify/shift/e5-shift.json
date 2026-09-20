@@ -11,20 +11,11 @@
       "overflowX": 0,
       "h1": "One employee, every kind of shop.",
       ".station": 3,
-      ".field-study": 1,
       ".station-chips span": 9
-    },
-    "playground": {
-      "overflowX": 0,
-      "h1": "Don’t read about it. Hire it for five minute",
-      ".pg-transcript .msg.bot": 1,
-      ".pg-composer input": 1,
-      ".pg-card": 2
     },
     "about": {
       "overflowX": 0,
       "h1": "Not just a widget.",
-      ".field-study": 1,
       ".proc-row h3": 6
     },
     "features": {
@@ -47,8 +38,7 @@
     }
   },
   "reduced": {
-    "bot": true,
-    "typing": false,
+    "hero": true,
     "overflowX": 0
   },
   "errors": []

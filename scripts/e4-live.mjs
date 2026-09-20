@@ -20,11 +20,11 @@ let ready = false;
 for (let i = 1; i <= 36; i++) {
   const probe = await browser.newPage();
   try {
-    // new-build marker: orbitals gone, canvas present (first-field restore)
+    // new-build marker: floating hero mark exists only in the orb-theme build
     await probe.goto(`${URL}/#/enter`, { waitUntil: 'load', timeout: 30000 });
-    await probe.waitForTimeout(3000);
-    ready = await probe.evaluate(() => !document.querySelector('.orbs') && !!document.querySelector('canvas.world-fixed'));
-    console.log(`try ${i}: restored=${ready}`);
+    await probe.waitForTimeout(4000);
+    ready = await probe.evaluate(() => !!document.querySelector('.hero-mark'));
+    console.log(`try ${i}: hero-mark=${ready}`);
     if (ready) { await probe.close(); break; }
   } catch (e) {
     console.log(`try ${i}: ${String(e).split('\n')[0]}`);
@@ -70,15 +70,6 @@ M.worlds = await page.evaluate(() => ({
   overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 }));
 await page.screenshot({ path: `${OUT}/e4-live-worlds.png` });
-
-await page.goto(`${URL}/#/playground`, { waitUntil: 'load' });
-await page.waitForTimeout(2000);
-M.playground = await page.evaluate(() => ({
-  bot: !!document.querySelector('.pg-transcript .msg.bot'),
-  composer: !!document.querySelector('.pg-composer input'),
-  overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-}));
-await page.screenshot({ path: `${OUT}/e4-live-playground.png` });
 
 M.errors = errors;
 writeFileSync(`${OUT}/e4-live.json`, JSON.stringify(M, null, 2));

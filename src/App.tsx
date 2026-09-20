@@ -5,23 +5,19 @@ import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
 import SiteFooter from './components/SiteFooter'
-import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
-/* SHIFT — app shell. Same proven mechanics (hash routes, lazy pages, Lenis
-   heartbeat, X veils, boot/intro gates), new route map:
-   enter → worlds → playground → about → features → pricing → demo. */
+/* SHIFT — app shell. Hash routes, lazy pages, Lenis heartbeat, orb intro on
+   index fresh loads ONLY. No loaders anywhere else: route shifts are instant
+   app-swipes (incoming page slides in, no veil, no delay). */
 const EnterStage = lazy(() => import('./pages/EnterStage'))
 const Worlds = lazy(() => import('./pages/Worlds'))
-const Playground = lazy(() => import('./pages/Playground'))
 const About = lazy(() => import('./pages/About'))
 const Features = lazy(() => import('./pages/Features'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const Demo = lazy(() => import('./pages/Demo'))
 const Gate = lazy(() => import('./pages/Gate'))
-// SHIFTWORLD is the persistent field: one canvas, one ticker, all routes.
-// First paint never waits for three.js.
 const ShiftWorld = lazy(() => import('./components/ShiftWorld'))
 
 gsap.registerPlugin(ScrollTrigger)
@@ -30,8 +26,6 @@ ScrollTrigger.config({ ignoreMobileResize: true })
 export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash())
   const [intro, setIntro] = useState(() => routeFromHash() === 'enter')
-  const [booted, setBooted] = useState(() => routeFromHash() === 'enter')
-  const [switching, setSwitching] = useState(false)
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const lenis = useRef<Lenis | null>(null)
 
@@ -88,25 +82,19 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    let pending = 0
+    // instant app-swipe: no veil, no delay
     navBus.go = (to: Route, query?: string) => {
       const hash = query ? `#/${to}?${query}` : `#/${to}`
       if (to === xs.route && window.location.hash === hash) return
-      window.clearTimeout(pending)
-      setSwitching(true)
-      pending = window.setTimeout(() => {
-        window.location.hash = hash
-      }, 450)
+      window.location.hash = hash
     }
     return () => {
-      window.clearTimeout(pending)
       navBus.go = undefined
     }
   }, [])
 
   useEffect(() => {
     ScrollTrigger.refresh()
-    setSwitching(false)
     if (document.fonts) {
       void document.fonts.ready.then(() => ScrollTrigger.refresh())
     }
@@ -117,11 +105,6 @@ export default function App() {
   const finishIntro = useCallback(() => {
     xs.entered = true
     setIntro(false)
-  }, [])
-
-  const finishBoot = useCallback(() => {
-    xs.entered = true
-    setBooted(true)
   }, [])
 
   useEffect(() => {
@@ -141,11 +124,10 @@ export default function App() {
         <ShiftWorld />
       </Suspense>
       <div className="glass-finish" aria-hidden="true" />
-      <main id="main" key={route}>
+      <main id="main" key={route} className="page-swipe">
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
           {route === 'worlds' && <Worlds />}
-          {route === 'playground' && <Playground />}
           {route === 'about' && <About />}
           {route === 'features' && <Features />}
           {route === 'pricing' && <Pricing />}
@@ -156,12 +138,6 @@ export default function App() {
         <SiteFooter route={route} />
       </Suspense>
       {intro && <Gate onEnter={finishIntro} />}
-      {!booted && <XLoader onDone={finishBoot} />}
-      {switching && (
-        <div className="xload xload-fast" role="status" aria-label="Loading">
-          <XMark />
-        </div>
-      )}
     </div>
   )
 }

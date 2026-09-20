@@ -6,10 +6,10 @@ import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger)
 
-/* ENTER — the night shift, live. Hero + a living ledger (rAF textContent, no
-   state), capabilities timetable, worlds teaser, process, departure with a
-   live clock. Scroll reveals are transform/opacity only; reduced motion gets
-   final states with zero pins. */
+/* ENTER — the night shift, rebuilt. Free-floating XEVEN mark opens the hero,
+   then the live ledger, capabilities, worlds teaser, process, departure.
+   Sections carry ids for the index-only rail. Reveals are transform/opacity
+   only; reduced motion gets final states. */
 
 const LEDGER: Array<[string, string[]]> = [
   ['CHATS', ['12,408 this week', 'midnight rush handled', '3 languages tonight']],
@@ -93,22 +93,23 @@ export default function EnterStage() {
 
   return (
     <div className="page" ref={root}>
-      <section className="st-hero">
+      <section className="st-hero" id="top">
+        <p className="hero-mark" aria-hidden="true">XEVEN</p>
         <p className="mono rv">XEVEN — THE NIGHT SHIFT</p>
         <h1 className="hero-title rv">{PRODUCT.hero}</h1>
         <p className="hero-sub rv">{PRODUCT.sub}</p>
         <div className="hero-cta-row rv">
-          <button className="pill" data-cursor onClick={() => navigate('playground')}>
-            Talk to XEVEN →
+          <button className="pill" data-cursor onClick={() => navigate('demo')}>
+            Book a demo →
           </button>
-          <button className="pill pill-ghost" data-cursor onClick={() => navigate('demo')}>
-            Book a demo
+          <button className="pill pill-ghost" data-cursor onClick={() => navigate('worlds')}>
+            See the worlds
           </button>
         </div>
         <Ledger />
       </section>
 
-      <section className="zone" aria-label="Capabilities">
+      <section className="zone" id="caps" aria-label="Capabilities">
         <p className="mono zone-kicker rv">01 — WHAT IT DOES ON SHIFT</p>
         <h2 className="zone-title rv">Five instruments, one employee.</h2>
         {INSTRUMENTS.map((r) => (
@@ -122,7 +123,7 @@ export default function EnterStage() {
         ))}
       </section>
 
-      <section className="zone" aria-label="Worlds">
+      <section className="zone" id="worlds" aria-label="Worlds">
         <p className="mono zone-kicker rv">02 — WHERE IT WORKS</p>
         <h2 className="zone-title rv">Three rooms, same employee.</h2>
         <div className="tease-grid">
@@ -140,7 +141,7 @@ export default function EnterStage() {
         </div>
       </section>
 
-      <section className="zone" aria-label="Process">
+      <section className="zone" id="process" aria-label="Process">
         <p className="mono zone-kicker rv">03 — HOW A MESSAGE MOVES</p>
         <h2 className="zone-title rv">Hear, hold, answer, earn.</h2>
         {TELEMETRY.map((r) => (
@@ -155,13 +156,13 @@ export default function EnterStage() {
         ))}
       </section>
 
-      <section className="fin" aria-label="Departure">
+      <section className="fin" id="departure" aria-label="Departure">
         <p className="mono rv">{TRIAL.kicker}</p>
         <h2 className="zone-title rv">{TRIAL.title}</h2>
         <p className="page-lede rv">{TRIAL.lede} {PRODUCT.trial}</p>
         <div className="hero-cta-row rv" style={{ marginTop: 'var(--s24)' }}>
-          <button className="pill" data-cursor onClick={() => navigate('playground')}>
-            Step into the shift →
+          <button className="pill" data-cursor onClick={() => navigate('demo')}>
+            Start the trial →
           </button>
           <button className="pill pill-ghost" data-cursor onClick={() => navigate('pricing')}>
             See pricing
