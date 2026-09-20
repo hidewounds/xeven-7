@@ -5,6 +5,7 @@ name: pin-production-alias
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 jobs:
   pin:
     runs-on: ubuntu-latest
