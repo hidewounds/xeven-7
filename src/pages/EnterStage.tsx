@@ -106,9 +106,15 @@ export default function EnterStage() {
         <p className="mono rv">XEVEN — THE NIGHT SHIFT</p>
         <h1 className="hero-title rv" aria-label={PRODUCT.hero}>
           {dust
-            ? PRODUCT.hero.split('').map((c, i) => (
-                <span key={i} className="dust-char" style={{ animationDelay: `${i * 22}ms` }} aria-hidden="true">
-                  {c === ' ' ? ' ' : c}
+            ? PRODUCT.hero.split(' ').map((word, wi) => (
+                <span key={wi}>
+                  <span className="dust-word" aria-hidden="true">
+                    {word.split('').map((c, i) => (
+                      <span key={i} className="dust-char" style={{ animationDelay: `${(wi * 8 + i) * 22}ms` }}>
+                        {c}
+                      </span>
+                    ))}
+                  </span>{' '}
                 </span>
               ))
             : PRODUCT.hero}

@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 
-/* Gate — the SPHERE intro (index fresh loads only). A living 3D ball built
-   the reference way: 560 streak-particles with real depth (front bright and
-   large, back dim and small, rim-lit silhouette), slow two-axis tumble,
-   white-hot core with cyan sparks. Arc: GATHER (condense) → DIFFUSE (radii
-   breathe outward) → BLOOM (pink flood carrying a diamond lattice that grows
-   on it, then dissolves into the index). Click skips to the bloom. Reduced:
-   one still, fast exit. */
+/* Gate — the BLOOM intro (index fresh loads only). No overlay page: the veil
+   starts opaque over the live field, the swarm thinks in the middle, then
+   everything inverts — veil lifts, orb particles scatter outward and fade,
+   the field ignites beneath them, and the index (mounted in front from the
+   start) fades in with dust words landing on the living field.
+   Click skips to the bloom. Reduced: still + fast exit. */
 
 const WORDS = ['GATHER', 'DIFFUSE', 'BLOOM']
 const N = 560
@@ -21,6 +20,8 @@ interface P {
   size: number
   col: string
   core: boolean
+  dx: number
+  dy: number
 }
 
 const BODY = ['#3d0a24', '#3d0a24', '#6e0d38', '#a4124f', '#a4124f', '#ff2d78', '#ff2d78']
@@ -33,8 +34,9 @@ function makeSwarm(seedR: number): P[] {
   }
   return Array.from({ length: N }, () => {
     const core = rnd()
+    const a = rnd() * Math.PI * 2
     return {
-      a: rnd() * Math.PI * 2,
+      a,
       r: 0.1 + 0.9 * Math.pow(rnd(), 0.5),
       sp: 0.3 + rnd() * 0.9,
       dir: rnd() < 0.7 ? 1 : -1,
@@ -43,6 +45,8 @@ function makeSwarm(seedR: number): P[] {
       size: core > 0.94 ? 1.7 : 0.6 + rnd() * 1.2,
       col: core > 0.968 ? '#4df3ff' : core > 0.9 ? '#ffe3ef' : BODY[Math.floor(rnd() * BODY.length)],
       core: core > 0.9,
+      dx: Math.cos(a),
+      dy: Math.sin(a),
     }
   })
 }
@@ -55,16 +59,16 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
   )
   const [n, setN] = useState(() => (reduced ? 100 : 0))
   const [wi, setWi] = useState(0)
-  const [cover, setCover] = useState(false)
+  const [bloom, setBloom] = useState(false)
 
   const finish = () => {
     if (done.current) return
     done.current = true
     onEnter()
   }
-  const toCover = () => {
+  const toBloom = () => {
     if (done.current) return
-    setCover(true)
+    setBloom(true)
     setN(100)
     window.dispatchEvent(new CustomEvent('xeven:orb-bloom'))
     window.setTimeout(finish, reduced ? 0 : 950)
@@ -89,19 +93,17 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
     let raf = 0
     const t0 = performance.now()
 
-    const draw = (t: number, breathe: number) => {
+    const drawSwarm = (t: number, breathe: number, alpha: number, scatter: number) => {
       ctx.globalCompositeOperation = 'source-over'
       ctx.fillStyle = 'rgba(6, 9, 15, 0.3)'
       ctx.fillRect(0, 0, S, S)
       ctx.globalCompositeOperation = 'lighter'
       ctx.lineCap = 'round'
-      // slow two-axis tumble so the ball turns in depth
       const tumble = t * 0.35
       const ct = Math.cos(tumble)
       const st = Math.sin(tumble)
       for (const p of swarm) {
         const ang = p.a + t * p.sp * p.dir * 0.85
-        // orbit plane tilted per particle, then tumbled: z decides depth
         const ox = Math.cos(ang) * p.r
         const oy = Math.sin(ang) * p.r * Math.cos(p.tilt)
         const oz = Math.sin(ang) * p.r * Math.sin(p.tilt)
@@ -111,22 +113,24 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
         const bright = 0.3 + 0.7 * depth
         const wob = 1 + 0.07 * Math.sin(t * 1.6 + p.wob)
         const rr = p.r * R * breathe * wob
-        const x = cx + (rx / Math.max(p.r, 1e-3)) * rr
-        const y = cy + (oy / Math.max(p.r, 1e-3)) * rr * 0.94 + Math.sin(t * 1.2 + p.wob) * 2.5
-        // rim light: silhouette edge burns brighter
-        const edge = Math.min(1, Math.hypot(x - cx, y - cy) / (R * breathe))
+        const bx = (rx / Math.max(p.r, 1e-3)) * rr
+        const by = (oy / Math.max(p.r, 1e-3)) * rr * 0.94 + Math.sin(t * 1.2 + p.wob) * 2.5
+        // scatter: positions fly outward along their birth direction
+        const sx = bx + p.dx * scatter * R * 2.2
+        const sy = by + p.dy * scatter * R * 2.2
+        const x = cx + sx
+        const y = cy + sy
+        const edge = Math.min(1, Math.hypot(bx, by) / (R * breathe))
         const rim = edge > 0.78 ? (edge - 0.78) * 3.2 : 0
-        const px = x - Math.cos(ang) * 3 * p.sp
-        const py = y - Math.sin(ang) * 3 * p.sp
         ctx.strokeStyle = p.col
-        ctx.globalAlpha = Math.min(1, bright * (p.core ? 1 : 0.85) + rim * 0.7)
+        ctx.globalAlpha = alpha * Math.min(1, bright * (p.core ? 1 : 0.85) + rim * 0.7)
         ctx.lineWidth = p.size * (0.55 + 0.65 * depth) * (1 + rim * 0.8)
         ctx.beginPath()
-        ctx.moveTo(px, py)
+        ctx.moveTo(x - Math.cos(ang) * 3 * p.sp, y - Math.sin(ang) * 3 * p.sp)
         ctx.lineTo(x, y)
         ctx.stroke()
       }
-      ctx.globalAlpha = 1
+      ctx.globalAlpha = alpha
       // reflection pool
       ctx.globalCompositeOperation = 'source-over'
       const g = ctx.createRadialGradient(cx, cy + R * 0.98, 4, cx, cy + R * 0.98, R * 1.15)
@@ -139,24 +143,34 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
       ctx.translate(-cx, -(cy + R * 0.98))
       ctx.fillRect(cx - R * 1.2, cy + R * 0.98 - R * 1.2, R * 2.4, R * 2.4)
       ctx.restore()
+      ctx.globalAlpha = 1
     }
 
     if (reduced) {
-      draw(1.2, 0.9)
-      const t = window.setTimeout(toCover, 400)
+      drawSwarm(1.2, 0.9, 1, 0)
+      const t = window.setTimeout(toBloom, 400)
       return () => window.clearTimeout(t)
     }
-    // GATHER 0–0.45 (condense 1→0.8) · DIFFUSE 0.45–0.8 (breathe 0.8→1.7) · BLOOM 0.8–1
+    let bloomT = -1
     const step = (now: number) => {
-      const p = Math.min(1, (now - t0) / 3000)
+      const p = Math.min(1, (now - t0) / 2400)
       setN(Math.floor(p * 100))
       setWi(p < 0.45 ? 0 : p < 0.8 ? 1 : 2)
-      const breathe = p < 0.45 ? 1 - (p / 0.45) * 0.2 : 0.8 + ((p - 0.45) / 0.35) * 0.9
-      draw((now - t0) / 1000, breathe)
-      if (p >= 1) {
-        toCover()
+      if (p < 1) {
+        const breathe = p < 0.45 ? 1 - (p / 0.45) * 0.2 : 0.8 + ((p - 0.45) / 0.35) * 0.9
+        drawSwarm((now - t0) / 1000, breathe, 1, 0)
+        raf = requestAnimationFrame(step)
         return
       }
+      // bloom: scatter + fade over ~750ms
+      if (bloomT < 0) {
+        bloomT = 0
+        toBloom()
+      }
+      bloomT += 1 / 60
+      const k = Math.min(1, bloomT / 0.75)
+      drawSwarm((now - t0) / 1000, 1.7, 1 - k, k * k)
+      if (k >= 1) return
       raf = requestAnimationFrame(step)
     }
     raf = requestAnimationFrame(step)
@@ -166,16 +180,16 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
 
   return (
     <div
-      className={`intro orb-intro${cover ? ' cover' : ''}`}
-      onClick={toCover}
+      className={`intro orb-intro${bloom ? ' bloom' : ''}`}
+      onClick={toBloom}
       role="button"
       aria-label="Enter the site"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') toCover()
+        if (e.key === 'Enter' || e.key === ' ') toBloom()
       }}
     >
-      <div className="orb-diamonds" aria-hidden="true" />
+      <div className="intro-veil" aria-hidden="true" />
       <div className="intro-stage orb-stage">
         <div className="orb-creature" aria-hidden="true">
           <canvas ref={canvas} className="orb-canvas" width={300} height={300} />

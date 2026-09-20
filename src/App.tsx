@@ -26,6 +26,7 @@ ScrollTrigger.config({ ignoreMobileResize: true })
 export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash())
   const [intro, setIntro] = useState(() => routeFromHash() === 'enter')
+  const [bloomed, setBloomed] = useState(false)
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const lenis = useRef<Lenis | null>(null)
 
@@ -81,6 +82,13 @@ export default function App() {
     return () => window.removeEventListener('hashchange', settle)
   }, [])
 
+  // instant app-swipe: no veil, no delay
+  useEffect(() => {
+    const onBloom = () => setBloomed(true)
+    window.addEventListener('xeven:orb-bloom', onBloom)
+    return () => window.removeEventListener('xeven:orb-bloom', onBloom)
+  }, [])
+
   useEffect(() => {
     // instant app-swipe: no veil, no delay
     navBus.go = (to: Route, query?: string) => {
@@ -124,7 +132,7 @@ export default function App() {
         <ShiftWorld />
       </Suspense>
       <div className="glass-finish" aria-hidden="true" />
-      <main id="main" key={route} className="page-swipe">
+      <main id="main" key={route} className={intro && !bloomed ? 'pre-bloom' : 'page-swipe'}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
           {route === 'worlds' && <Worlds />}

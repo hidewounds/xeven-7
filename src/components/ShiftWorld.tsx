@@ -376,6 +376,13 @@ export default function ShiftWorld() {
     const camTarget = new THREE.Vector3(...STOPS[xs.route])
     const pm = { x: 0, y: 0 }
     let stir = 0
+    let pulse = 0
+    // ignition: the orb's death is the field's birth — burst on bloom
+    const onBloom = () => {
+      stir = 1
+      pulse = 1
+    }
+    window.addEventListener('xeven:orb-bloom', onBloom)
 
     const resize = () => {
       renderer.setSize(window.innerWidth, window.innerHeight, false)
@@ -515,7 +522,8 @@ export default function ShiftWorld() {
           bu[i].set(bx, by, bu[i].z, bu[i].w)
         })
 
-        const s = 1 + Math.sin(clockT * 1.6) * 0.18
+        const s = (1 + Math.sin(clockT * 1.6) * 0.18) * (1 + pulse * 0.7)
+        pulse = Math.max(0, pulse - dt * 0.8)
         beacons.scale.setScalar(s)
         stars.rotation.y = clockT * 0.004
         solids[0].rotation.x += dt * 0.18
@@ -552,6 +560,7 @@ export default function ShiftWorld() {
       window.removeEventListener('pointerleave', onGone)
       window.removeEventListener('blur', onGone)
       window.removeEventListener('wheel', wake)
+      window.removeEventListener('xeven:orb-bloom', onBloom)
       window.removeEventListener('resize', resize)
       document.removeEventListener('visibilitychange', onVis)
       canvas.removeEventListener('webglcontextlost', onLost, false)

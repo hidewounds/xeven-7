@@ -11,6 +11,11 @@ main > .page { width: 100%; }
 /* app-swipe: incoming route slides in, no veil, no lag */
 .page-swipe > .page { animation: page-in 480ms cubic-bezier(0.22, 1, 0.36, 1); }
 
+/* pre-bloom: index waits invisible above the field, then fades onto it */
+.pre-bloom > .page { opacity: 0; }
+
+main > .page { transition: opacity 700ms ease; }
+
 @keyframes page-in {
   from { opacity: 0; transform: translateX(56px); }
 }
@@ -534,42 +539,37 @@ canvas.world-fixed {
 }
 
 /* ---------- thinking orb intro ---------- */
-.orb-intro { background: var(--void); transition: background 480ms ease; }
+/* ---------- thinking orb intro: veil + scatter bloom ---------- */
+.orb-intro { background: transparent; }
 
-.orb-intro.cover {
-  background: var(--candy);
-}
-
-/* diamond lattice grows on the flood, then dissolves into the index */
-.orb-diamonds {
+.intro-veil {
   position: absolute;
   inset: 0;
-  background:
-    repeating-linear-gradient(45deg, rgba(6, 9, 15, 0.28) 0 2px, transparent 2px 26px),
-    repeating-linear-gradient(-45deg, rgba(6, 9, 15, 0.28) 0 2px, transparent 2px 26px);
-  opacity: 0;
-  transition: opacity 900ms ease-out;
+  background: var(--void);
+  opacity: 1;
+  transition: opacity 650ms ease;
 }
 
-.orb-intro.cover .orb-diamonds { opacity: 1; }
+.orb-intro.bloom .intro-veil { opacity: 0; }
+
+.orb-stage { position: relative; }
+
+.orb-intro.bloom .intro-count { opacity: 0; }
+
+.intro-count { transition: opacity 300ms ease; }
 
 .orb-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--s32);
-  transition: opacity 300ms ease;
+  position: relative;
 }
-
-.orb-intro.cover .orb-stage { opacity: 0; }
 
 .orb-creature {
   width: min(300px, 64vw);
   aspect-ratio: 1;
-  transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-.orb-intro.cover .orb-creature { transform: scale(34); }
 
 .orb-canvas {
   width: 100%;
@@ -598,6 +598,8 @@ canvas.world-fixed {
 }
 
 /* ---------- dust-forming words (post-orb arrivals only) ---------- */
+.dust-word { display: inline-block; white-space: nowrap; }
+
 .dust-char {
   display: inline-block;
   opacity: 0;
@@ -632,8 +634,7 @@ canvas.world-fixed {
 /* ---------- reduced motion: full stand-down ---------- */
 @media (prefers-reduced-motion: reduce) {
   .hero-mark { animation: none; }
-  .orb-intro.cover .orb-creature { transform: none; }
-  .orb-intro.cover { background: var(--candy); }
+  .intro-veil { transition: none; }
   .dust-char { opacity: 1; filter: none; transform: none; animation: none; }
   .dust-motes { display: none; }
   .page-swipe > .page { animation: none; }
