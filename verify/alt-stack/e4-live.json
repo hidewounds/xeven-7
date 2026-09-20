@@ -9,5 +9,14 @@
     "inputs": 2,
     "overflowX": 0
   },
+  "worlds": {
+    "stations": 3,
+    "overflowX": 0
+  },
+  "playground": {
+    "bot": true,
+    "composer": true,
+    "overflowX": 0
+  },
   "errors": []
 }

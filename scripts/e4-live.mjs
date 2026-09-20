@@ -20,10 +20,11 @@ let ready = false;
 for (let i = 1; i <= 36; i++) {
   const probe = await browser.newPage();
   try {
-    await probe.goto(`${URL}/#/about`, { waitUntil: 'load', timeout: 30000 });
+    // new-build marker: worlds stations exist only in the SHIFT rebuild
+    await probe.goto(`${URL}/#/worlds`, { waitUntil: 'load', timeout: 30000 });
     await probe.waitForTimeout(3000);
-    ready = await probe.evaluate(() => !!document.querySelector('.field-study'));
-    console.log(`try ${i}: field-study=${ready}`);
+    ready = await probe.evaluate(() => document.querySelectorAll('.station').length === 3);
+    console.log(`try ${i}: stations=${ready}`);
     if (ready) { await probe.close(); break; }
   } catch (e) {
     console.log(`try ${i}: ${String(e).split('\n')[0]}`);
