@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { INSTRUMENTS, PRODUCT, TELEMETRY, TRIAL } from '../data/product'
@@ -70,6 +70,14 @@ function Clock() {
 
 export default function EnterStage() {
   const root = useRef<HTMLDivElement>(null!)
+  // dust reveal plays once, only when the orb bloom fires while mounted
+  const [dust, setDust] = useState(false)
+  useEffect(() => {
+    if (xs.reduced) return
+    const onBloom = () => setDust(true)
+    window.addEventListener('xeven:orb-bloom', onBloom)
+    return () => window.removeEventListener('xeven:orb-bloom', onBloom)
+  }, [])
 
   useEffect(() => {
     if (xs.reduced) return
@@ -96,7 +104,22 @@ export default function EnterStage() {
       <section className="st-hero" id="top">
         <p className="hero-mark" aria-hidden="true">XEVEN</p>
         <p className="mono rv">XEVEN — THE NIGHT SHIFT</p>
-        <h1 className="hero-title rv">{PRODUCT.hero}</h1>
+        <h1 className="hero-title rv" aria-label={PRODUCT.hero}>
+          {dust
+            ? PRODUCT.hero.split('').map((c, i) => (
+                <span key={i} className="dust-char" style={{ animationDelay: `${i * 22}ms` }} aria-hidden="true">
+                  {c === ' ' ? ' ' : c}
+                </span>
+              ))
+            : PRODUCT.hero}
+        </h1>
+        {dust && (
+          <div className="dust-motes" aria-hidden="true">
+            {Array.from({ length: 14 }, (_, i) => (
+              <i key={i} style={{ left: `${(i * 67 + 11) % 100}%`, animationDelay: `${(i * 137) % 900}ms` }} />
+            ))}
+          </div>
+        )}
         <p className="hero-sub rv">{PRODUCT.sub}</p>
         <div className="hero-cta-row rv">
           <button className="pill" data-cursor onClick={() => navigate('demo')}>

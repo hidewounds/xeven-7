@@ -536,7 +536,22 @@ canvas.world-fixed {
 /* ---------- thinking orb intro ---------- */
 .orb-intro { background: var(--void); transition: background 480ms ease; }
 
-.orb-intro.cover { background: var(--candy); }
+.orb-intro.cover {
+  background: var(--candy);
+}
+
+/* diamond lattice grows on the flood, then dissolves into the index */
+.orb-diamonds {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(45deg, rgba(6, 9, 15, 0.28) 0 2px, transparent 2px 26px),
+    repeating-linear-gradient(-45deg, rgba(6, 9, 15, 0.28) 0 2px, transparent 2px 26px);
+  opacity: 0;
+  transition: opacity 900ms ease-out;
+}
+
+.orb-intro.cover .orb-diamonds { opacity: 1; }
 
 .orb-stage {
   display: flex;
@@ -582,11 +597,45 @@ canvas.world-fixed {
   50% { transform: translateY(-14px) rotate(0.4deg); }
 }
 
+/* ---------- dust-forming words (post-orb arrivals only) ---------- */
+.dust-char {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(14px);
+  animation: dust-settle 750ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes dust-settle {
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+.dust-motes { position: relative; height: 0; }
+
+.dust-motes i {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--glow);
+  opacity: 0;
+  animation: mote-rise 2.2s ease-out forwards;
+}
+
+@keyframes mote-rise {
+  0% { opacity: 0; transform: translateY(0); }
+  25% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-130px); }
+}
+
 /* ---------- reduced motion: full stand-down ---------- */
 @media (prefers-reduced-motion: reduce) {
   .hero-mark { animation: none; }
   .orb-intro.cover .orb-creature { transform: none; }
   .orb-intro.cover { background: var(--candy); }
+  .dust-char { opacity: 1; filter: none; transform: none; animation: none; }
+  .dust-motes { display: none; }
   .page-swipe > .page { animation: none; }
   .mnav a { opacity: 1; translate: none; transition: none; }
   .pill:hover, .tease:hover, .tier:hover { transform: none; }

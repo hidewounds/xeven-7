@@ -1,27 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
 
-/* Gate — the SWARM intro (index fresh loads only). A living creature built
-   the way the reference does it: hundreds of magenta streak-particles
-   churning around a white-hot core, motion-trail rendering, a reflection
-   pool beneath. It thinks ~2.4s breathing inward, then stretches to the four
-   corners and floods pink — that flood IS the index reveal. Click skips to
-   the stretch. Hook classes kept for the capture rig. Reduced: one still. */
+/* Gate — the SPHERE intro (index fresh loads only). A living 3D ball built
+   the reference way: 560 streak-particles with real depth (front bright and
+   large, back dim and small, rim-lit silhouette), slow two-axis tumble,
+   white-hot core with cyan sparks. Arc: GATHER (condense) → DIFFUSE (radii
+   breathe outward) → BLOOM (pink flood carrying a diamond lattice that grows
+   on it, then dissolves into the index). Click skips to the bloom. Reduced:
+   one still, fast exit. */
 
-const WORDS = ['GATHERING', 'CONDENSING', 'OPENING']
-const N = 520
+const WORDS = ['GATHER', 'DIFFUSE', 'BLOOM']
+const N = 560
 
 interface P {
   a: number
   r: number
   sp: number
   dir: 1 | -1
+  tilt: number
   wob: number
-  wobSp: number
   size: number
   col: string
+  core: boolean
 }
 
-const PALETTE = ['#3d0a24', '#3d0a24', '#a4124f', '#a4124f', '#ff2d78', '#ff2d78', '#ffd9e8', '#4df3ff']
+const BODY = ['#3d0a24', '#3d0a24', '#6e0d38', '#a4124f', '#a4124f', '#ff2d78', '#ff2d78']
 
 function makeSwarm(seedR: number): P[] {
   let s = seedR
@@ -33,13 +35,14 @@ function makeSwarm(seedR: number): P[] {
     const core = rnd()
     return {
       a: rnd() * Math.PI * 2,
-      r: 0.12 + 0.88 * Math.pow(rnd(), 0.55),
-      sp: 0.25 + rnd() * 0.85,
-      dir: rnd() < 0.72 ? 1 : -1,
+      r: 0.1 + 0.9 * Math.pow(rnd(), 0.5),
+      sp: 0.3 + rnd() * 0.9,
+      dir: rnd() < 0.7 ? 1 : -1,
+      tilt: (rnd() - 0.5) * 0.9,
       wob: rnd() * Math.PI * 2,
-      wobSp: 0.6 + rnd() * 1.6,
-      size: core > 0.93 ? 1.6 : 0.6 + rnd() * 1.1,
-      col: core > 0.965 ? '#4df3ff' : core > 0.9 ? '#ffd9e8' : PALETTE[Math.floor(rnd() * 6)],
+      size: core > 0.94 ? 1.7 : 0.6 + rnd() * 1.2,
+      col: core > 0.968 ? '#4df3ff' : core > 0.9 ? '#ffe3ef' : BODY[Math.floor(rnd() * BODY.length)],
+      core: core > 0.9,
     }
   })
 }
@@ -63,7 +66,8 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
     if (done.current) return
     setCover(true)
     setN(100)
-    window.setTimeout(finish, reduced ? 0 : 480)
+    window.dispatchEvent(new CustomEvent('xeven:orb-bloom'))
+    window.setTimeout(finish, reduced ? 0 : 950)
   }
 
   useEffect(() => {
@@ -78,34 +82,52 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
     cv.width = S * dpr
     cv.height = S * dpr
     ctx.scale(dpr, dpr)
-    const swarm = makeSwarm(1234567)
+    const swarm = makeSwarm(987654321)
     const cx = S / 2
     const cy = S / 2 - 6
     const R = S * 0.36
     let raf = 0
     const t0 = performance.now()
 
-    const draw = (t: number, contract: number) => {
+    const draw = (t: number, breathe: number) => {
       ctx.globalCompositeOperation = 'source-over'
       ctx.fillStyle = 'rgba(6, 9, 15, 0.3)'
       ctx.fillRect(0, 0, S, S)
       ctx.globalCompositeOperation = 'lighter'
       ctx.lineCap = 'round'
+      // slow two-axis tumble so the ball turns in depth
+      const tumble = t * 0.35
+      const ct = Math.cos(tumble)
+      const st = Math.sin(tumble)
       for (const p of swarm) {
-        const ang = p.a + t * p.sp * p.dir * 0.9
-        const rr = p.r * R * contract * (1 + 0.08 * Math.sin(t * p.wobSp + p.wob))
-        const x = cx + Math.cos(ang) * rr + Math.sin(t * 1.7 + p.wob) * 3
-        const y = cy + Math.sin(ang) * rr * 0.94 + Math.cos(t * 1.3 + p.wob) * 3
-        const px = cx + Math.cos(ang - p.sp * p.dir * 0.05) * rr
-        const py = cy + Math.sin(ang - p.sp * p.dir * 0.05) * rr * 0.94
+        const ang = p.a + t * p.sp * p.dir * 0.85
+        // orbit plane tilted per particle, then tumbled: z decides depth
+        const ox = Math.cos(ang) * p.r
+        const oy = Math.sin(ang) * p.r * Math.cos(p.tilt)
+        const oz = Math.sin(ang) * p.r * Math.sin(p.tilt)
+        const rx = ox * ct - oz * st
+        const rz = ox * st + oz * ct
+        const depth = 0.5 + 0.5 * (rz / Math.max(p.r, 1e-3))
+        const bright = 0.3 + 0.7 * depth
+        const wob = 1 + 0.07 * Math.sin(t * 1.6 + p.wob)
+        const rr = p.r * R * breathe * wob
+        const x = cx + (rx / Math.max(p.r, 1e-3)) * rr
+        const y = cy + (oy / Math.max(p.r, 1e-3)) * rr * 0.94 + Math.sin(t * 1.2 + p.wob) * 2.5
+        // rim light: silhouette edge burns brighter
+        const edge = Math.min(1, Math.hypot(x - cx, y - cy) / (R * breathe))
+        const rim = edge > 0.78 ? (edge - 0.78) * 3.2 : 0
+        const px = x - Math.cos(ang) * 3 * p.sp
+        const py = y - Math.sin(ang) * 3 * p.sp
         ctx.strokeStyle = p.col
-        ctx.lineWidth = p.size
+        ctx.globalAlpha = Math.min(1, bright * (p.core ? 1 : 0.85) + rim * 0.7)
+        ctx.lineWidth = p.size * (0.55 + 0.65 * depth) * (1 + rim * 0.8)
         ctx.beginPath()
         ctx.moveTo(px, py)
         ctx.lineTo(x, y)
         ctx.stroke()
       }
-      // reflection pool: squashed magenta echo beneath
+      ctx.globalAlpha = 1
+      // reflection pool
       ctx.globalCompositeOperation = 'source-over'
       const g = ctx.createRadialGradient(cx, cy + R * 0.98, 4, cx, cy + R * 0.98, R * 1.15)
       g.addColorStop(0, 'rgba(255, 45, 120, 0.4)')
@@ -121,14 +143,16 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
 
     if (reduced) {
       draw(1.2, 0.9)
-      const t = window.setTimeout(finish, 400)
+      const t = window.setTimeout(toCover, 400)
       return () => window.clearTimeout(t)
     }
+    // GATHER 0–0.45 (condense 1→0.8) · DIFFUSE 0.45–0.8 (breathe 0.8→1.7) · BLOOM 0.8–1
     const step = (now: number) => {
-      const p = Math.min(1, (now - t0) / 2400)
+      const p = Math.min(1, (now - t0) / 3000)
       setN(Math.floor(p * 100))
-      setWi(Math.min(WORDS.length - 1, Math.floor(p * WORDS.length)))
-      draw((now - t0) / 1000, 1 - p * 0.18)
+      setWi(p < 0.45 ? 0 : p < 0.8 ? 1 : 2)
+      const breathe = p < 0.45 ? 1 - (p / 0.45) * 0.2 : 0.8 + ((p - 0.45) / 0.35) * 0.9
+      draw((now - t0) / 1000, breathe)
       if (p >= 1) {
         toCover()
         return
@@ -151,6 +175,7 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
         if (e.key === 'Enter' || e.key === ' ') toCover()
       }}
     >
+      <div className="orb-diamonds" aria-hidden="true" />
       <div className="intro-stage orb-stage">
         <div className="orb-creature" aria-hidden="true">
           <canvas ref={canvas} className="orb-canvas" width={300} height={300} />
