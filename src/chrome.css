@@ -549,65 +549,18 @@ canvas.world-fixed {
 .orb-intro.cover .orb-stage { opacity: 0; }
 
 .orb-creature {
-  width: 132px;
-  height: 132px;
+  width: min(300px, 64vw);
+  aspect-ratio: 1;
   transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .orb-intro.cover .orb-creature { transform: scale(34); }
 
-.orb-revolve {
+.orb-canvas {
   width: 100%;
   height: 100%;
-  animation: orb-revolve 7s linear infinite;
-}
-
-.orb-stretch {
-  width: 100%;
-  height: 100%;
-  border-radius: 58% 42% 55% 45% / 45% 55% 42% 58%;
-  background:
-    radial-gradient(circle at 36% 30%, #fff3f9 0%, var(--candy) 34%, #c9337f 72%, #8f1c55 100%);
-  box-shadow:
-    inset 0 0 34px 8px var(--glow),
-    inset 0 0 8px 2px #ffffff,
-    0 0 46px 4px rgba(255, 111, 174, 0.55),
-    0 0 120px 12px rgba(77, 243, 255, 0.22);
-  animation:
-    orb-morph 3.2s ease-in-out infinite,
-    orb-stretch 0.95s ease-in-out infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.orb-core {
-  width: 44%;
-  height: 44%;
+  display: block;
   border-radius: 50%;
-  background: radial-gradient(circle at 42% 36%, #ffffff 0%, var(--glow) 45%, rgba(77, 243, 255, 0) 78%);
-  box-shadow: 0 0 26px 6px rgba(77, 243, 255, 0.8);
-  animation: orb-core-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes orb-revolve { to { transform: rotate(360deg); } }
-
-@keyframes orb-morph {
-  0%, 100% { border-radius: 58% 42% 55% 45% / 45% 55% 42% 58%; }
-  33% { border-radius: 45% 55% 42% 60% / 60% 42% 58% 44%; }
-  66% { border-radius: 52% 48% 60% 40% / 40% 58% 45% 55%; }
-}
-
-@keyframes orb-stretch {
-  0%, 100% { transform: scale(1, 1); }
-  30% { transform: scale(1.14, 0.86); }
-  55% { transform: scale(0.88, 1.12); }
-  80% { transform: scale(1.06, 0.94); }
-}
-
-@keyframes orb-core-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.95; }
-  50% { transform: scale(1.18); opacity: 1; }
 }
 
 /* ---------- floating hero mark ---------- */
@@ -631,7 +584,7 @@ canvas.world-fixed {
 
 /* ---------- reduced motion: full stand-down ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .orb-revolve, .orb-stretch, .orb-core, .hero-mark { animation: none; }
+  .hero-mark { animation: none; }
   .orb-intro.cover .orb-creature { transform: none; }
   .orb-intro.cover { background: var(--candy); }
   .page-swipe > .page { animation: none; }

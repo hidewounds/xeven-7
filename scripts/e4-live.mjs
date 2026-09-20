@@ -20,11 +20,11 @@ let ready = false;
 for (let i = 1; i <= 36; i++) {
   const probe = await browser.newPage();
   try {
-    // new-build marker: floating hero mark exists only in the orb-theme build
-    await probe.goto(`${URL}/#/enter`, { waitUntil: 'load', timeout: 30000 });
-    await probe.waitForTimeout(4000);
-    ready = await probe.evaluate(() => !!document.querySelector('.hero-mark'));
-    console.log(`try ${i}: hero-mark=${ready}`);
+    // new-build marker: swarm canvas exists only in the swarm-orb build
+    await probe.goto(`${URL}/#/enter`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await probe.waitForTimeout(1500);
+    ready = await probe.evaluate(() => !!document.querySelector('.orb-canvas'));
+    console.log(`try ${i}: swarm=${ready}`);
     if (ready) { await probe.close(); break; }
   } catch (e) {
     console.log(`try ${i}: ${String(e).split('\n')[0]}`);

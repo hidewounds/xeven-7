@@ -211,7 +211,8 @@ export default function ShiftWorld() {
             0.5 + 0.5 * sin((gpos.x + gpos.y) * 1.6 + tt * 0.1 + 4.2));
           theme = mix(vec3(0.35), theme, 0.55);
           col += theme * uThemeAmt * (0.6 + air * 1.6) * uShowcase;
-          // blob glows: three soft bodies breathing inside the field
+          // blob bodies: dark morphing masses, zero emission — they occlude
+          // and tint, never glow. Presence via density, not light.
           vec3 mintC = vec3(0.30, 0.95, 1.0);
           vec3 emberC = vec3(1.0, 0.44, 0.68);
           vec3 moonC = vec3(1.0, 0.97, 0.90);
@@ -221,8 +222,9 @@ export default function ShiftWorld() {
             float fall = smoothstep(bb.z, 0.0, bd);
             fall *= fall;
             vec3 bc = bb.w < 0.5 ? mintC : (bb.w < 1.5 ? emberC : moonC);
-            float pulse = 0.75 + 0.25 * sin(uTime * 0.7 + float(i) * 2.1);
-            col += bc * fall * 0.10 * pulse * uShowcase;
+            float body = fall * uShowcase;
+            col *= (1.0 - body * 0.55);
+            col = mix(col, bc * 0.10, body * 0.6);
           }
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
