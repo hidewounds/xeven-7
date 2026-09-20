@@ -11,12 +11,11 @@ export interface NavLink {
 }
 
 export const NAV_LINKS: NavLink[] = [
-  { to: 'enter', label: 'Home', short: 'Top' },
-  { to: 'about', label: 'About', short: 'About' },
-  { to: 'features', label: 'Features', short: 'Features' },
-  { to: 'pricing', label: 'Pricing', short: 'Pricing' },
-  { to: 'demo', label: 'Book a demo', short: 'Demo' },
+  { to: 'enter', label: 'Shift', short: '00' },
+  { to: 'worlds', label: 'Worlds', short: '01' },
+  { to: 'playground', label: 'Playground', short: '02' },
+  { to: 'about', label: 'About', short: '03' },
+  { to: 'features', label: 'Features', short: '04' },
+  { to: 'pricing', label: 'Pricing', short: '05' },
+  { to: 'demo', label: 'Book a demo', short: '06' },
 ]
-
-/** Primary links excluding Home (used by inline menus). */
-export const MENU_LINKS: NavLink[] = NAV_LINKS.filter((l) => l.to !== 'enter')

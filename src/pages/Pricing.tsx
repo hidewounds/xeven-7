@@ -1,79 +1,87 @@
 import { useState } from 'react'
+import { ADDONS, PLANS, TRIAL, yearlyTotal } from '../data/product'
 import { navigate } from '../app/store'
-import { ADDONS, PLANS, PRODUCT, yearlyTotal } from '../data/product'
+import { useMagnetic } from '../useMagnetic'
 
-/* /pricing — the four plans with a monthly/yearly toggle (yearly saves
-   20% and setup goes free, per the pricing toggle and checkout), plus
-   add-ons. Prices follow pricing-config.js (see src/data/product.ts). */
-
-type Cycle = 'm' | 'y'
+/* PRICING — monthly/yearly arithmetic straight from the single source of
+   truth, add-ons, trial banner. Tier cards carry the magnetic pull. */
 
 export default function Pricing() {
-  const [cycle, setCycle] = useState<Cycle>('m')
+  const [yearly, setYearly] = useState(false)
+  const mag = useMagnetic<HTMLDivElement>()
+
   return (
     <div className="page">
-      <p className="mono">PRICING — PLANS</p>
-      <h1 className="page-title">Pay for intelligence, not seats.</h1>
-      <p className="page-lede">
-        {PRODUCT.trial} {cycle === 'y' ? 'Yearly billing saves 20% — setup free.' : 'Switch to yearly and save 20% — setup free.'}
-      </p>
-      <div className="pills" role="group" aria-label="Billing period">
-        {(['m', 'y'] as const).map((c) => (
-          <button
-            key={c}
-            className={cycle === c ? 'pill' : 'pill pill-ghost'}
-            aria-pressed={cycle === c}
-            data-cursor
-            onClick={() => setCycle(c)}
-          >
-            {c === 'm' ? 'Monthly' : 'Yearly · −20%'}
-          </button>
-        ))}
+      <p className="mono">PRICING — WHAT THE SHIFT COSTS</p>
+      <h1 className="page-title">One employee, four wages.</h1>
+      <div className="bill-toggle" role="group" aria-label="Billing period">
+        <button
+          className={yearly ? 'pill pill-ghost' : 'pill'}
+          aria-pressed={!yearly}
+          data-cursor
+          onClick={() => setYearly(false)}
+        >
+          Monthly
+        </button>
+        <button
+          className={yearly ? 'pill' : 'pill pill-ghost'}
+          aria-pressed={yearly}
+          data-cursor
+          onClick={() => setYearly(true)}
+        >
+          Yearly −20%
+        </button>
       </div>
       <div className="tier-grid">
-        {PLANS.map((t) => (
-          <div key={t.n} className="tier" data-cursor>
-            <h3>{t.n}</h3>
-            <div className="tier-price">
-              {t.m === null ? 'Custom' : cycle === 'm' ? `$${t.m}/mo` : `$${yearlyTotal(t.m)}/yr`}
-            </div>
-            <p className="mono">
-              {t.setup === null ? 'bespoke setup' : cycle === 'm' ? `+ $${t.setup} setup` : 'setup free ✓'}
+        {PLANS.map((p) => (
+          <div key={p.n} ref={p.n === 'Growth' ? mag : undefined} className={`tier${p.n === 'Growth' ? ' hot' : ''}`}>
+            <h3>{p.n}</h3>
+            <p className="tier-price">
+              {p.m === null
+                ? 'BESPOKE'
+                : yearly
+                  ? `$${yearlyTotal(p.m)}/YR — SETUP FREE`
+                  : `$${p.m}/MO${p.setup ? ` + $${p.setup} SETUP` : ''}`}
             </p>
             <ul>
-              {t.inc.map((f) => (
+              {p.inc.map((f) => (
                 <li key={f}>✓ {f}</li>
               ))}
-              {t.exc.map((f) => (
-                <li key={f} className="tier-na">
-                  — {f}
-                </li>
+              {p.exc.map((f) => (
+                <li key={f} className="no">✕ {f}</li>
               ))}
             </ul>
-            <button
-              className="tier-go"
-              onClick={() => navigate('demo', t.m === null ? undefined : `plan=${t.n.toLowerCase()}`)}
-              data-cursor
-            >
-              {t.m === null ? 'Book a call' : cycle === 'm' ? 'Start trial →' : 'Start yearly →'}
-            </button>
+            <div>
+              <button
+                className={p.n === 'Growth' ? 'pill' : 'pill pill-ghost'}
+                data-cursor
+                onClick={() => navigate('demo', `plan=${p.n.toLowerCase()}`)}
+              >
+                Begin with {p.n} →
+              </button>
+            </div>
           </div>
         ))}
       </div>
-      <p className="mono">ADD-ONS — EXTEND ANY PLAN</p>
-      <div className="rows">
+      <p className="mono">ADD-ONS</p>
+      <div className="tier-grid">
         {ADDONS.map((a) => (
-          <div key={a.n} className="row">
-            <div className="row-head" style={{ cursor: 'default' }}>
-              <span className="row-n">{a.p}</span>
-              <h3>{a.n}</h3>
-              <span className="row-x" aria-hidden="true" />
-            </div>
-            <div className="row-body" style={{ gridTemplateRows: '1fr' }}>
-              <p style={{ marginBottom: 'var(--s24)' }}>{a.d}</p>
-            </div>
+          <div key={a.n} className="tier">
+            <h3 style={{ fontSize: 24 }}>{a.n}</h3>
+            <p className="tier-price">{a.p.toUpperCase()}</p>
+            <p style={{ color: 'var(--muted)', margin: 0 }}>{a.d}</p>
           </div>
         ))}
+      </div>
+      <div className="tier hot" style={{ marginTop: 'var(--s16)' }}>
+        <p className="mono">{TRIAL.kicker}</p>
+        <h3>{TRIAL.title}</h3>
+        <p style={{ color: 'var(--muted)', margin: 0 }}>{TRIAL.lede}</p>
+        <div>
+          <button className="pill" data-cursor onClick={() => navigate('demo')}>
+            Start the trial →
+          </button>
+        </div>
       </div>
     </div>
   )

@@ -1,54 +1,35 @@
-import { useState } from 'react'
-import { MENU_LINKS } from '../nav'
-import { navigate } from '../app/store'
+import { NAV_LINKS } from '../nav'
+import { navBus } from '../app/store'
 import type { Route } from '../app/store'
 
-/* Site footer — one shared departure rendered on every route: brand,
-   product/start columns from the single nav model, trial CTA, email,
-   auto year. Professional close instead of a dead end. */
+/* SiteFooter — wordmark yield, studio inbox, route index. */
 
 export default function SiteFooter({ route }: { route: Route }) {
-  const [year] = useState(() => new Date().getFullYear())
   return (
     <footer className="sitefoot">
-      <div className="sitefoot-mega" aria-hidden="true">
-        XEVEN
-      </div>
-      <div className="sitefoot-grid">
+      <div className="foot-grid">
         <div>
-          <p className="mono">XEVEN</p>
-          <p className="sitefoot-tag">AI employee that changes business.</p>
-          <button className="pill" onClick={() => navigate('demo')} data-cursor>
-            Start free trial →
-          </button>
+          <p className="foot-mark">XEVEN</p>
+          <nav className="foot-nav" aria-label="Footer">
+            {NAV_LINKS.map((l) => (
+              <a
+                key={l.to}
+                href={`#/${l.to}`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  navBus.go?.(l.to)
+                }}
+                aria-current={route === l.to ? 'page' : undefined}
+              >
+                {l.label.toUpperCase()}
+              </a>
+            ))}
+          </nav>
         </div>
-        <nav aria-label="Footer">
-          <p className="mono">PRODUCT</p>
-          {MENU_LINKS.filter((l) => l.to !== 'demo').map((l) => (
-            <button
-              key={l.to}
-              className={route === l.to ? 'sitefoot-link is-here' : 'sitefoot-link'}
-              onClick={() => navigate(l.to)}
-              data-cursor
-            >
-              {l.label}
-            </button>
-          ))}
-          <a className="sitefoot-link" href="/architecture.html" data-cursor>
-            Architecture
-          </a>
-        </nav>
-        <div>
-          <p className="mono">START</p>
-          <button className="sitefoot-link" onClick={() => navigate('demo')} data-cursor>
-            Book a demo
-          </button>
-          <a className="sitefoot-link" href="mailto:hello@xeven.world" data-cursor>
-            hello@xeven.world
-          </a>
-        </div>
+        <a className="foot-mail" href="mailto:hello@xeven.world">
+          HELLO@XEVEN.WORLD
+        </a>
       </div>
-      <p className="mono sitefoot-base">© {year} XEVEN · 14-DAY FREE TRIAL · CANCEL IN ONE CLICK</p>
     </footer>
   )
 }

@@ -1,4 +1,6 @@
-/* XEVEN tokens. Palette: void/fog-teal/bone/ember/mint/moon. No purple-blue gradients. */
+/* XEVEN SHIFT — tokens + base. Palette DNA kept (void/fog-teal/bone/ember/mint/moon);
+   everything else rebuilt for the Living Shift: timetable rhythm, station
+   cards, playground console. No purple-blue gradients, ever. */
 
 :root {
   --void: #06090f;
@@ -12,6 +14,7 @@
   --line: rgba(232, 237, 238, 0.14);
   --line-strong: rgba(232, 237, 238, 0.3);
   --glass: rgba(8, 13, 18, 0.6);
+  --veil: rgba(10, 15, 21, 0.88);
 
   --s4: 4px; --s8: 8px; --s12: 12px; --s16: 16px; --s24: 24px;
   --s32: 32px; --s48: 48px; --s64: 64px; --s96: 96px;
@@ -21,14 +24,14 @@
   --cond: 'Space Grotesk', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --disp-xl: clamp(80px, 18vw, 220px);
-  --disp-l: clamp(48px, 9vw, 130px);
-  --disp-m: clamp(32px, 5vw, 64px);
+  --disp-xl: clamp(56px, 10vw, 148px);
+  --disp-l: clamp(44px, 8vw, 120px);
+  --disp-m: clamp(30px, 5vw, 60px);
 
   --d-fast: 140ms; --d-med: 320ms; --d-slow: 700ms;
 
-  --z-bg: 0; --z-canvas: 1; --z-graph: 2; --z-type: 10;
-  --z-trail: 30; --z-ui: 40; --z-menu: 60; --z-curtain: 80;
+  --z-bg: 0; --z-canvas: 1; --z-type: 10;
+  --z-ui: 40; --z-menu: 60; --z-curtain: 80;
   --z-loader: 90; --z-a11y: 10000;
 
   color-scheme: dark;
@@ -56,9 +59,95 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 
 :focus-visible { outline: 1px solid var(--mint); outline-offset: 3px; }
 
-/* premium scrollbar: thin bone-on-void, never the native gray block */
 html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--void); }
 ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; border: 2px solid var(--void); }
 ::-webkit-scrollbar-thumb:hover { background: var(--mint); }
+
+/* shared type atoms */
+.mono {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  color: var(--muted);
+  margin: 0;
+}
+
+.page {
+  position: relative;
+  z-index: var(--z-type);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--s128) var(--s24) var(--s96);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s24);
+}
+
+.page-title {
+  font-family: var(--disp);
+  font-size: var(--disp-l);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.page-lede {
+  font-size: clamp(17px, 2vw, 22px);
+  color: var(--muted);
+  max-width: 62ch;
+  margin: 0;
+}
+
+/* pills — the one control voice */
+.pills { display: flex; gap: var(--s12); flex-wrap: wrap; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s24);
+  border-radius: 999px;
+  border: 1px solid var(--mint);
+  background: var(--mint);
+  color: #06231b;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--d-fast) ease, background var(--d-fast) ease;
+}
+
+.pill:hover { transform: translateY(-1px); }
+
+.pill-ghost {
+  background: transparent;
+  color: var(--bone);
+  border-color: var(--line-strong);
+}
+
+.pill-ghost:hover { border-color: var(--mint); }
+
+.pill + .pill { margin-left: var(--s12); }
+
+.pill[disabled] { opacity: 0.55; cursor: wait; }
+
+/* skip link */
+.skip {
+  position: fixed;
+  top: -60px;
+  left: var(--s16);
+  z-index: var(--z-a11y);
+  background: var(--mint);
+  color: #06231b;
+  padding: var(--s8) var(--s16);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  transition: top var(--d-fast) ease;
+}
+
+.skip:focus { top: var(--s16); }

@@ -1,0 +1,55 @@
+{
+  "routes": {
+    "enter": {
+      "overflowX": 0,
+      "h1": "THE AI EMPLOYEE FOR BUSINESS WEBSITES",
+      ".ledger-row": 4,
+      ".tease": 3,
+      ".t-row": 9
+    },
+    "worlds": {
+      "overflowX": 0,
+      "h1": "One employee, every kind of shop.",
+      ".station": 3,
+      ".field-study": 1,
+      ".station-chips span": 9
+    },
+    "playground": {
+      "overflowX": 0,
+      "h1": "Don’t read about it. Hire it for five minute",
+      ".pg-transcript .msg.bot": 1,
+      ".pg-composer input": 1,
+      ".pg-card": 2
+    },
+    "about": {
+      "overflowX": 0,
+      "h1": "Not just a widget.",
+      ".field-study": 1,
+      ".proc-row h3": 6
+    },
+    "features": {
+      "overflowX": 0,
+      "h1": "Don’t read features. Open them.",
+      ".kb-demo input": 1,
+      ".team-chip": 6
+    },
+    "pricing": {
+      "overflowX": 0,
+      "h1": "One employee, four wages.",
+      ".tier": 8,
+      ".bill-toggle": 1
+    },
+    "demo": {
+      "overflowX": 0,
+      "h1": "Book a demo.",
+      ".form-card-shine .shine-ring": 1,
+      ".form-card input": 2
+    }
+  },
+  "reduced": {
+    "bot": true,
+    "typing": false,
+    "overflowX": 0
+  },
+  "errors": []
+}

@@ -1,14 +1,11 @@
 import { Suspense, lazy, useState } from 'react'
 import { INSTRUMENTS, KB, KB_EMPTY, SKILLS } from '../data/product'
 
-/* /features — the five instruments up close, the six assistant skills,
-   the live knowledge index, and a copilot that operates this very page.
-   All copy sourced (see src/data/product.ts). */
+/* FEATURES — the five instruments up close, the six skills, the live
+   knowledge index, and a copilot that operates this very page. */
 
 const CopilotDemo = lazy(() => import('../components/CopilotDemo'))
 
-/* Knowledge index demo: static client-side filter over the published
-   entries, mirroring the site's own index behavior. */
 function KBDemo() {
   const [q, setQ] = useState('')
   const f = q.toLowerCase().trim()
@@ -42,20 +39,37 @@ export default function Features() {
   return (
     <div className="page">
       <p className="mono">FEATURES — WHAT IT DOES</p>
-      <h1 className="page-title">Don’t read features. Play them.</h1>
+      <h1 className="page-title">Don’t read features. Open them.</h1>
       <div className="rows">
         {INSTRUMENTS.map((r, i) => (
-          <div key={r.t} className={open === i ? 'row open' : 'row'}>
-            <button className="row-head" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i} data-cursor>
-              <span className="row-n">0{i + 1}</span>
-              <h3>{r.t}</h3>
-              <span className="row-x" aria-hidden="true">
+          <div key={r.t} className="proc-row">
+            <button
+              className="row-head"
+              onClick={() => setOpen(open === i ? null : i)}
+              aria-expanded={open === i}
+              data-cursor
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: 'var(--s16)',
+                width: '100%',
+                textAlign: 'left',
+                cursor: 'pointer',
+                minHeight: 44,
+              }}
+            >
+              <span className="proc-n">0{i + 1}</span>
+              <h3 style={{ flex: 1 }}>{r.t}</h3>
+              <span className="proc-n" aria-hidden="true">
                 {open === i ? '−' : '+'}
               </span>
             </button>
-            <div className="row-body">
-              <p>{r.d}</p>
-            </div>
+            {open === i && (
+              <div>
+                <p style={{ color: 'var(--muted)', margin: 'var(--s8) 0' }}>{r.d}</p>
+                <p className="mono">{r.s}</p>
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -9,24 +9,25 @@ import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
-/* Route-level code splitting: three.js / gsap SplitText ride in async
-   chunks so the first paint is shell + copy only. */
-const Gate = lazy(() => import('./pages/Gate'))
+/* SHIFT — app shell. Same proven mechanics (hash routes, lazy pages, Lenis
+   heartbeat, X veils, boot/intro gates), new route map:
+   enter → worlds → playground → about → features → pricing → demo. */
 const EnterStage = lazy(() => import('./pages/EnterStage'))
+const Worlds = lazy(() => import('./pages/Worlds'))
+const Playground = lazy(() => import('./pages/Playground'))
 const About = lazy(() => import('./pages/About'))
 const Features = lazy(() => import('./pages/Features'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const Demo = lazy(() => import('./pages/Demo'))
-// VOIDWORLD unifies field + objects + cursor presence in one canvas, one
-// ticker, one journey — first paint never waits for three.js.
-const VoidWorld = lazy(() => import('./components/VoidWorld'))
+const Gate = lazy(() => import('./pages/Gate'))
+// SHIFTWORLD is the persistent field: one canvas, one ticker, all routes.
+// First paint never waits for three.js.
+const ShiftWorld = lazy(() => import('./components/ShiftWorld'))
 
 gsap.registerPlugin(ScrollTrigger)
 ScrollTrigger.config({ ignoreMobileResize: true })
 
 export default function App() {
-  // the cinematic intro plays only over a fresh index load — every other
-  // route boots behind a revolving X instead
   const [route, setRoute] = useState<Route>(() => routeFromHash())
   const [intro, setIntro] = useState(() => routeFromHash() === 'enter')
   const [booted, setBooted] = useState(() => routeFromHash() === 'enter')
@@ -37,7 +38,6 @@ export default function App() {
   useEffect(() => {
     xs.reduced = reduced
     if (reduced) {
-      // no Lenis under reduced motion: section links jump natively
       scrollBus.scrollTo = (target: string | number) => {
         if (typeof target === 'number') window.scrollTo(0, target)
         else document.querySelector(target)?.scrollIntoView()
@@ -73,13 +73,10 @@ export default function App() {
 
   useEffect(() => {
     const settle = () => {
-      // 404 fallback: unknown hash → canonical enter URL (replace, no
-      // history entry)
       if (unknownHash()) {
         window.location.replace(`#/enter`)
         return
       }
-      // bare fragments (#main) are in-page anchors — never a route change
       if (window.location.hash !== '' && !window.location.hash.startsWith('#/')) return
       const r = routeFromHash()
       xs.route = r
@@ -95,8 +92,6 @@ export default function App() {
     navBus.go = (to: Route, query?: string) => {
       const hash = query ? `#/${to}?${query}` : `#/${to}`
       if (to === xs.route && window.location.hash === hash) return
-      // interruptible: a second navigation retargets the pending switch
-      // instead of queuing behind it
       window.clearTimeout(pending)
       setSwitching(true)
       pending = window.setTimeout(() => {
@@ -111,9 +106,7 @@ export default function App() {
 
   useEffect(() => {
     ScrollTrigger.refresh()
-    // the switch veil lifts once the new route has rendered
     setSwitching(false)
-    // webfonts shift layout — re-measure after they land
     if (document.fonts) {
       void document.fonts.ready.then(() => ScrollTrigger.refresh())
     }
@@ -142,19 +135,17 @@ export default function App() {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      {/* bar-free everywhere: content floats, the field is the chrome */}
       <TopBar route={route} />
-      {/* fake survey ruler: inches are routes, cm ticks the scroll travel */}
       <RulerBar route={route} />
       <Suspense fallback={null}>
-        <VoidWorld />
+        <ShiftWorld />
       </Suspense>
-      {/* glass finish: a lens grade between world and content — sheen +
-          depth vignette, zero blur, zero backdrop-filter, pointer-transparent */}
       <div className="glass-finish" aria-hidden="true" />
       <main id="main" key={route}>
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
+          {route === 'worlds' && <Worlds />}
+          {route === 'playground' && <Playground />}
           {route === 'about' && <About />}
           {route === 'features' && <Features />}
           {route === 'pricing' && <Pricing />}

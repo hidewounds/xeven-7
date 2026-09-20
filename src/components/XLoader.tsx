@@ -1,55 +1,51 @@
 import { useEffect, useState } from 'react'
 
-/* Boot loader for non-enter refreshes: a lone revolving X on the void.
-   No progress bar, no percentage — it simply revolves until the site is
-   ready, then fades. Under reduced motion the X sits static. */
+/* XLoader — the lone revolving X. CSS-only 1.1s spin, 900ms minimum dwell,
+   fonts-aware, 3s failsafe, static under reduced motion. */
 
 export function XMark() {
   return (
-    <svg viewBox="0 0 48 48" className="xload-x" aria-hidden="true">
-      <path d="M11 11 L37 37 M37 11 L11 37" stroke="currentColor" strokeWidth={6} strokeLinecap="round" fill="none" />
-    </svg>
+    <span
+      aria-hidden="true"
+      style={{
+        fontFamily: 'var(--disp)',
+        fontSize: 44,
+        color: 'var(--bone)',
+        display: 'inline-block',
+        animation: 'xspin 1.1s linear infinite',
+      }}
+    >
+      X
+    </span>
   )
 }
 
 export default function XLoader({ onDone }: { onDone: () => void }) {
-  const [leaving, setLeaving] = useState(false)
-  const [gone, setGone] = useState(false)
+  const [reduced] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
 
   useEffect(() => {
-    let live = true
-    const timers: number[] = []
-    const leave = () => {
-      if (!live) return
-      setLeaving(true)
-      timers.push(
-        window.setTimeout(() => {
-          if (!live) return
-          setGone(true)
-          onDone()
-        }, 320),
-      )
+    const t0 = performance.now()
+    let done = false
+    const finish = () => {
+      if (done) return
+      done = true
+      onDone()
     }
-    // minimum dwell so the X reads instead of flickering
-    timers.push(window.setTimeout(leave, 900))
-    // boot with the type, not before it
-    if (document.fonts) {
-      void document.fonts.ready.then(() => {
-        if (live) timers.push(window.setTimeout(leave, 450))
-      })
-    }
-    // failsafe — never trap the visitor behind the veil
-    timers.push(window.setTimeout(leave, 3000))
-    return () => {
-      live = false
-      timers.forEach((t) => window.clearTimeout(t))
-    }
-  }, [onDone])
+    const waitFonts = document.fonts ? document.fonts.ready : Promise.resolve()
+    void waitFonts.then(() => {
+      const wait = Math.max(0, 900 - (performance.now() - t0))
+      window.setTimeout(finish, reduced ? 0 : wait)
+    })
+    const failsafe = window.setTimeout(finish, 3000)
+    return () => window.clearTimeout(failsafe)
+  }, [onDone, reduced])
 
-  if (gone) return null
   return (
-    <div className={leaving ? 'xload xload-done' : 'xload'} role="status" aria-label="Loading site">
+    <div className="xload" role="status" aria-label="Loading">
       <XMark />
+      <style>{`@keyframes xspin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }

@@ -1,307 +1,173 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SplitText } from 'gsap/SplitText'
+import { INSTRUMENTS, PRODUCT, TELEMETRY, TRIAL } from '../data/product'
 import { navigate, xs } from '../app/store'
-import { T } from '../motion'
-import { INSTRUMENTS, PRODUCT, TELEMETRY, TRIAL, TRUSTLINE, BOLT } from '../data/product'
-gsap.registerPlugin(ScrollTrigger, SplitText)
 
-/* Index — XEVEN home: hero, telemetry, instruments, measured play, trial
-   commission. Frameless stations, one timeline per property,
-   transform/opacity only. All copy sourced from the platform repo and
-   marketing site (see src/data/product.ts). */
+gsap.registerPlugin(ScrollTrigger)
 
-const CAPS = INSTRUMENTS
+/* ENTER — the night shift, live. Hero + a living ledger (rAF textContent, no
+   state), capabilities timetable, worlds teaser, process, departure with a
+   live clock. Scroll reveals are transform/opacity only; reduced motion gets
+   final states with zero pins. */
 
-const STEPS = TELEMETRY
+const LEDGER: Array<[string, string[]]> = [
+  ['CHATS', ['12,408 this week', 'midnight rush handled', '3 languages tonight']],
+  ['CARTS', ['2 recovered', '1 held at checkout', '0 abandoned twice']],
+  ['SLOTS', ['96 demos held', 'Tue 3PM just went', 'holds expire in 5:00']],
+  ['FACTS', ['38K held', '0 invented', '1 erased on request']],
+]
+
+function Ledger() {
+  const refs = useRef<Array<HTMLSpanElement | null>>([])
+  useEffect(() => {
+    if (xs.reduced) return
+    let raf = 0
+    const t0 = performance.now()
+    const tick = (now: number) => {
+      const s = Math.floor((now - t0) / 2600)
+      refs.current.forEach((el, i) => {
+        if (el) el.textContent = LEDGER[i][1][s % LEDGER[i][1].length]
+      })
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+  return (
+    <div className="ledger" aria-label="Live shift board">
+      {LEDGER.map(([word, notes], i) => (
+        <div className="ledger-row" key={word}>
+          <span className={`ledger-dot${i === 2 ? ' ember' : ' mint'}`} aria-hidden="true" />
+          <span className="ledger-word">{word}</span>
+          <span className="ledger-note" ref={(el) => { refs.current[i] = el }}>
+            {notes[0]}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function Clock() {
+  const ref = useRef<HTMLParagraphElement>(null!)
+  useEffect(() => {
+    if (xs.reduced) {
+      ref.current.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      return
+    }
+    let raf = 0
+    const tick = () => {
+      ref.current.textContent =
+        'SHIFT TIME ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+  return <p className="clock" ref={ref} aria-live="off" />
+}
 
 export default function EnterStage() {
   const root = useRef<HTMLDivElement>(null!)
-  const scroll = useRef({ v: 0 })
-  const vel = useRef({ v: 0 })
-  const [reduced] = useState(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )
-  // no-WebGL presentation: when the scene cannot start (or the context is
-  // lost), it announces itself and the hero shows a static X emblem —
-  // the mechanism as content, not a missing canvas.
-  const [noGL, setNoGL] = useState(
-    () => !!document.querySelector<HTMLCanvasElement>('canvas.world-fixed')?.dataset.webgl,
-  )
+
   useEffect(() => {
-    const on = () => setNoGL(true)
-    const off = () => setNoGL(false)
-    window.addEventListener('xeven:nowebgl', on)
-    window.addEventListener('xeven:webgl', off)
-    return () => {
-      window.removeEventListener('xeven:nowebgl', on)
-      window.removeEventListener('xeven:webgl', off)
-    }
+    if (xs.reduced) return
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>('.rv').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 36 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+          },
+        )
+      })
+    }, root)
+    return () => ctx.revert()
   }, [])
 
-  useLayoutEffect(() => {
-    // reduced motion: no SplitText, pins, or scrubs — no ticker burn.
-    // Readable final states come from CSS + initial values below.
-    if (reduced) return
-    const ctx = gsap.context(() => {
-      // headline reveal
-      const split = new SplitText('.st-hero-title', { type: 'lines,words,chars', mask: 'lines', autoSplit: true })
-      gsap.from(split.chars, { yPercent: 120, duration: T.scene, ease: T.expo, stagger: 0.02, delay: 0.3 })
-      gsap.to('.st-fade', { opacity: 0, y: -50, ease: 'none', scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 30%', scrub: 1.2 } })
-      // dolly through space: the title pushes toward the camera and drifts
-      // up as the hero exits (parent scale — the SplitText chars own their
-      // own transforms, never contested)
-      gsap.to('.st-hero-title', {
-        scale: 1.18,
-        yPercent: -12,
-        ease: 'none',
-        scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 20%', scrub: 1.2 },
-      })
-      // ghost echo drifts slower than the title (depth without parallax
-      // libraries — transform-only, own property, own trigger range)
-      gsap.to('.hero-echo', {
-        yPercent: 24,
-        ease: 'none',
-        scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom top', scrub: 1.2 },
-      })
-      // scroll cue: mint hairline draws as the hero leaves
-      gsap.fromTo(
-        '.st-cue b',
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom 35%', scrub: 1.2 },
-        },
-      )
-
-      // wordmark yields while the field owns the page, returns at the trial
-      const tbLogo = document.querySelector('.tb-logo')
-      if (tbLogo) {
-        gsap.to(tbLogo, {
-          opacity: 0,
-          ease: 'none',
-          scrollTrigger: { trigger: '.st-hero', start: 'bottom 75%', end: 'bottom 30%', scrub: 1.2 },
-        })
-        gsap.to(tbLogo, {
-          opacity: 1,
-          ease: 'none',
-          scrollTrigger: { trigger: '.st-trial', start: 'top 95%', end: 'top 55%', scrub: 1.2 },
-        })
-      }
-
-      // progress mirrors — trigger is the context root itself: selector text
-      // inside gsap.context only matches descendants, so '.st-scroll'
-      // resolves to nothing (GSAP "Element not found", mirror never fires)
-      ScrollTrigger.create({
-        trigger: root.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
-        onUpdate: (self) => {
-          scroll.current.v = self.progress
-          const v = Math.min(1, Math.abs(self.getVelocity()) / 3000)
-          vel.current.v = v
-          xs.vel = v
-        },
-      })
-
-      // capability stations arrive on the descent — one writer per station
-      gsap.utils.toArray<HTMLElement>('.cap-station').forEach((row) => {
-        gsap.fromTo(
-          row,
-          { y: 60, opacity: 0.3 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: { trigger: row, start: 'top 88%', end: 'top 48%', scrub: 1.2 },
-          },
-        )
-      })
-
-      // connector thread: stub runs center→spine, spine draws, ember node
-      // rides stub→spine — ONE timeline owns stub, node and spine
-      const spineH = () => document.querySelector('.proc-line')?.clientHeight ?? 0
-      const stubW = () =>
-        -(window.innerWidth * 0.42 - (window.innerWidth <= 900 ? 22 : 114))
-      const lineTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: '.st-proc',
-          start: 'top 85%',
-          end: 'top 40%',
-          scrub: 1.2,
-          invalidateOnRefresh: true,
-        },
-      })
-      lineTl
-        .fromTo('.proc-stub', { scaleX: 0 }, { scaleX: 1, ease: 'none', duration: 0.3 }, 0)
-        .fromTo(
-          '.thread-node',
-          { x: 0, y: 0, scale: 0 },
-          { x: stubW, y: 0, scale: 1, ease: 'none', duration: 0.3 },
-          0,
-        )
-        .to('.thread-node', { y: spineH, ease: 'none', duration: 0.7 }, 0.3)
-        .fromTo('.proc-line > span', { scaleY: 0 }, { scaleY: 1, ease: 'none', duration: 0.7 }, 0.3)
-
-      // process rows arrive — one writer per row (observer owns classes)
-      gsap.utils.toArray<HTMLElement>('.st-proc .proc-row').forEach((row) => {
-        gsap.fromTo(
-          row,
-          { y: 60, opacity: 0.3 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: { trigger: row, start: 'top 88%', end: 'top 48%', scrub: 1.2 },
-          },
-        )
-      })
-
-      // measured play + trial commission rise as sheets
-      gsap.fromTo(
-        '.bolt-stat',
-        { y: 70, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          ease: 'none',
-          stagger: 0.08,
-          immediateRender: false,
-          scrollTrigger: { trigger: '.st-bolt', start: 'top 80%', end: 'top 45%', scrub: T.scrub },
-        },
-      )
-      gsap.fromTo(
-        '.st-trial .trial-card',
-        { y: 70, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: { trigger: '.st-trial', start: 'top 80%', end: 'top 50%', scrub: T.scrub },
-        },
-      )
-
-    }, root)
-
-    // active process row: IntersectionObserver toggles a class (discrete —
-    // deliberately NOT a GSAP color writer; the class only touches
-    // text-shadow + the ::after bar, props nothing else writes)
-    const rows = root.current.querySelectorAll('.st-proc .proc-row')
-    const rio = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            rows.forEach((r) => r.classList.remove('proc-on'))
-            e.target.classList.add('proc-on')
-          }
-        }
-      },
-      { rootMargin: '-42% 0px -42% 0px', threshold: 0 },
-    )
-    rows.forEach((r) => rio.observe(r))
-
-    return () => {
-      ctx.revert()
-      rio.disconnect()
-    }
-  }, [reduced])
-
   return (
-    <div className="st-scroll" ref={root}>
+    <div className="page" ref={root}>
       <section className="st-hero">
-        <div className="hero-echo" aria-hidden="true">
-          XEVEN
+        <p className="mono rv">XEVEN — THE NIGHT SHIFT</p>
+        <h1 className="hero-title rv">{PRODUCT.hero}</h1>
+        <p className="hero-sub rv">{PRODUCT.sub}</p>
+        <div className="hero-cta-row rv">
+          <button className="pill" data-cursor onClick={() => navigate('playground')}>
+            Talk to XEVEN →
+          </button>
+          <button className="pill pill-ghost" data-cursor onClick={() => navigate('demo')}>
+            Book a demo
+          </button>
         </div>
-        {noGL && (
-          <svg className="x-emblem" viewBox="0 0 200 200" role="img" aria-label="Xeven mechanism, static preview">
-            <line x1="48" y1="48" x2="152" y2="152" stroke="#e8edee" strokeWidth="16" />
-            <line x1="152" y1="48" x2="48" y2="152" stroke="#9cf5d3" strokeWidth="16" />
-          </svg>
-        )}
-        <p className="mono st-fade">{PRODUCT.byline} — 00 TOP</p>
-        <h1 className="st-hero-title">{PRODUCT.hero}</h1>
-        <p className="st-sub st-fade">{PRODUCT.sub}</p>
-        <p className="st-hint">
-          <span>scroll to explore →</span>
-          <i className="st-cue" aria-hidden="true">
-            <b />
-          </i>
-        </p>
+        <Ledger />
       </section>
 
-      <section className="st-proc">
-        <p className="mono">01 — TELEMETRY</p>
-        <i className="thread-node" aria-hidden="true" />
-        <div className="proc-line" aria-hidden="true">
-          <i className="proc-stub" />
-          <span />
-        </div>
-        {STEPS.map((s) => (
-          <div key={s.n} className="proc-row">
-            <span className="proc-n">{s.n}</span>
-            <h3>{s.t}</h3>
-            <p>{s.d}</p>
-            <p className="proc-meta">{s.meta}</p>
+      <section className="zone" aria-label="Capabilities">
+        <p className="mono zone-kicker rv">01 — WHAT IT DOES ON SHIFT</p>
+        <h2 className="zone-title rv">Five instruments, one employee.</h2>
+        {INSTRUMENTS.map((r) => (
+          <div className="t-row rv" key={r.t}>
+            <span className="t-n">{r.s}</span>
+            <div>
+              <h3>{r.t}</h3>
+              <p>{r.d}</p>
+            </div>
           </div>
         ))}
       </section>
 
-      <section className="st-caps">
-        <p className="mono">02 — INSTRUMENTS</p>
-        {CAPS.map((c, i) => (
-          <article key={c.t} className="cap-station" aria-label={`${c.t}, instrument ${i + 1} of ${CAPS.length}`}>
-            <span className="cap-ghost" aria-hidden="true">
-              {`0${i + 1}`}
-            </span>
-            <p className="mono cap-kicker">
-              INSTRUMENT {`0${i + 1}`} / {`0${CAPS.length}`}
-            </p>
-            <h3>{c.t}</h3>
-            <p className="cap-desc">{c.d}</p>
-            <p className="cap-stack">{c.s}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="st-bolt">
-        <p className="mono">03 — MEASURED PLAY</p>
-        <h2>
-          More conversations. <em>More customers.</em>
-        </h2>
-        <div className="bolt-grid">
-          {BOLT.map((b) => (
-            <div key={b.n} className="bolt-stat">
-              <b>{b.n}</b>
-              <h3>{b.t}</h3>
-              <p>{b.d}</p>
-            </div>
+      <section className="zone" aria-label="Worlds">
+        <p className="mono zone-kicker rv">02 — WHERE IT WORKS</p>
+        <h2 className="zone-title rv">Three rooms, same employee.</h2>
+        <div className="tease-grid">
+          {[
+            ['Café', 'Morning rush, remembered regulars, oat-milk-first.'],
+            ['Clinic', 'Front desk that never puts anyone on hold.'],
+            ['Store', 'Night shift that recovers carts while you sleep.'],
+          ].map(([t, d]) => (
+            <button key={t} className="tease rv" data-cursor onClick={() => navigate('worlds')} style={{ textAlign: 'left' }}>
+              <p className="mono">{t.toUpperCase()} STATION</p>
+              <h3>{t}</h3>
+              <p>{d}</p>
+            </button>
           ))}
         </div>
-        <p className="mono trustline">{TRUSTLINE.join(' · ')}</p>
       </section>
 
-      <section className="st-trial">
-        <p className="mono">04 — START</p>
-        <div className="trial-card">
-          <p className="mono">{TRIAL.kicker}</p>
-          <h2>{TRIAL.title}</h2>
-          <p className="cap-desc">{TRIAL.lede}</p>
-          <div className="pills">
-            <button className="pill" onClick={() => navigate('demo')} data-cursor>
-              Start free trial →
-            </button>
-            <button className="pill pill-ghost" onClick={() => navigate('pricing')} data-cursor>
-              See pricing
-            </button>
+      <section className="zone" aria-label="Process">
+        <p className="mono zone-kicker rv">03 — HOW A MESSAGE MOVES</p>
+        <h2 className="zone-title rv">Hear, hold, answer, earn.</h2>
+        {TELEMETRY.map((r) => (
+          <div className="t-row rv" key={r.n}>
+            <span className="t-n">{r.n}</span>
+            <div>
+              <h3>{r.t}</h3>
+              <p>{r.d}</p>
+              <p className="mono">{r.meta}</p>
+            </div>
           </div>
+        ))}
+      </section>
+
+      <section className="fin" aria-label="Departure">
+        <p className="mono rv">{TRIAL.kicker}</p>
+        <h2 className="zone-title rv">{TRIAL.title}</h2>
+        <p className="page-lede rv">{TRIAL.lede} {PRODUCT.trial}</p>
+        <div className="hero-cta-row rv" style={{ marginTop: 'var(--s24)' }}>
+          <button className="pill" data-cursor onClick={() => navigate('playground')}>
+            Step into the shift →
+          </button>
+          <button className="pill pill-ghost" data-cursor onClick={() => navigate('pricing')}>
+            See pricing
+          </button>
         </div>
+        <Clock />
       </section>
     </div>
   )

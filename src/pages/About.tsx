@@ -1,17 +1,14 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
-import { BOLT, MISSION, PRINCIPLES } from '../data/product'
+import { BOLT, MISSION, PRINCIPLES, TRUSTLINE } from '../data/product'
+import { xs } from '../app/store'
 
-/* /about — mission, measured stats, principles. All sourced from the
-   marketing site (see src/data/product.ts). The field-study figure is the
-   R3F vignette: own lazy chunk (never first paint), static panel under
-   reduced motion, compositor-only entrance via observer + CSS. */
+/* ABOUT — why it exists. Mission, live field study, bolt stats, principles,
+   and the trustline the whole company stands on. */
 
 const R3FDemo = lazy(() => import('../components/R3FDemo'))
 
 export default function About() {
-  const [reduced] = useState(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )
+  const [reduced] = useState(() => xs.reduced)
   const fig = useRef<HTMLElement>(null!)
 
   useEffect(() => {
@@ -29,15 +26,14 @@ export default function About() {
     io.observe(el)
     return () => io.disconnect()
   }, [reduced])
+
   return (
     <div className="page">
       <p className="mono">{MISSION.kicker}</p>
       <h1 className="page-title">{MISSION.title}</h1>
       <p className="page-lede">{MISSION.lede}</p>
-      <figure
-        ref={fig}
-        className="field-study"
-      >
+
+      <figure ref={fig} className="field-study">
         {reduced ? (
           <div className="field-study-still" aria-hidden="true" />
         ) : (
@@ -47,6 +43,7 @@ export default function About() {
         )}
         <figcaption className="mono">FIELD STUDY — PROCEDURAL WEBGL</figcaption>
       </figure>
+
       <div className="rows">
         {BOLT.map((p) => (
           <div key={p.n} className="proc-row">
@@ -64,6 +61,13 @@ export default function About() {
             <h3>{p.t}</h3>
             <p>{p.d}</p>
           </div>
+        ))}
+      </div>
+      <div className="team" aria-label="Standing promises">
+        {TRUSTLINE.map((t) => (
+          <span key={t} className="team-chip">
+            {t}
+          </span>
         ))}
       </div>
     </div>

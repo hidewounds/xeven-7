@@ -1,16 +1,13 @@
 import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
-import { hashQuery } from '../app/store'
-import ShineBorder from '../components/magicui/ShineBorder'
+import { hashQuery, navigate } from '../app/store'
 import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS, PLANS } from '../data/product'
+import ShineBorder from '../components/magicui/ShineBorder'
 
-/* /demo — the briefing room. The demo booking flow: pick a focus, leave
-   a name and work email, hold a slot the way Chrono does. Arriving with
-   `?plan=<slug>` (e.g. from pricing) preselects that plan and attaches
-   it to the request. POSTs to the studio inbox; success renders only
-   after the server confirms. Values survive failure; retry reuses them.
-   A direct mailto stays available throughout. */
+/* DEMO — the briefing room, rebuilt. Talk it through with the playground
+   employee first, or book straight: pick a focus, leave a name and work
+   email, hold a slot the way Chrono does. `?plan=<slug>` preselects. */
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -76,7 +73,18 @@ export default function Demo() {
     <div className="page">
       <p className="mono">DEMO — BRIEFING ROOM</p>
       <h1 className="page-title">Book a demo.</h1>
-      <p className="page-lede">Thirty seconds. Then we talk shop. {DEMO_NOTE}</p>
+      <p className="page-lede">
+        Thirty seconds. Then we talk shop. {DEMO_NOTE} Or skip the form — talk it through with the
+        employee first:{' '}
+        <button
+          className="pill pill-ghost"
+          data-cursor
+          onClick={() => navigate('playground')}
+          style={{ minHeight: 36 }}
+        >
+          Open the playground →
+        </button>
+      </p>
       {plan && (
         <p className="pill pill-ghost" style={{ alignSelf: 'flex-start' }} aria-live="polite">
           {plan[0].toUpperCase() + plan.slice(1)} plan selected

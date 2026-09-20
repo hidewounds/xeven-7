@@ -62,6 +62,23 @@ M.demo = await page.evaluate(() => ({
 }));
 await page.screenshot({ path: `${OUT}/e4-live-demo.png` });
 
+await page.goto(`${URL}/#/worlds`, { waitUntil: 'load' });
+await page.waitForTimeout(2000);
+M.worlds = await page.evaluate(() => ({
+  stations: document.querySelectorAll('.station').length,
+  overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+}));
+await page.screenshot({ path: `${OUT}/e4-live-worlds.png` });
+
+await page.goto(`${URL}/#/playground`, { waitUntil: 'load' });
+await page.waitForTimeout(2000);
+M.playground = await page.evaluate(() => ({
+  bot: !!document.querySelector('.pg-transcript .msg.bot'),
+  composer: !!document.querySelector('.pg-composer input'),
+  overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+}));
+await page.screenshot({ path: `${OUT}/e4-live-playground.png` });
+
 M.errors = errors;
 writeFileSync(`${OUT}/e4-live.json`, JSON.stringify(M, null, 2));
 console.log(JSON.stringify(M, null, 2));

@@ -1,6 +1,6 @@
 /* Shared mutable experience store. Plain object — never React state in hot paths. */
 
-export type Route = 'enter' | 'about' | 'features' | 'pricing' | 'demo'
+export type Route = 'enter' | 'worlds' | 'playground' | 'about' | 'features' | 'pricing' | 'demo'
 
 export interface XStore {
   route: Route
@@ -44,7 +44,7 @@ export function hashQuery(key: string): string | null {
   return new URLSearchParams(q.split('#')[0]).get(key)
 }
 
-const KNOWN: Route[] = ['enter', 'about', 'features', 'pricing', 'demo']
+const KNOWN: Route[] = ['enter', 'worlds', 'playground', 'about', 'features', 'pricing', 'demo']
 
 export function routeFromHash(): Route {
   const h = window.location.hash.replace(/^#\/?/, '').split('?')[0]
