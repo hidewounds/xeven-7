@@ -1,7 +1,7 @@
 {
   "url": "https://xeven-7.vercel.app",
   "about": {
-    "canvas": true,
+    "canvas": false,
     "overflowX": 0
   },
   "demo": {
@@ -11,11 +11,6 @@
   },
   "worlds": {
     "stations": 3,
-    "overflowX": 0
-  },
-  "playground": {
-    "bot": true,
-    "composer": true,
     "overflowX": 0
   },
   "errors": []
