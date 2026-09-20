@@ -13,8 +13,9 @@ export default function R3FDemo() {
       camera={{ position: [0, 1.2, 6], fov: 42 }}
       gl={{ antialias: true, alpha: true }}
     >
-      <ambientLight intensity={0.6} />
-      <spotLight position={[4, 6, 4]} angle={0.4} intensity={1.2} />
+      <ambientLight intensity={1.1} />
+      <spotLight position={[4, 6, 4]} angle={0.4} intensity={3} />
+      <pointLight position={[-4, 2, 3]} intensity={8} color="#ff4d2e" />
       <Stars radius={40} depth={20} count={1500} factor={3} fade speed={0.6} />
       <Float speed={2} rotationIntensity={0.6} floatIntensity={1.1}>
         <mesh>

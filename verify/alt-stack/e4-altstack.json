@@ -1,0 +1,21 @@
+{
+  "about": {
+    "canvas": true,
+    "landed": true,
+    "caption": "FIELD STUDY — PROCEDURAL WEBGL",
+    "externalVideo": [],
+    "overflowX": 0
+  },
+  "demo": {
+    "shine": true,
+    "card": true,
+    "inputs": 2,
+    "overflowX": 0
+  },
+  "reduced": {
+    "still": true,
+    "canvas": false,
+    "overflowX": 0
+  },
+  "errors": []
+}

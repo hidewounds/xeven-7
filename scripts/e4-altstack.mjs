@@ -31,6 +31,7 @@ M.about = await page.evaluate(() => ({
   canvas: !!document.querySelector('.field-study canvas'),
   landed: document.querySelector('.field-study')?.classList.contains('landed'),
   caption: document.querySelector('.field-study figcaption')?.textContent ?? null,
+  externalVideo: Array.from(document.querySelectorAll('.vid video')).map((v) => v.currentSrc || v.src),
   overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 }));
 await page.screenshot({ path: `${OUT}/e4-about.png` });
@@ -39,8 +40,8 @@ await page.screenshot({ path: `${OUT}/e4-about.png` });
 await page.goto(`${URL}/#/demo`, { waitUntil: 'load' });
 await page.waitForTimeout(2000);
 M.demo = await page.evaluate(() => ({
-  shine: !!document.querySelector('.shine-border'),
-  card: !!document.querySelector('.shine-border-content.form-card'),
+  shine: !!document.querySelector('.shine-ring'),
+  card: !!document.querySelector('.form-card.form-card-shine'),
   inputs: document.querySelectorAll('.form-card input').length,
   overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 }));

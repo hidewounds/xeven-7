@@ -82,7 +82,8 @@ export default function Demo() {
           {plan[0].toUpperCase() + plan.slice(1)} plan selected
         </p>
       )}
-      <ShineBorder ref={card} contentClassName="form-card" radius={24} duration={16} shineColor={['#9cf5d3', '#ff4d2e']}>
+      <div ref={card} className="form-card form-card-shine">
+        <ShineBorder duration={16} shineColor={['#9cf5d3', '#ff4d2e']} />
         {status === 'sent' ? (
           <div className="form-done">
             <div className="form-check" aria-hidden="true">
@@ -152,7 +153,7 @@ export default function Demo() {
             </p>
           </form>
         )}
-      </ShineBorder>
+      </div>
     </div>
   )
 }

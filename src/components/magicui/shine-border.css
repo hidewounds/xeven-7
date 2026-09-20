@@ -1,5 +1,7 @@
 /* ShineBorder — plain-CSS companion for ShineBorder.tsx (Magic UI pattern, MIT).
- * Uses XEVEN tokens; falls back to a static border where @property is unsupported. */
+ * The ring is masked to its own padding box, so only a hairline paints over
+ * (or just outside) the host container. Falls back to invisible where
+ * @property/mask is unsupported. */
 
 @property --sb-angle {
   syntax: '<angle>';
@@ -7,32 +9,22 @@
   inherits: false;
 }
 
-.shine-border {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: var(--sb-r, 14px);
-  padding: var(--sb-w, 1px);
-  background: transparent;
-}
-
-.shine-border-glow {
+.shine-ring {
   position: absolute;
-  inset: 0;
-  z-index: 0;
+  inset: -1px;
+  border-radius: inherit;
+  padding: var(--sb-w, 1px);
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
   animation: sb-spin var(--sb-duration, 14s) linear infinite;
 }
 
-.shine-border-content {
+/* host helper: positioning context for the ring, zero visual change */
+.form-card-shine {
   position: relative;
-  z-index: 1;
-  border-radius: calc(var(--sb-r, 14px) - var(--sb-w, 1px));
-  background: transparent;
-}
-
-/* form-card brings its own veil; the shine ring replaces its 1px border */
-.shine-border-content.form-card {
-  border: none;
 }
 
 @keyframes sb-spin {
@@ -42,7 +34,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shine-border-glow {
+  .shine-ring {
     animation: none;
   }
 }
