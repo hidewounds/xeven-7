@@ -46,6 +46,11 @@
       ".form-card input": 2
     }
   },
+  "cursor": {
+    "orbs": 3,
+    "ring": true,
+    "overflowX": 0
+  },
   "reduced": {
     "bot": true,
     "typing": false,

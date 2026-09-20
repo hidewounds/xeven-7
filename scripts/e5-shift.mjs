@@ -44,6 +44,24 @@ for (const [route, c] of Object.entries(checks)) {
 }
 await page.close();
 
+// orbitals: three dots ride the pointer, click emits one ring
+const cur = await browser.newPage({ viewport: { width: 1600, height: 900 } });
+await cur.goto(`${URL}/#/enter`, { waitUntil: 'load' });
+await cur.waitForTimeout(4500);
+await cur.mouse.move(800, 450);
+await cur.waitForTimeout(400);
+await cur.mouse.move(900, 500, { steps: 6 });
+await cur.mouse.down();
+await cur.mouse.up();
+await cur.waitForTimeout(250);
+M.cursor = await cur.evaluate(() => ({
+  orbs: document.querySelectorAll('.orbs .orb').length,
+  ring: !!document.querySelector('.orb-ring'),
+  overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+}));
+await cur.screenshot({ path: `${OUT}/s-cursor.png` });
+await cur.close();
+
 // reduced motion pass: enter + playground (no canvas loops, transcript static)
 const red = await browser.newPage({ viewport: { width: 1600, height: 900 }, reducedMotion: 'reduce' });
 red.on('console', (m) => { if (m.type() === 'error') errors.push(`[reduced] ${m.text()}`); });
