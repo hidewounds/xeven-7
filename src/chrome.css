@@ -619,34 +619,6 @@ canvas.world-fixed {
   .foot-grid { grid-template-columns: 1fr; }
 }
 
-/* ---------- orbitals: cursor companion ---------- */
-.orbs {
-  position: fixed;
-  inset: 0;
-  z-index: 95;
-  pointer-events: none;
-  transition: opacity 300ms ease;
-}
-
-.orb {
-  position: absolute;
-  left: 0;
-  top: 0;
-  border-radius: 50%;
-  transition: opacity 300ms ease;
-  will-change: transform;
-}
-
-.orb-ring {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--mint);
-  border-radius: 50%;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
 /* ---------- reduced motion: full stand-down ---------- */@media (prefers-reduced-motion: reduce) {
   .field-study { opacity: 1; translate: none; transition: none; }
   .xload-fast { animation: none; opacity: 0; visibility: hidden; }

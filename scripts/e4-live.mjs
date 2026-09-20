@@ -20,11 +20,11 @@ let ready = false;
 for (let i = 1; i <= 36; i++) {
   const probe = await browser.newPage();
   try {
-    // new-build marker: orbitals exist only in the merged-field build
+    // new-build marker: orbitals gone, canvas present (first-field restore)
     await probe.goto(`${URL}/#/enter`, { waitUntil: 'load', timeout: 30000 });
     await probe.waitForTimeout(3000);
-    ready = await probe.evaluate(() => document.querySelectorAll('.orbs .orb').length === 3);
-    console.log(`try ${i}: orbitals=${ready}`);
+    ready = await probe.evaluate(() => !document.querySelector('.orbs') && !!document.querySelector('canvas.world-fixed'));
+    console.log(`try ${i}: restored=${ready}`);
     if (ready) { await probe.close(); break; }
   } catch (e) {
     console.log(`try ${i}: ${String(e).split('\n')[0]}`);

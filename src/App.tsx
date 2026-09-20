@@ -4,7 +4,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
-import CursorOrbitals from './components/CursorOrbitals'
 import SiteFooter from './components/SiteFooter'
 import XLoader, { XMark } from './components/XLoader'
 import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
@@ -138,7 +137,6 @@ export default function App() {
       </a>
       <TopBar route={route} />
       <RulerBar route={route} />
-      <CursorOrbitals />
       <Suspense fallback={null}>
         <ShiftWorld />
       </Suspense>
