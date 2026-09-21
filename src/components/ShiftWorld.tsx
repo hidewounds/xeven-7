@@ -258,9 +258,9 @@ export default function ShiftWorld() {
       renderer.setClearColor(fog.color, 1)
       camera.position.set(...CAM)
       camera.lookAt(0, 0.4, -4)
-      // subpages: wordmark hangs high and faint behind kickers, off headlines
+      // all labels hang high and never scroll; only size separates index
       const hero = xs.route === 'enter'
-      label.position.y = hero ? 1.2 : 4.6
+      label.position.y = 4.6
       labelMat.opacity = hero ? 0.9 : 0.22
       drawLabel()
       renderer.render(scene, camera)
@@ -272,6 +272,19 @@ export default function ShiftWorld() {
       camera.updateProjectionMatrix()
       dirty = true
     }
+    // cursor steering: pointer (and touch-drag) aim the camera
+    const pm = { x: 0, y: 0 }
+    const steer = (clientX: number, clientY: number) => {
+      pm.x = clientX / window.innerWidth - 0.5
+      pm.y = clientY / window.innerHeight - 0.5
+    }
+    const onPointerMove = (e: PointerEvent) => steer(e.clientX, e.clientY)
+    const onTouchSteer = (e: TouchEvent) => {
+      const t = e.touches[0]
+      if (t) steer(t.clientX, t.clientY)
+    }
+    window.addEventListener('pointermove', onPointerMove, { passive: true })
+    window.addEventListener('touchmove', onTouchSteer, { passive: true })
     let raf = 0
     let alive = true
     let last = performance.now()
@@ -308,14 +321,15 @@ export default function ShiftWorld() {
       }
       if ((live || dirty) && !document.hidden) {
         if (live) {
-          const sy = Math.min(window.scrollY, 2200)
-          camera.position.set(
-            CAM[0] + Math.sin(clockT * 0.21) * 0.5,
-            CAM[1] + Math.sin(clockT * 0.16 + 1) * 0.35 - sy * 0.0012,
-            CAM[2] + Math.cos(clockT * 0.13) * 0.4,
-          )
+          // cursor aims, micro-sway breathes underneath — scroll does nothing
+          const tx = CAM[0] + pm.x * 3.2 + Math.sin(clockT * 0.21) * 0.15
+          const ty = CAM[1] - pm.y * 2.0 + Math.sin(clockT * 0.16 + 1) * 0.1
+          const tz = CAM[2] + Math.cos(clockT * 0.13) * 0.15
+          camera.position.x += (tx - camera.position.x) * 0.05
+          camera.position.y += (ty - camera.position.y) * 0.05
+          camera.position.z += (tz - camera.position.z) * 0.05
           camera.lookAt(camera.position.x * 0.4, 0.4, -4)
-          label.position.y = 1.2 + Math.sin(clockT * 0.8) * 0.15
+          label.position.y = 4.6 + Math.sin(clockT * 0.8) * 0.12
           quadUniforms.uTime.value = clockT
         }
         renderer.render(scene, camera)
@@ -337,6 +351,8 @@ export default function ShiftWorld() {
     return () => {
       alive = false
       cancelAnimationFrame(raf)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('touchmove', onTouchSteer)
       window.removeEventListener('resize', resize)
       window.removeEventListener('hashchange', onHash)
       canvas.removeEventListener('webglcontextlost', onLost, false)
