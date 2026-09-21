@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { INSTRUMENTS, PRODUCT, TELEMETRY, TRIAL } from '../data/product'
 import DemoChat from '../components/DemoChat'
+import { useMagnetic } from '../useMagnetic'
 import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -24,19 +25,39 @@ function Ledger() {
   useEffect(() => {
     if (xs.reduced) return
     let raf = 0
-    const t0 = performance.now()
+    let started = false
+    const t0 = { now: 0 }
     const tick = (now: number) => {
-      const s = Math.floor((now - t0) / 2600)
+      if (!started) {
+        started = true
+        t0.now = now
+      }
+      const s = Math.floor((now - t0.now) / 2600)
       refs.current.forEach((el, i) => {
         if (el) el.textContent = LEDGER[i][1][s % LEDGER[i][1].length]
       })
       raf = requestAnimationFrame(tick)
+    }
+    // wake with the veil lift when the intro is showing; otherwise now
+    if (document.querySelector('.intro')) {
+      const onBloom = () => {
+        cancelAnimationFrame(raf)
+        raf = requestAnimationFrame(tick)
+      }
+      window.addEventListener('xeven:orb-bloom', onBloom)
+      const failsafe = window.setTimeout(() => raf = requestAnimationFrame(tick), 6000)
+      return () => {
+        window.removeEventListener('xeven:orb-bloom', onBloom)
+        window.clearTimeout(failsafe)
+        cancelAnimationFrame(raf)
+      }
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [])
   return (
     <div className="ledger" aria-label="Live shift board">
+      <p className="mono ledger-label">LIVE FROM THE DEMO SHIFT</p>
       {LEDGER.map(([word, notes], i) => (
         <div className="ledger-row" key={word}>
           <span className={`ledger-dot${i === 2 ? ' ember' : ' mint'}`} aria-hidden="true" />
@@ -71,6 +92,8 @@ function Clock() {
 
 export default function EnterStage() {
   const root = useRef<HTMLDivElement>(null!)
+  const heroMag = useMagnetic<HTMLButtonElement>()
+  const finMag = useMagnetic<HTMLButtonElement>()
   // dust reveal plays once, only when the orb bloom fires while mounted
   const [dust, setDust] = useState(false)
   useEffect(() => {
@@ -83,18 +106,29 @@ export default function EnterStage() {
   useEffect(() => {
     if (xs.reduced) return
     const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>('.rv').forEach((el) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 36 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-          },
-        )
+      const batch = (sel: string, y: number, duration: number) => {
+        gsap.utils.toArray<HTMLElement>(sel).forEach((el) => {
+          gsap.fromTo(
+            el,
+            { opacity: 0, y },
+            {
+              opacity: 1,
+              y: 0,
+              duration,
+              ease: 'power3.out',
+              scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+            },
+          )
+        })
+      }
+      batch('.rv-fast', 24, 0.6)
+      batch('.rv', 36, 0.9)
+      batch('.rv-slow', 48, 1.2)
+      // hero parallax: mark drifts against the ledger on scroll
+      gsap.to('.hero-mark', {
+        yPercent: 26,
+        ease: 'none',
+        scrollTrigger: { trigger: '.st-hero', start: 'top top', end: 'bottom top', scrub: true },
       })
     }, root)
     return () => ctx.revert()
@@ -105,6 +139,12 @@ export default function EnterStage() {
       <section className="st-hero hero-center" id="top">
         <p className="hero-mark" aria-hidden="true">XEVEN</p>
         <p className="mono rv">XEVEN — THE NIGHT SHIFT</p>
+        <p className="hero-prop rv">The AI employee for business websites.</p>
+        <div className="hero-cta-row rv">
+          <button ref={heroMag} className="pill" data-cursor onClick={() => navigate('demo')}>
+            Book a demo →
+          </button>
+        </div>
         <Ledger />
         <p className="mono rv" aria-hidden="true">SCROLL TO ENTER ↓</p>
       </section>
@@ -155,7 +195,7 @@ export default function EnterStage() {
         <p className="mono zone-kicker rv">01 — WHAT IT DOES ON SHIFT</p>
         <h2 className="zone-title rv">Five instruments, one employee.</h2>
         {INSTRUMENTS.map((r) => (
-          <div className="t-row rv" key={r.t}>
+          <div className="t-row rv-fast" key={r.t}>
             <span className="t-n">{r.s}</span>
             <div>
               <h3>{r.t}</h3>
@@ -187,7 +227,7 @@ export default function EnterStage() {
         <p className="mono zone-kicker rv">03 — HOW A MESSAGE MOVES</p>
         <h2 className="zone-title rv">Hear, hold, answer, earn.</h2>
         {TELEMETRY.map((r) => (
-          <div className="t-row rv" key={r.n}>
+          <div className="t-row rv-slow" key={r.n}>
             <span className="t-n">{r.n}</span>
             <div>
               <h3>{r.t}</h3>
@@ -203,7 +243,7 @@ export default function EnterStage() {
         <h2 className="zone-title rv">{TRIAL.title}</h2>
         <p className="page-lede rv">{TRIAL.lede} {PRODUCT.trial}</p>
         <div className="hero-cta-row rv" style={{ marginTop: 'var(--s24)' }}>
-          <button className="pill" data-cursor onClick={() => navigate('demo')}>
+          <button ref={finMag} className="pill" data-cursor onClick={() => navigate('demo')}>
             Start the trial →
           </button>
           <button className="pill pill-ghost" data-cursor onClick={() => navigate('pricing')}>

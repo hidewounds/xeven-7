@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ADDONS, PLANS, TRIAL, yearlyTotal } from '../data/product'
+import { ADDONS, PLANS, PRODUCT, TRIAL, yearlyTotal } from '../data/product'
 import { navigate } from '../app/store'
 import { useMagnetic } from '../useMagnetic'
 
@@ -32,6 +32,9 @@ export default function Pricing() {
           Yearly −20%
         </button>
       </div>
+      <p className="mono" style={{ alignSelf: 'flex-start' }}>
+        {TRIAL.lede} {PRODUCT.trial}
+      </p>
       <div className="tier-grid">
         {PLANS.map((p) => (
           <div key={p.n} ref={p.n === 'Growth' ? mag : undefined} className={`tier${p.n === 'Growth' ? ' hot' : ''}`}>

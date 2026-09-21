@@ -26,9 +26,12 @@ export default function SiteFooter({ route }: { route: Route }) {
             ))}
           </nav>
         </div>
-        <a className="foot-mail" href="mailto:hello@xeven.world">
-          HELLO@XEVEN.WORLD
-        </a>
+        <div>
+          <p className="mono" style={{ margin: '0 0 var(--s16)' }}>NIGHT SHIFT — ALWAYS ON</p>
+          <a className="foot-mail" href="mailto:hello@xeven.world">
+            HELLO@XEVEN.WORLD
+          </a>
+        </div>
       </div>
     </footer>
   )

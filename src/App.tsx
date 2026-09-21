@@ -131,6 +131,8 @@ export default function App() {
       <Suspense fallback={null}>
         <ShiftWorld />
       </Suspense>
+      <div className="weather" data-route={route} aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
       <div className="glass-finish" aria-hidden="true" />
       <main id="main" key={route} className={intro && !bloomed ? 'pre-bloom' : 'page-swipe'}>
         <Suspense fallback={null}>

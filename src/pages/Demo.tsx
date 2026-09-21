@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
 import { hashQuery } from '../app/store'
-import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS, PLANS } from '../data/product'
+import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS, INSTRUMENTS, PLANS } from '../data/product'
 import ShineBorder from '../components/magicui/ShineBorder'
 
 /* DEMO — the briefing room. Pick a focus, leave a name and work email,
@@ -75,11 +75,23 @@ export default function Demo() {
       <p className="page-lede">
         Thirty seconds. Then we talk shop. {DEMO_NOTE}
       </p>
-      {plan && (
+      {plan ? (
         <p className="pill pill-ghost" style={{ alignSelf: 'flex-start' }} aria-live="polite">
           {plan[0].toUpperCase() + plan.slice(1)} plan selected
         </p>
+      ) : (
+        <p className="pill pill-ghost" style={{ alignSelf: 'flex-start' }}>
+          All plans — we’ll fit yours on the call
+        </p>
       )}
+      <ol className="demo-steps" aria-label="What happens next">
+        <li><b>01</b> Tell us your focus</li>
+        <li><b>02</b> We confirm in hours</li>
+        <li><b>03</b> XEVEN trains on your site</li>
+      </ol>
+      <p className="mono proof-strip" aria-label="Published shift numbers">
+        {INSTRUMENTS.slice(0, 3).map((r) => r.s).join(' · ')}
+      </p>
       <div ref={card} className="form-card form-card-shine">
         <ShineBorder duration={16} shineColor={['#4df3ff', '#ff6fae']} />
         {status === 'sent' ? (
@@ -147,7 +159,18 @@ export default function Demo() {
               </button>
             )}
             <p className="form-alt">
-              Prefer mail? <a href="mailto:hello@xeven.world">hello@xeven.world</a>
+              Prefer mail?{' '}
+              <button
+                className="pill pill-ghost"
+                type="button"
+                data-cursor
+                onClick={() => {
+                  window.location.href = 'mailto:hello@xeven.world'
+                }}
+                style={{ minHeight: 36 }}
+              >
+                hello@xeven.world
+              </button>
             </p>
           </form>
         )}
