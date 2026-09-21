@@ -258,9 +258,9 @@ export default function ShiftWorld() {
       renderer.setClearColor(fog.color, 1)
       camera.position.set(...CAM)
       camera.lookAt(0, 0.4, -4)
-      // all labels hang high and never scroll; only size separates index
+      // index mark floats centered; subpages hang high behind kickers
       const hero = xs.route === 'enter'
-      label.position.y = 4.6
+      label.position.y = hero ? 1.4 : 4.6
       labelMat.opacity = hero ? 0.9 : 0.22
       drawLabel()
       renderer.render(scene, camera)
@@ -329,7 +329,7 @@ export default function ShiftWorld() {
           camera.position.y += (ty - camera.position.y) * 0.05
           camera.position.z += (tz - camera.position.z) * 0.05
           camera.lookAt(camera.position.x * 0.4, 0.4, -4)
-          label.position.y = 4.6 + Math.sin(clockT * 0.8) * 0.12
+          label.position.y = 1.4 + Math.sin(clockT * 0.8) * 0.12
           quadUniforms.uTime.value = clockT
         }
         renderer.render(scene, camera)
