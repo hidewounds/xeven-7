@@ -1,9 +1,9 @@
 import type { Route } from '../app/store'
 
-/* FieldMark — the route wordmark (XEVEN / WORLDS / …). A fixed overlay
-   pinned to the top of every page: it never scrolls or steers with the
-   camera. Hollow outline; gradient stroke on index, bright cyan off it.
-   Decorative — screen readers ignore it. */
+/* FieldMark — the floating route wordmark (XEVEN / WORLDS / …). A fixed
+   HTML/SVG overlay, pixel-locked to the viewport: it never scrolls, bobs,
+   or drifts with the WebGL camera. Hollow outline; gradient stroke on
+   index, bright cyan on subpages. Decorative — screen readers ignore it. */
 
 const LABELS: Record<Route, string> = {
   enter: 'XEVEN',

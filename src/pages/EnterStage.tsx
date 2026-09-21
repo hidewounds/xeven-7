@@ -41,16 +41,8 @@ export default function EnterStage() {
   return (
     <div className="page">
       <section className="st-hero hero-center" id="top" aria-label="XEVEN">
-        <h1 className="hero-title rv">{PRODUCT.hero}</h1>
-        <p className="hero-sub rv">{PRODUCT.sub}</p>
-        <div className="hero-cta-row rv">
-          <button className="pill" data-cursor onClick={() => navigate('demo')}>
-            Book a demo →
-          </button>
-          <button className="pill pill-ghost" data-cursor onClick={() => navigate('worlds')}>
-            See the worlds
-          </button>
-        </div>
+        <h1 className="sr-only">{PRODUCT.hero}</h1>
+        <p className="hero-sub">{PRODUCT.sub}</p>
       </section>
       <section className="zone" id="anatomy" aria-label="Field anatomy">
         <p className="mono zone-kicker rv">ANATOMY OF THE FIELD</p>
