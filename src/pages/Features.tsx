@@ -1,6 +1,5 @@
 import { Suspense, lazy, useState } from 'react'
 import { INSTRUMENTS, KB, KB_EMPTY, SKILLS } from '../data/product'
-import { useRouteReady } from '../app/store'
 
 /* FEATURES — the five instruments up close, the six skills, the live
    knowledge index, and a copilot that operates this very page. */
@@ -36,7 +35,6 @@ function KBDemo() {
 }
 
 export default function Features() {
-  useRouteReady()
   const [open, setOpen] = useState<number | null>(0)
   return (
     <div className="page">
@@ -96,3 +94,4 @@ export default function Features() {
     </div>
   )
 }
+

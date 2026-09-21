@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { navigate, useRouteReady, xs } from '../app/store'
+import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -34,7 +34,6 @@ const STATIONS = [
 
 export default function Worlds() {
   const root = useRef<HTMLDivElement>(null!)
-  useRouteReady()
 
   useEffect(() => {
     if (xs.reduced) return
@@ -92,3 +91,4 @@ export default function Worlds() {
     </div>
   )
 }
+

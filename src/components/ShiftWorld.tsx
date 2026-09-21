@@ -3,17 +3,18 @@ import * as THREE from 'three'
 import { xs } from '../app/store'
 import type { Route } from '../app/store'
 
-/* SHIFTWORLD VI — a long diamond corridor. The mosaic tiles edge-to-edge
- * and recedes in depth layers; on index, page scroll dollies the camera
- * down the corridor (scrubbed, reversible, per-section stops ahead). The
- * route wordmark is NOT here — the fixed FieldMark overlay owns titles so
- * they stay pixel-locked while the field moves. Subpages: one frozen
- * hold. Nothing chases the pointer except a slow camera steer. */
+/* SHIFTWORLD VI — a deep diamond corridor that travels WITH the scroll.
+ * Page scroll pans the camera vertically through the lattice (no zoom,
+ * no dolly) on every route, so the background moves with the content.
+ * Reversible and smoothed. The route wordmark is NOT here — the fixed
+ * FieldMark overlay owns titles. A slow pointer steer breathes underneath. */
 
 const VOID = new THREE.Color(0x06090f)
 const HALF = 14
 const GAP = 0.5
 const BOW = 2.2
+/** world units the camera pans across a full page scroll */
+const PAN = 4
 
 const TINTS: Record<Route, { fog: number }> = {
   enter: { fog: 0x06090f },
@@ -25,6 +26,12 @@ const TINTS: Record<Route, { fog: number }> = {
 }
 
 const CAM: [number, number, number] = [0, 1.4, 9.5]
+
+/** page scroll progress 0..1 — drives the camera pan on every route */
+function scrollP(): number {
+  const max = document.documentElement.scrollHeight - window.innerHeight
+  return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+}
 
 function bowed(x: number, z: number): number {
   const r = Math.sqrt(x * x + z * z) / (HALF * 1.42)
@@ -199,8 +206,9 @@ export default function ShiftWorld() {
       const fog = scene.fog as THREE.FogExp2
       fog.color.set(TINTS[xs.route].fog)
       renderer.setClearColor(fog.color, 1)
-      camera.position.set(...CAM)
-      camera.lookAt(0, 0.4, -4)
+      const p = scrollP()
+      camera.position.set(CAM[0], CAM[1] - p * PAN, CAM[2])
+      camera.lookAt(0, 0.4 - p * PAN, -4)
       renderer.render(scene, camera)
     }
 
@@ -223,11 +231,16 @@ export default function ShiftWorld() {
     }
     window.addEventListener('pointermove', onPointerMove, { passive: true })
     window.addEventListener('touchmove', onTouchSteer, { passive: true })
+    // scroll pans the background with the content — repaint on scroll.
+    const onScroll = () => {
+      dirty = true
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
     let raf = 0
     let alive = true
     let last = performance.now()
     let clockT = Math.random() * 10
-    let dolly = 0
+    let pan = 0
     let dirty = false
     resize()
     window.addEventListener('resize', resize)
@@ -249,9 +262,8 @@ export default function ShiftWorld() {
 
     renderStill()
 
-    // index-only drift: slow cursor steer + scroll dolly down the corridor.
-    // dolly is a pure function of scroll progress (smoothed), so the
-    // journey is scrub-reversible and interruptible; subpages sleep.
+    // scroll pans the camera through the lattice — background travels
+    // with the content. Smoothed and reversible; never zooms.
     const frame = (now: number) => {
       if (!alive) return
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -261,19 +273,21 @@ export default function ShiftWorld() {
         clockT += dt
       }
       if ((live || dirty) && !document.hidden) {
+        const p = scrollP()
+        pan += (p - pan) * 0.08
         if (live) {
-          const max = document.documentElement.scrollHeight - window.innerHeight
-          const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
-          dolly += (p - dolly) * 0.08
           // cursor aims gently, micro-sway breathes underneath
           const tx = CAM[0] + pm.x * 1.6 + Math.sin(clockT * 0.21) * 0.07
-          const ty = CAM[1] - pm.y * 1.0 + Math.sin(clockT * 0.16 + 1) * 0.05 - dolly * 0.8
-          const tz = CAM[2] - dolly * 5.0 + Math.cos(clockT * 0.13) * 0.07
+          const ty = CAM[1] - pm.y * 1.0 + Math.sin(clockT * 0.16 + 1) * 0.05 - pan * PAN
+          const tz = CAM[2] + Math.cos(clockT * 0.13) * 0.07
           camera.position.x += (tx - camera.position.x) * 0.02
           camera.position.y += (ty - camera.position.y) * 0.02
           camera.position.z += (tz - camera.position.z) * 0.02
-          camera.lookAt(camera.position.x * 0.4, 0.4 - dolly * 0.4, -4 - dolly * 4)
+          camera.lookAt(camera.position.x * 0.4, 0.4 - pan * PAN, -4)
           quadUniforms.uTime.value = clockT
+        } else {
+          camera.position.set(CAM[0], CAM[1] - pan * PAN, CAM[2])
+          camera.lookAt(0, 0.4 - pan * PAN, -4)
         }
         renderer.render(scene, camera)
         dirty = false
@@ -296,6 +310,7 @@ export default function ShiftWorld() {
       cancelAnimationFrame(raf)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('touchmove', onTouchSteer)
+      window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', resize)
       window.removeEventListener('hashchange', onHash)
       canvas.removeEventListener('webglcontextlost', onLost, false)
