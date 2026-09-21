@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
-import { hashQuery } from '../app/store'
+import { hashQuery, useRouteReady } from '../app/store'
 import { DEMO_FOCUS, DEMO_NOTE, DEMO_SLOTS, INSTRUMENTS, PLANS } from '../data/product'
 import ShineBorder from '../components/magicui/ShineBorder'
 
@@ -15,6 +15,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const planSlug = (n: string) => n.toLowerCase()
 
 export default function Demo() {
+  useRouteReady()
   const [plan] = useState(() => {
     const q = (hashQuery('plan') || '').toLowerCase()
     return PLANS.some((p) => planSlug(p.n) === q) ? q : null

@@ -3,25 +3,17 @@ import * as THREE from 'three'
 import { xs } from '../app/store'
 import type { Route } from '../app/store'
 
-/* SHIFTWORLD V — a frozen diamond wall. One straight camera on every route,
- * one attached mosaic, one static render on mount and on resize. Nothing
- * moves — no ticker, no pointer, no touch. Each page's designation hangs at
- * the top as a giant hollow outline that never scrolls. Per-route haze
- * retint kept (color mood, not motion). */
+/* SHIFTWORLD VI — a long diamond corridor. The mosaic tiles edge-to-edge
+ * and recedes in depth layers; on index, page scroll dollies the camera
+ * down the corridor (scrubbed, reversible, per-section stops ahead). The
+ * route wordmark is NOT here — the fixed FieldMark overlay owns titles so
+ * they stay pixel-locked while the field moves. Subpages: one frozen
+ * hold. Nothing chases the pointer except a slow camera steer. */
 
 const VOID = new THREE.Color(0x06090f)
 const HALF = 14
 const GAP = 0.5
 const BOW = 2.2
-
-const LABELS: Record<Route, string> = {
-  enter: 'XEVEN',
-  worlds: 'WORLDS',
-  about: 'ABOUT',
-  features: 'FEATURES',
-  pricing: 'PRICING',
-  demo: 'DEMO',
-}
 
 const TINTS: Record<Route, { fog: number }> = {
   enter: { fog: 0x06090f },
@@ -66,21 +58,25 @@ export default function ShiftWorld() {
     key.position.set(4, 7, 5)
     scene.add(key)
 
-    // ---- attached diamond mosaic: edge-to-edge tiles, one draw ----
+    // ---- diamond corridor: edge-to-edge tiles, receding depth layers ----
     const QUAD = GAP * 3.2
     const CELLS = Math.floor((2 * HALF) / QUAD)
-    const NQ = CELLS * CELLS
+    const LAYERS = 4
+    const LAYER_GAP = 8
+    const NQ = CELLS * CELLS * LAYERS
     const quadGeo = new THREE.PlaneGeometry(1, 1)
     {
       const aSeed = new Float32Array(NQ)
       const aQI = new Float32Array(NQ)
       const aQJ = new Float32Array(NQ)
-      for (let bj = 0; bj < CELLS; bj++) {
-        for (let bi = 0; bi < CELLS; bi++) {
-          const i = bj * CELLS + bi
-          aSeed[i] = Math.random()
-          aQI[i] = bi
-          aQJ[i] = bj
+      for (let l = 0; l < LAYERS; l++) {
+        for (let bj = 0; bj < CELLS; bj++) {
+          for (let bi = 0; bi < CELLS; bi++) {
+            const i = (l * CELLS + bj) * CELLS + bi
+            aSeed[i] = Math.random()
+            aQI[i] = bi
+            aQJ[i] = bj
+          }
         }
       }
       quadGeo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(aSeed, 1))
@@ -180,68 +176,23 @@ export default function ShiftWorld() {
     {
       const dummy = new THREE.Object3D()
       const c = Math.SQRT1_2
-      for (let bj = 0; bj < CELLS; bj++) {
-        for (let bi = 0; bi < CELLS; bi++) {
-          const i = bj * CELLS + bi
-          const uc = -HALF + (bi + 0.5) * QUAD
-          const vc = -HALF + (bj + 0.5) * QUAD
-          const wx = uc * c - vc * c
-          const wy = uc * c + vc * c
-          dummy.position.set(wx, wy - 1.6, bowed(wx, 0) - 0.02)
-          dummy.scale.set(QUAD, QUAD, 1)
-          dummy.rotation.set(0, 0, Math.PI / 4)
-          dummy.updateMatrix()
-          quads.setMatrixAt(i, dummy.matrix)
+      for (let l = 0; l < LAYERS; l++) {
+        for (let bj = 0; bj < CELLS; bj++) {
+          for (let bi = 0; bi < CELLS; bi++) {
+            const i = (l * CELLS + bj) * CELLS + bi
+            const uc = -HALF + (bi + 0.5) * QUAD
+            const vc = -HALF + (bj + 0.5) * QUAD
+            const wx = uc * c - vc * c
+            const wy = uc * c + vc * c
+            dummy.position.set(wx, wy - 1.6, bowed(wx, 0) - 0.02 - l * LAYER_GAP)
+            dummy.scale.set(QUAD, QUAD, 1)
+            dummy.rotation.set(0, 0, Math.PI / 4)
+            dummy.updateMatrix()
+            quads.setMatrixAt(i, dummy.matrix)
+          }
         }
       }
       quads.instanceMatrix.needsUpdate = true
-    }
-
-    // ---- hollow giant wordmark pinned to the top of the frame ----
-    const labelCanvas = document.createElement('canvas')
-    labelCanvas.width = 2048
-    labelCanvas.height = 512
-    const labelTex = new THREE.CanvasTexture(labelCanvas)
-    labelTex.colorSpace = THREE.SRGBColorSpace
-    const labelMat = new THREE.MeshBasicMaterial({
-      map: labelTex,
-      transparent: true,
-      opacity: 0.9,
-      depthWrite: false,
-    })
-    const label = new THREE.Mesh(new THREE.PlaneGeometry(20, 5), labelMat)
-    label.position.set(0, 1.2, -2)
-    scene.add(label)
-    const drawLabel = () => {
-      const ctx = labelCanvas.getContext('2d')
-      if (!ctx) return
-      const hero = xs.route === 'enter'
-      ctx.clearRect(0, 0, 2048, 512)
-      ctx.font = `400 ${hero ? 330 : 190}px Anton, "Arial Narrow", sans-serif`
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      try {
-        ;(ctx as unknown as { letterSpacing: string }).letterSpacing = '20px'
-      } catch {
-        /* older canvas: tracking unsupported, word still draws */
-      }
-      if (hero) {
-        const g = ctx.createLinearGradient(320, 0, 1728, 0)
-        g.addColorStop(0, '#ff6fae')
-        g.addColorStop(0.55, '#f2a0c6')
-        g.addColorStop(1, '#4df3ff')
-        ctx.strokeStyle = g
-        ctx.lineWidth = 5
-      } else {
-        ctx.strokeStyle = '#4df3ff'
-        ctx.lineWidth = 3
-      }
-      ctx.strokeText(LABELS[xs.route], 1024, 268)
-      labelTex.needsUpdate = true
-    }
-    drawLabel()
-    if (document.fonts) {
-      void document.fonts.ready.then(() => drawLabel())
     }
 
     const renderStill = () => {
@@ -250,15 +201,6 @@ export default function ShiftWorld() {
       renderer.setClearColor(fog.color, 1)
       camera.position.set(...CAM)
       camera.lookAt(0, 0.4, -4)
-      // index mark floats centered; subpages hang high behind kickers.
-      // narrow portraits shrink the wordmark so it never crops.
-      const hero = xs.route === 'enter'
-      label.position.y = hero ? 1.4 : 4.6
-      labelMat.opacity = hero ? 0.9 : 0.22
-      const aspect = window.innerWidth / Math.max(1, window.innerHeight)
-      const ls = Math.min(1, aspect / 1.1)
-      label.scale.set(ls, ls, 1)
-      drawLabel()
       renderer.render(scene, camera)
     }
 
@@ -285,6 +227,7 @@ export default function ShiftWorld() {
     let alive = true
     let last = performance.now()
     let clockT = Math.random() * 10
+    let dolly = 0
     let dirty = false
     resize()
     window.addEventListener('resize', resize)
@@ -306,7 +249,9 @@ export default function ShiftWorld() {
 
     renderStill()
 
-    // index-only drift: ambient sway + scroll parallax, everywhere else sleeps
+    // index-only drift: slow cursor steer + scroll dolly down the corridor.
+    // dolly is a pure function of scroll progress (smoothed), so the
+    // journey is scrub-reversible and interruptible; subpages sleep.
     const frame = (now: number) => {
       if (!alive) return
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -317,15 +262,17 @@ export default function ShiftWorld() {
       }
       if ((live || dirty) && !document.hidden) {
         if (live) {
-          // cursor aims, micro-sway breathes underneath — scroll does nothing
-          const tx = CAM[0] + pm.x * 3.2 + Math.sin(clockT * 0.21) * 0.15
-          const ty = CAM[1] - pm.y * 2.0 + Math.sin(clockT * 0.16 + 1) * 0.1
-          const tz = CAM[2] + Math.cos(clockT * 0.13) * 0.15
-          camera.position.x += (tx - camera.position.x) * 0.05
-          camera.position.y += (ty - camera.position.y) * 0.05
-          camera.position.z += (tz - camera.position.z) * 0.05
-          camera.lookAt(camera.position.x * 0.4, 0.4, -4)
-          label.position.y = 1.4 + Math.sin(clockT * 0.8) * 0.12
+          const max = document.documentElement.scrollHeight - window.innerHeight
+          const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+          dolly += (p - dolly) * 0.08
+          // cursor aims gently, micro-sway breathes underneath
+          const tx = CAM[0] + pm.x * 1.6 + Math.sin(clockT * 0.21) * 0.07
+          const ty = CAM[1] - pm.y * 1.0 + Math.sin(clockT * 0.16 + 1) * 0.05 - dolly * 0.8
+          const tz = CAM[2] - dolly * 5.0 + Math.cos(clockT * 0.13) * 0.07
+          camera.position.x += (tx - camera.position.x) * 0.02
+          camera.position.y += (ty - camera.position.y) * 0.02
+          camera.position.z += (tz - camera.position.z) * 0.02
+          camera.lookAt(camera.position.x * 0.4, 0.4 - dolly * 0.4, -4 - dolly * 4)
           quadUniforms.uTime.value = clockT
         }
         renderer.render(scene, camera)
@@ -338,8 +285,8 @@ export default function ShiftWorld() {
     }
 
     ;(window as unknown as { __shiftworld?: object }).__shiftworld = {
-      get label() {
-        return LABELS[xs.route]
+      get route() {
+        return xs.route
       },
       quads,
     }
@@ -353,7 +300,6 @@ export default function ShiftWorld() {
       window.removeEventListener('hashchange', onHash)
       canvas.removeEventListener('webglcontextlost', onLost, false)
       canvas.removeEventListener('webglcontextrestored', onRestored, false)
-      labelTex.dispose()
       scene.traverse((o) => {
         const mesh = o as THREE.Mesh
         if (mesh.geometry) mesh.geometry.dispose()

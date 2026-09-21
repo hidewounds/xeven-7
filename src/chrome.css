@@ -3,7 +3,7 @@
    backdrop-filter anywhere — solid veils only. */
 
 /* ---------- shell ---------- */
-.xp { position: relative; min-height: 100svh; display: flex; flex-direction: column; }
+.xp { position: relative; min-height: 100svh; display: flex; flex-direction: column; padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
 
 main { flex: 1 0 auto; display: flex; flex-direction: column; min-height: 60svh; }
 main > .page { width: 100%; }
@@ -41,6 +41,94 @@ canvas.world-fixed {
   background:
     radial-gradient(120% 90% at 50% 110%, transparent 55%, rgba(3, 5, 8, 0.55) 100%),
     linear-gradient(to bottom, rgba(3, 5, 8, 0.25), transparent 22%);
+}
+
+/* ---------- field mark: fixed route wordmark over the diamonds.
+   Pixel-locked to the viewport — never scrolls, bobs, or steers with
+   the camera. Hollow SVG outline; gradient on index, bright cyan off it. */
+.field-mark {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+.field-mark.hero { top: 50%; transform: translateY(-50%); }
+.field-mark.sub { top: 72px; }
+
+.field-mark svg { width: min(1060px, 94vw); height: auto; display: block; }
+.field-mark.sub svg { width: min(640px, 80vw); }
+
+.field-mark-text {
+  font-family: var(--disp);
+  font-size: 200px;
+  fill: none;
+  letter-spacing: 14px;
+}
+
+.field-mark.hero .field-mark-text { stroke-width: 3; }
+.field-mark.sub .field-mark-text { stroke-width: 2; opacity: 0.6; }
+
+/* ---------- XLoader: the loading interface. Lone revolving X. ---------- */
+.xloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loader);
+  background: var(--void);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xloader-x {
+  font-family: var(--disp);
+  font-size: 72px;
+  line-height: 1;
+  color: var(--bone);
+  animation: x-spin 1.1s linear infinite;
+}
+
+@keyframes x-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- footbar: slim fixed bar on every page ---------- */
+.footbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-ui);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s16);
+  padding: var(--s8) var(--s24) calc(var(--s8) + env(safe-area-inset-bottom));
+  background: rgba(6, 9, 15, 0.86);
+  border-top: 1px solid var(--line);
+}
+
+.footbar-mark {
+  font-family: var(--disp);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.footbar-pos { white-space: nowrap; }
+
+.footbar-cta {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--glow);
+  text-decoration: none;
+  padding: var(--s8) 0;
+  border-bottom: 1px solid var(--glow);
+  white-space: nowrap;
 }
 
 /* ---------- top bar: content floats, zero bar chrome ---------- */
@@ -705,9 +793,13 @@ canvas.world-fixed {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3C/svg%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* anchor targets clear the floating topbar when jumped to */
+.st-hero, .zone, .fin { scroll-margin-top: 24px; }
+
 /* ---------- reduced motion: full stand-down ---------- */
 @media (prefers-reduced-motion: reduce) {
   .intro-veil { transition: none; }
+  .xloader-x { animation: none; }
   .dust-char { opacity: 1; filter: none; transform: none; animation: none; }
   .dust-motes { display: none; }
   .page-swipe > .page { animation: none; }

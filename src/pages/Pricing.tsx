@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { ADDONS, PLANS, PRODUCT, TRIAL, yearlyTotal } from '../data/product'
-import { navigate } from '../app/store'
+import { navigate, useRouteReady } from '../app/store'
 import { useMagnetic } from '../useMagnetic'
 
 /* PRICING — monthly/yearly arithmetic straight from the single source of
    truth, add-ons, trial banner. Tier cards carry the magnetic pull. */
 
 export default function Pricing() {
+  useRouteReady()
   const [yearly, setYearly] = useState(false)
   const mag = useMagnetic<HTMLDivElement>()
 

@@ -1,9 +1,11 @@
 import { BOLT, MISSION, PRINCIPLES, TRUSTLINE } from '../data/product'
+import { useRouteReady } from '../app/store'
 
 /* ABOUT — why it exists. Mission, bolt stats, principles, and the trustline
    the whole company stands on. No vignette: the field behind is the art. */
 
 export default function About() {
+  useRouteReady()
   return (
     <div className="page">
       <p className="mono">{MISSION.kicker}</p>

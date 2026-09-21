@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { PRODUCT, TRIAL } from '../data/product'
-import { navigate, xs } from '../app/store'
+import { navigate, useRouteReady, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -17,6 +17,7 @@ const ANATOMY = [
 ]
 
 export default function EnterStage() {
+  useRouteReady()
   useEffect(() => {
     if (xs.reduced) return
     const ctx = gsap.context(() => {

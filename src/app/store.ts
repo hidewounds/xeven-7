@@ -1,4 +1,5 @@
 /* Shared mutable experience store. Plain object — never React state in hot paths. */
+import { useEffect } from 'react'
 
 export type Route = 'enter' | 'worlds' | 'about' | 'features' | 'pricing' | 'demo'
 
@@ -14,6 +15,17 @@ export const xs: XStore = {
 
 /** Animated navigation bus — App registers the curtain-wipe version. */
 export const navBus: { go?: (to: Route, query?: string) => void } = {}
+
+/** Boot bus — each page signals mount so App can lift the XLoader veil.
+ *  App owns the min-dwell + failsafe timers around this signal. */
+export const bootBus: { ready?: () => void } = {}
+
+/** Call once per page component: notifies App the route is mounted. */
+export function useRouteReady(): void {
+  useEffect(() => {
+    bootBus.ready?.()
+  }, [])
+}
 
 /** Scroll bus — App registers Lenis stop/start/scrollTo so overlays and
    section links (menu, ruler) can drive page scroll without touching the

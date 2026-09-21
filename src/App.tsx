@@ -5,7 +5,10 @@ import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
 import SiteFooter from './components/SiteFooter'
-import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
+import FieldMark from './components/FieldMark'
+import XLoader from './components/XLoader'
+import FootBar from './components/FootBar'
+import { bootBus, navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
 /* SHIFT — app shell. Hash routes, lazy pages, Lenis heartbeat. No loaders,
@@ -24,6 +27,13 @@ ScrollTrigger.config({ ignoreMobileResize: true })
 export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash())
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  // XLoader veil is derived, never set synchronously in an effect:
+  // readyFor trails route until the page signals mount (900ms min dwell)
+  // or the 3s failsafe fires. All state updates below are async.
+  const [readyFor, setReadyFor] = useState<Route | null>(null)
+  const veil = !reduced && readyFor !== route
+  const routeRef = useRef<Route>(route)
+  const t0 = useRef(0)
   const lenis = useRef<Lenis | null>(null)
 
   useEffect(() => {
@@ -99,6 +109,28 @@ export default function App() {
     else lenis.current?.scrollTo(0, { immediate: true })
   }, [route, reduced])
 
+  // XLoader veil wiring: stamp the route change, arm the page-ready
+  // signal (min 900ms dwell) and the 3s failsafe. Reduced motion never
+  // veils — content just appears.
+  useEffect(() => {
+    if (reduced) return
+    routeRef.current = route
+    t0.current = performance.now()
+    const captured = routeRef.current
+    const later = (fn: () => void, ms: number) => window.setTimeout(() => {
+      if (routeRef.current === captured) fn()
+    }, ms)
+    bootBus.ready = () => {
+      const wait = Math.max(0, 900 - (performance.now() - t0.current))
+      later(() => setReadyFor(captured), wait)
+    }
+    const tMax = later(() => setReadyFor(captured), 3000)
+    return () => {
+      window.clearTimeout(tMax)
+      if (bootBus.ready) bootBus.ready = undefined
+    }
+  }, [route, reduced])
+
   return (
     <div className="xp" id="top">
       <a className="skip" href="#main">
@@ -109,6 +141,8 @@ export default function App() {
       <Suspense fallback={null}>
         <ShiftWorld />
       </Suspense>
+      <FieldMark route={route} />
+      {veil && <XLoader />}
       <div className="weather" data-route={route} aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <div className="glass-finish" aria-hidden="true" />
@@ -123,6 +157,7 @@ export default function App() {
         </Suspense>
       </main>
       <SiteFooter route={route} />
+      <FootBar route={route} />
     </div>
   )
 }
