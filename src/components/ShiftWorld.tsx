@@ -45,6 +45,7 @@ export default function ShiftWorld() {
   useEffect(() => {
     const canvas = ref.current
     const coarse = window.matchMedia('(pointer: coarse)').matches
+    const reduced = xs.reduced
     let renderer: THREE.WebGLRenderer
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, alpha: false, powerPreference: 'low-power' })
@@ -206,34 +207,44 @@ export default function ShiftWorld() {
 
     // ---- hollow giant wordmark pinned to the top of the frame ----
     const labelCanvas = document.createElement('canvas')
-    labelCanvas.width = 1400
-    labelCanvas.height = 320
+    labelCanvas.width = 2048
+    labelCanvas.height = 512
     const labelTex = new THREE.CanvasTexture(labelCanvas)
     labelTex.colorSpace = THREE.SRGBColorSpace
     const labelMat = new THREE.MeshBasicMaterial({
       map: labelTex,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
       depthWrite: false,
     })
-    const label = new THREE.Mesh(new THREE.PlaneGeometry(13.5, 3.1), labelMat)
-    label.position.set(0, 3.4, -2)
+    const label = new THREE.Mesh(new THREE.PlaneGeometry(20, 5), labelMat)
+    label.position.set(0, 1.2, -2)
     scene.add(label)
     const drawLabel = () => {
       const ctx = labelCanvas.getContext('2d')
       if (!ctx) return
-      ctx.clearRect(0, 0, 1400, 320)
-      ctx.strokeStyle = '#e8edee'
-      ctx.lineWidth = 3
-      ctx.font = '400 190px Anton, "Arial Narrow", sans-serif'
+      const hero = xs.route === 'enter'
+      ctx.clearRect(0, 0, 2048, 512)
+      ctx.font = `400 ${hero ? 330 : 190}px Anton, "Arial Narrow", sans-serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       try {
-        ;(ctx as unknown as { letterSpacing: string }).letterSpacing = '16px'
+        ;(ctx as unknown as { letterSpacing: string }).letterSpacing = '20px'
       } catch {
         /* older canvas: tracking unsupported, word still draws */
       }
-      ctx.strokeText(LABELS[xs.route], 700, 168)
+      if (hero) {
+        const g = ctx.createLinearGradient(320, 0, 1728, 0)
+        g.addColorStop(0, '#ff6fae')
+        g.addColorStop(0.55, '#f2a0c6')
+        g.addColorStop(1, '#4df3ff')
+        ctx.strokeStyle = g
+        ctx.lineWidth = 5
+      } else {
+        ctx.strokeStyle = '#4df3ff'
+        ctx.lineWidth = 3
+      }
+      ctx.strokeText(LABELS[xs.route], 1024, 268)
       labelTex.needsUpdate = true
     }
     drawLabel()
@@ -249,8 +260,8 @@ export default function ShiftWorld() {
       camera.lookAt(0, 0.4, -4)
       // subpages: wordmark hangs high and faint behind kickers, off headlines
       const hero = xs.route === 'enter'
-      label.position.y = hero ? 3.4 : 4.9
-      labelMat.opacity = hero ? 0.85 : 0.22
+      label.position.y = hero ? 1.2 : 4.6
+      labelMat.opacity = hero ? 0.9 : 0.22
       drawLabel()
       renderer.render(scene, camera)
     }
@@ -259,11 +270,19 @@ export default function ShiftWorld() {
       renderer.setSize(window.innerWidth, window.innerHeight, false)
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
-      renderStill()
+      dirty = true
     }
+    let raf = 0
+    let alive = true
+    let last = performance.now()
+    let clockT = Math.random() * 10
+    let dirty = false
     resize()
     window.addEventListener('resize', resize)
-    const onHash = () => renderStill()
+    const onHash = () => {
+      dirty = true
+      renderStill()
+    }
     window.addEventListener('hashchange', onHash)
     const onLost = (e: Event) => {
       e.preventDefault()
@@ -278,6 +297,36 @@ export default function ShiftWorld() {
 
     renderStill()
 
+    // index-only drift: ambient sway + scroll parallax, everywhere else sleeps
+    const frame = (now: number) => {
+      if (!alive) return
+      const dt = Math.min(0.05, (now - last) / 1000)
+      last = now
+      const live = xs.route === 'enter' && !reduced && !document.hidden
+      if (live) {
+        clockT += dt
+      }
+      if ((live || dirty) && !document.hidden) {
+        if (live) {
+          const sy = Math.min(window.scrollY, 2200)
+          camera.position.set(
+            CAM[0] + Math.sin(clockT * 0.21) * 0.5,
+            CAM[1] + Math.sin(clockT * 0.16 + 1) * 0.35 - sy * 0.0012,
+            CAM[2] + Math.cos(clockT * 0.13) * 0.4,
+          )
+          camera.lookAt(camera.position.x * 0.4, 0.4, -4)
+          label.position.y = 1.2 + Math.sin(clockT * 0.8) * 0.15
+          quadUniforms.uTime.value = clockT
+        }
+        renderer.render(scene, camera)
+        dirty = false
+      }
+      raf = requestAnimationFrame(frame)
+    }
+    if (!reduced) {
+      raf = requestAnimationFrame(frame)
+    }
+
     ;(window as unknown as { __shiftworld?: object }).__shiftworld = {
       get label() {
         return LABELS[xs.route]
@@ -286,6 +335,8 @@ export default function ShiftWorld() {
     }
 
     return () => {
+      alive = false
+      cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('hashchange', onHash)
       canvas.removeEventListener('webglcontextlost', onLost, false)
