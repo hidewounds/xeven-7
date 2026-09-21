@@ -8,10 +8,10 @@ import type { Route } from '../app/store'
 const LABELS: Record<Route, string> = {
   enter: 'XEVEN',
   worlds: 'WORLDS',
-  about: 'ABOUT',
-  features: 'FEATURES',
-  pricing: 'PRICING',
-  demo: 'DEMO',
+  about: 'MANUAL',
+  features: 'MOVES',
+  pricing: 'WAGES',
+  demo: 'BRIEFING',
 }
 
 export default function FieldMark({ route }: { route: Route }) {

@@ -6,6 +6,7 @@ import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
 import SiteFooter from './components/SiteFooter'
 import FieldMark from './components/FieldMark'
+import Cursor from './components/Cursor'
 import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
@@ -18,6 +19,15 @@ const Features = lazy(() => import('./pages/Features'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const Demo = lazy(() => import('./pages/Demo'))
 const ShiftWorld = lazy(() => import('./components/ShiftWorld'))
+
+const ROUTE_TITLES: Record<Route, string> = {
+  enter: 'XEVEN — The AI Employee for Business Websites',
+  worlds: 'Worlds — One Employee, Every Kind of Shop · XEVEN',
+  about: 'Manual — Not Just a Widget · XEVEN',
+  features: 'Moves — Don’t Read Features. Open Them. · XEVEN',
+  pricing: 'Wages — One Employee, Four Wages · XEVEN',
+  demo: 'Briefing — Book a Demo · XEVEN',
+}
 
 gsap.registerPlugin(ScrollTrigger)
 ScrollTrigger.config({ ignoreMobileResize: true })
@@ -93,6 +103,7 @@ export default function App() {
 
   useEffect(() => {
     ScrollTrigger.refresh()
+    document.title = ROUTE_TITLES[route]
     if (document.fonts) {
       void document.fonts.ready.then(() => ScrollTrigger.refresh())
     }
@@ -107,6 +118,7 @@ export default function App() {
       </a>
       <TopBar route={route} />
       <RulerBar route={route} />
+      <Cursor />
       <Suspense fallback={null}>
         <ShiftWorld />
       </Suspense>

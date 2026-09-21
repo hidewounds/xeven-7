@@ -1,13 +1,15 @@
-/* XEVEN SHIFT — tokens + base. Palette DNA kept (void/fog-teal/bone/ember/mint/moon);
-   everything else rebuilt for the Living Shift: timetable rhythm, station
-   cards, playground console. No purple-blue gradients, ever. */
+/* XEVEN NIGHT SHIFT — tokens + base. Greenfield system.
+   Palette discipline: void ground, bone text, ONE signal cyan (action /
+   verified), ONE warmth (human / urgent, <5% of pixels). Never pure black,
+   never pure white, never purple-blue gradients. */
 
 :root {
   --void: #06090f;
   --fog: #0e1a20;
   --bone: #e8edee;
-  --candy: #ff6fae;
   --glow: #4df3ff;
+  --candy: #ff6fae;
+  --ember: #ff4d2e;
   --moon: #fff8e6;
   --muted: #93a3a8;
   --faint: #5c6e74;
@@ -24,21 +26,21 @@
   --cond: 'Space Grotesk', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --disp-xl: clamp(56px, 10vw, 148px);
+  --disp-xl: clamp(64px, 13vw, 180px);
   --disp-l: clamp(44px, 8vw, 120px);
   --disp-m: clamp(30px, 5vw, 60px);
 
   --d-fast: 140ms; --d-med: 320ms; --d-slow: 700ms;
 
   --z-bg: 0; --z-canvas: 1; --z-type: 10;
-  --z-ui: 40; --z-menu: 60; --z-curtain: 80;
-  --z-loader: 90; --z-a11y: 10000;
+  --z-ui: 40; --z-cursor: 70; --z-menu: 60; --z-a11y: 10000;
 
   color-scheme: dark;
   font: 16px/150% var(--cond);
   color: var(--bone);
   background: var(--void);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 * { box-sizing: border-box; }
@@ -57,7 +59,7 @@ button { font: inherit; color: inherit; background: none; border: none; padding:
 
 ::selection { background: var(--glow); color: #06231b; }
 
-:focus-visible { outline: 1px solid var(--glow); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; border-radius: 4px; }
 
 html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
 ::-webkit-scrollbar { width: 10px; }
@@ -65,13 +67,11 @@ html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
 ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; border: 2px solid var(--void); }
 ::-webkit-scrollbar-thumb:hover { background: var(--glow); }
 
-/* shared type atoms */
+/* ---------- type atoms ---------- */
 .sr-only {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
@@ -113,7 +113,7 @@ html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
   margin: 0;
 }
 
-/* pills — the one control voice */
+/* ---------- pills: the one control voice ---------- */
 .pills { display: flex; gap: var(--s12); flex-wrap: wrap; }
 
 .pill {
@@ -130,24 +130,16 @@ html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
   letter-spacing: 0.18em;
   text-decoration: none;
   cursor: pointer;
-  transition: transform var(--d-fast) ease, background var(--d-fast) ease;
+  transition: transform var(--d-fast) ease, background var(--d-fast) ease, border-color var(--d-fast) ease, box-shadow var(--d-fast) ease;
 }
-
-.pill:hover { transform: translateY(-1px); }
-
-.pill-ghost {
-  background: transparent;
-  color: var(--bone);
-  border-color: var(--line-strong);
-}
-
-.pill-ghost:hover { border-color: var(--glow); }
-
+.pill:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(77, 243, 255, 0.22); }
+.pill:active { transform: translateY(0); }
+.pill-ghost { background: transparent; color: var(--bone); border-color: var(--line-strong); }
+.pill-ghost:hover { border-color: var(--glow); box-shadow: none; }
 .pill + .pill { margin-left: var(--s12); }
+.pill[disabled] { opacity: 0.55; cursor: wait; transform: none; box-shadow: none; }
 
-.pill[disabled] { opacity: 0.55; cursor: wait; }
-
-/* skip link */
+/* ---------- skip link ---------- */
 .skip {
   position: fixed;
   top: -60px;
@@ -161,5 +153,4 @@ html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
   font-size: 12px;
   transition: top var(--d-fast) ease;
 }
-
 .skip:focus { top: var(--s16); }

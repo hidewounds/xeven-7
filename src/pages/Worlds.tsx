@@ -1,12 +1,10 @@
-import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { navigate, xs } from '../app/store'
+import { TRANSCRIPTS } from '../data/product'
+import { navigate } from '../app/store'
+import Reveal from '../components/Reveal'
 
-gsap.registerPlugin(ScrollTrigger)
-
-/* WORLDS — three rooms, same employee. Café rush, clinic desk, store night
-   shift. Pure CSS light; the field behind does the glowing. */
+/* WORLDS — three rooms, one employee. Café rush, clinic desk, store night
+   shift. Each room carries a timecode and a receipt; the night room opens
+   its full transcript. Pure CSS light; the field behind does the glowing. */
 
 const STATIONS = [
   {
@@ -38,38 +36,20 @@ const STATIONS = [
   },
 ]
 
+const NIGHT = TRANSCRIPTS[1]
+
 export default function Worlds() {
-  const root = useRef<HTMLDivElement>(null!)
-
-  useEffect(() => {
-    if (xs.reduced) return
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>('.rv').forEach((el) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 36 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-          },
-        )
-      })
-    }, root)
-    return () => ctx.revert()
-  }, [])
-
   return (
-    <div className="page" ref={root}>
-      <p className="mono">WORLDS — WHERE IT WORKS</p>
-      <h1 className="page-title">One employee, every kind of shop.</h1>
-      <p className="page-lede">Walk the rooms. Each one is a real shift, running right now.</p>
+    <div className="page">
+      <Reveal>
+        <p className="mono">WORLDS — WHERE IT WORKS</p>
+        <h1 className="page-title">One employee, every kind of shop.</h1>
+        <p className="page-lede">Walk the rooms. Each one is a real shift, running right now.</p>
+      </Reveal>
 
       <div className="world-grid">
         {STATIONS.map((s) => (
-          <article className="station rv" key={s.num}>
+          <Reveal key={s.num} className="station">
             <div className={`station-art ${s.art}`} aria-hidden="true">
               <span className="station-num">{s.num}</span>
               <span className="station-time mono">{s.time}</span>
@@ -83,20 +63,39 @@ export default function Worlds() {
                 ))}
               </div>
               <p className="mono receipt-line">{s.receipt}</p>
-              <button className="pill pill-ghost" data-cursor onClick={() => navigate('demo')}>
+              <button className="pill pill-ghost" data-cursor="BOOK" onClick={() => navigate('demo')}>
                 Staff my shop →
               </button>
             </div>
-          </article>
+          </Reveal>
         ))}
       </div>
 
-      <div className="hero-cta-row" style={{ marginTop: 'var(--s32)' }}>
-        <button className="pill" data-cursor onClick={() => navigate('demo')}>
-          Put it in your shop →
-        </button>
-      </div>
+      <Reveal>
+        <p className="mono zone-kicker">NIGHT LOG — {NIGHT.room} · {NIGHT.time}</p>
+      </Reveal>
+      <Reveal className="receipt">
+        <div className="receipt-head">
+          <span className="live-dot mint" aria-hidden="true" />
+          VERIFIED TRANSCRIPT — REDACTED
+        </div>
+        <div className="receipt-lines">
+          {NIGHT.lines.map((l, i) => (
+            <div key={i} className={`msg-row ${l.who === 'XEVEN' ? 'bot' : 'user'}`}>
+              <span className="msg-who">{l.who}</span>
+              {l.text}
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <div className="hero-cta-row" style={{ marginTop: 'var(--s32)' }}>
+          <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>
+            Put it in your shop →
+          </button>
+        </div>
+      </Reveal>
     </div>
   )
 }
-

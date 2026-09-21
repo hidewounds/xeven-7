@@ -3,7 +3,8 @@ import { NAV_LINKS } from '../nav'
 import { navBus } from '../app/store'
 import type { Route } from '../app/store'
 
-/* TopBar — mark left ONLY, everything else right: nav, CTA, burger. */
+/* TopBar — mark left ONLY, everything else right: nav, CTA, burger.
+   Fullscreen staggered menu on small screens. */
 
 export default function TopBar({ route }: { route: Route }) {
   const [open, setOpen] = useState(false)
@@ -13,8 +14,6 @@ export default function TopBar({ route }: { route: Route }) {
     navBus.go?.(to)
   }
 
-  // overlay a11y: Escape closes, background scroll locks, focus moves
-  // into the menu on open and back to the burger on close.
   useEffect(() => {
     if (!open) return
     const btn = burger.current
@@ -39,6 +38,7 @@ export default function TopBar({ route }: { route: Route }) {
         <a
           className="tb-logo"
           href="#/enter"
+          data-cursor="SHIFT"
           onClick={(e) => {
             e.preventDefault()
             go('enter')
@@ -54,6 +54,7 @@ export default function TopBar({ route }: { route: Route }) {
                 href={`#/${l.to}`}
                 className={route === l.to ? 'active' : ''}
                 aria-current={route === l.to ? 'page' : undefined}
+                data-cursor="GO"
                 onClick={(e) => {
                   e.preventDefault()
                   go(l.to)
@@ -66,6 +67,7 @@ export default function TopBar({ route }: { route: Route }) {
           <a
             className="tb-cta"
             href="#/demo"
+            data-cursor="BOOK"
             onClick={(e) => {
               e.preventDefault()
               go('demo')

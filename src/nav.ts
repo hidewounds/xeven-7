@@ -13,7 +13,7 @@ export interface NavLink {
 export const NAV_LINKS: NavLink[] = [
   { to: 'enter', label: 'Shift', short: '00' },
   { to: 'worlds', label: 'Worlds', short: '01' },
-  { to: 'about', label: 'About', short: '02' },
+  { to: 'about', label: 'Manual', short: '02' },
   { to: 'features', label: 'Moves', short: '03' },
   { to: 'pricing', label: 'Wages', short: '04' },
   { to: 'demo', label: 'Book a demo', short: '05' },

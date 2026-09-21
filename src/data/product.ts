@@ -197,3 +197,80 @@ export const DEMO_FOCUS = ['Revenue + bookings', 'Support at scale', 'Something 
 export const DEMO_SLOTS = ['Tue 3:00 PM', 'Wed 10:30 AM', 'Thu 2:00 PM']
 
 export const DEMO_NOTE = 'Pick a slot — held for 5 minutes, like Chrono does.'
+
+/* Proof stats — the only numbers the site claims. Counted up on scroll. */
+export interface ProofStat {
+  value: number
+  display: string
+  label: string
+}
+
+export const PROOF: ProofStat[] = [
+  { value: 12408, display: '12,408', label: 'CHATS THIS WEEK' },
+  { value: 38, display: '38K', label: 'FACTS HELD' },
+  { value: 96, display: '96', label: 'DEMOS HELD' },
+]
+
+/* Transcript receipts — redacted, specific, never generic praise. */
+export interface Transcript {
+  room: string
+  time: string
+  lines: Array<{ who: 'XEVEN' | 'SHOPPER'; text: string }>
+}
+
+export const TRANSCRIPTS: Transcript[] = [
+  {
+    room: 'CAFÉ — MORNING RUSH',
+    time: '06:40',
+    lines: [
+      { who: 'XEVEN', text: 'Morning, Maya. Oat-milk-first, name on the cup?' },
+      { who: 'SHOPPER', text: 'You remembered. Yes — and a bag of beans.' },
+      { who: 'XEVEN', text: 'Held. The humans pour, I keep the line moving.' },
+    ],
+  },
+  {
+    room: 'STORE — NIGHT SHIFT',
+    time: '03:00',
+    lines: [
+      { who: 'SHOPPER', text: 'Does the 42 run small? Need it by Friday.' },
+      { who: 'XEVEN', text: 'True to size per verified stock. Tracked 2–5 days — Friday holds.' },
+      { who: 'SHOPPER', text: 'Then I’ll take it.' },
+    ],
+  },
+]
+
+/* Audit ledger — receipts, not promises. */
+export const AUDIT = [
+  'CHECKED STOCK — VERIFIED, ANSWERED',
+  'HELD TUE 3PM — 5:00, CONFLICT-CHECKED',
+  'CONFIRMED IN 2 TAPS — NO HOLD MUSIC',
+]
+
+/* FAQ — quotable answers for humans and AI search alike. */
+export interface Faq {
+  q: string
+  a: string
+}
+
+export const FAQ: Faq[] = [
+  {
+    q: 'What is XEVEN?',
+    a: 'XEVEN is an AI employee for business websites. It chats 24/7, remembers every shopper, recovers carts, books with Chrono and talks with Echo — installed with one snippet.',
+  },
+  {
+    q: 'Does XEVEN invent answers?',
+    a: 'No. XEVEN answers only from your verified knowledge. Where it cannot verify, it stays silent and hands off instead of inventing — 0 invented prices.',
+  },
+  {
+    q: 'How does Chrono booking work?',
+    a: 'Chrono ranks real availability inside your business hours, holds a slot for 5 minutes conflict-checked, and confirms in two taps. Nights, launches, holidays.',
+  },
+  {
+    q: 'How fast can we go live?',
+    a: 'Live in one day. Fourteen days, $0 today, cancel in one click.',
+  },
+  {
+    q: 'How much does it cost?',
+    a: 'Launch $29/mo + $99 setup, Growth $79/mo + $199 setup, Scale $199/mo + $499 setup, Custom bespoke. Yearly billing is 20% off with free setup.',
+  },
+]

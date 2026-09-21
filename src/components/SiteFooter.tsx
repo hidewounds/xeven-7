@@ -2,7 +2,7 @@ import { NAV_LINKS } from '../nav'
 import { navBus } from '../app/store'
 import type { Route } from '../app/store'
 
-/* SiteFooter — wordmark yield, studio inbox, route index. */
+/* SiteFooter — wordmark yield, proof line, studio inbox, route index. */
 
 export default function SiteFooter({ route }: { route: Route }) {
   return (
@@ -31,7 +31,7 @@ export default function SiteFooter({ route }: { route: Route }) {
           <a className="foot-mail" href="mailto:hello@xeven.world">
             HELLO@XEVEN.WORLD
           </a>
-          <p className="mono foot-copy">© 2026 XEVEN — VERIFIED OR SILENT.</p>
+          <p className="mono foot-copy">© 2026 XEVEN — VERIFIED OR SILENT. 14 DAYS, $0 TODAY.</p>
         </div>
       </div>
     </footer>
