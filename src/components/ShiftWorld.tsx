@@ -3,17 +3,24 @@ import * as THREE from 'three'
 import { xs } from '../app/store'
 import type { Route } from '../app/store'
 
-/* SHIFTWORLD VI — a deep diamond corridor. The mosaic tiles edge-to-edge
- * and recedes in static depth layers. The camera holds one position:
- * scroll never zooms or dollies the field. The route wordmark is NOT
- * here — the fixed FieldMark overlay owns titles. Subpages and index
- * share the same frozen hold; only a slow pointer steer + micro-sway
- * breathes. Per-route haze retint kept (color mood, not motion). */
+/* SHIFTWORLD VII — one long slip. The canvas is document-tall and scrolls
+ * WITH the page (absolute, not fixed): top of the document gets the top
+ * of the field, bottom gets the bottom. The lattice is baked to span the
+ * full measured height; the camera pulls back to frame it exactly, so
+ * tiles never stretch. Scroll never moves the camera. Rendering is
+ * on-demand (scroll/pointer wake, 1.5s sleep) so a multi-megapixel
+ * buffer never burns GPU at idle. Subpages share the same long slip,
+ * frozen. Titles live in the fixed FieldMark overlay, not here. */
 
 const VOID = new THREE.Color(0x06090f)
 const HALF = 14
 const GAP = 0.5
 const BOW = 2.2
+const FOV = 55
+const TAN_HALF = Math.tan(THREE.MathUtils.degToRad(FOV / 2))
+/** world units of field visible in a viewport-height window at the base framing */
+const BASE_H = 10.4
+const SLEEP_MS = 1500
 
 const TINTS: Record<Route, { fog: number }> = {
   enter: { fog: 0x06090f },
@@ -24,7 +31,8 @@ const TINTS: Record<Route, { fog: number }> = {
   demo: { fog: 0x06120e },
 }
 
-const CAM: [number, number, number] = [0, 1.4, 9.5]
+const CAMX = 0
+const CAMY = 1.4
 
 function bowed(x: number, z: number): number {
   const r = Math.sqrt(x * x + z * z) / (HALF * 1.42)
@@ -36,58 +44,39 @@ export default function ShiftWorld() {
 
   useEffect(() => {
     const canvas = ref.current
-    const coarse = window.matchMedia('(pointer: coarse)').matches
     const reduced = xs.reduced || window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let renderer: THREE.WebGLRenderer
     try {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, alpha: false, powerPreference: 'low-power' })
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'low-power' })
     } catch {
       canvas.style.display = 'none'
       return
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.65))
+    // tall buffer: DPR 1 keeps memory sane (a 1600x4000 canvas is ~26MB).
+    renderer.setPixelRatio(1)
     renderer.setClearColor(VOID, 1)
 
     const scene = new THREE.Scene()
     scene.fog = new THREE.FogExp2(VOID.getHex(), 0.03)
-    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120)
-    camera.position.set(...CAM)
+    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.5, 400)
+    camera.position.set(CAMX, CAMY, 11.5)
 
     scene.add(new THREE.AmbientLight(0x8899aa, 0.5))
     const key = new THREE.DirectionalLight(0x4df3ff, 0.9)
     key.position.set(4, 7, 5)
     scene.add(key)
 
-    // ---- diamond corridor: edge-to-edge tiles, receding depth layers ----
     const QUAD = GAP * 3.2
     const CELLS = Math.floor((2 * HALF) / QUAD)
     const LAYERS = 4
     const LAYER_GAP = 8
-    const NQ = CELLS * CELLS * LAYERS
-    const quadGeo = new THREE.PlaneGeometry(1, 1)
-    {
-      const aSeed = new Float32Array(NQ)
-      const aQI = new Float32Array(NQ)
-      const aQJ = new Float32Array(NQ)
-      for (let l = 0; l < LAYERS; l++) {
-        for (let bj = 0; bj < CELLS; bj++) {
-          for (let bi = 0; bi < CELLS; bi++) {
-            const i = (l * CELLS + bj) * CELLS + bi
-            aSeed[i] = Math.random()
-            aQI[i] = bi
-            aQJ[i] = bj
-          }
-        }
-      }
-      quadGeo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(aSeed, 1))
-      quadGeo.setAttribute('aQI', new THREE.InstancedBufferAttribute(aQI, 1))
-      quadGeo.setAttribute('aQJ', new THREE.InstancedBufferAttribute(aQJ, 1))
-    }
+
     const quadUniforms = {
       uTime: { value: 0 },
       uShowcase: { value: 1 },
       uVoid: { value: new THREE.Vector3(0.0235, 0.0353, 0.0588) },
       uThemeAmt: { value: 0.22 },
+      uDepthK: { value: 0.03 },
     }
     const quadMat = new THREE.ShaderMaterial({
       uniforms: quadUniforms,
@@ -115,6 +104,7 @@ export default function ShiftWorld() {
         uniform float uShowcase;
         uniform vec3 uVoid;
         uniform float uThemeAmt;
+        uniform float uDepthK;
         varying vec2 vUv;
         varying vec3 vWorld;
         varying float vSeed;
@@ -164,75 +154,146 @@ export default function ShiftWorld() {
             col += vec3(1.0) * cine * a * uShowcase;
           }
           float depth = length(vWorld - cameraPosition);
-          float f = exp(-pow(depth * 0.03, 2.0));
+          float f = exp(-pow(depth * uDepthK, 2.0));
           col = mix(uVoid, col, f);
           gl_FragColor = vec4(col, 1.0);
         }
       `,
     })
-    const quads = new THREE.InstancedMesh(quadGeo, quadMat, NQ)
-    quads.frustumCulled = false
-    scene.add(quads)
-    {
-      const dummy = new THREE.Object3D()
+
+    let quads: THREE.InstancedMesh | null = null
+    let dist = 11.5
+
+    // Bake the lattice to span the full document height. The 45-degree
+    // diamond rotation compresses vertical span, so rows cover extra.
+    const buildLattice = (worldH: number) => {
+      if (quads) {
+        scene.remove(quads)
+        quads.geometry.dispose()
+        quads = null
+      }
       const c = Math.SQRT1_2
+      const VSPAN = worldH / c + QUAD * 2
+      const ROWS = Math.max(CELLS, Math.ceil(VSPAN / QUAD))
+      const NQ = CELLS * ROWS * LAYERS
+      const geo = new THREE.PlaneGeometry(1, 1)
+      const aSeed = new Float32Array(NQ)
+      const aQI = new Float32Array(NQ)
+      const aQJ = new Float32Array(NQ)
+      const mesh = new THREE.InstancedMesh(geo, quadMat, NQ)
+      mesh.frustumCulled = false
+      const dummy = new THREE.Object3D()
+      const wyMin = -2 * HALF * c
+      const wyMax = wyMin + ROWS * QUAD * c
+      const wyMid = (wyMin + wyMax) / 2
       for (let l = 0; l < LAYERS; l++) {
-        for (let bj = 0; bj < CELLS; bj++) {
+        for (let bj = 0; bj < ROWS; bj++) {
           for (let bi = 0; bi < CELLS; bi++) {
-            const i = (l * CELLS + bj) * CELLS + bi
+            const i = (l * ROWS + bj) * CELLS + bi
             const uc = -HALF + (bi + 0.5) * QUAD
             const vc = -HALF + (bj + 0.5) * QUAD
             const wx = uc * c - vc * c
-            const wy = uc * c + vc * c
-            dummy.position.set(wx, wy - 1.6, bowed(wx, 0) - 0.02 - l * LAYER_GAP)
+            const wy = uc * c + vc * c - wyMid - 1.6
+            dummy.position.set(wx, wy, bowed(wx, 0) - 0.02 - l * LAYER_GAP)
             dummy.scale.set(QUAD, QUAD, 1)
             dummy.rotation.set(0, 0, Math.PI / 4)
             dummy.updateMatrix()
-            quads.setMatrixAt(i, dummy.matrix)
+            mesh.setMatrixAt(i, dummy.matrix)
+            aSeed[i] = Math.random()
+            aQI[i] = bi
+            aQJ[i] = bj
           }
         }
       }
-      quads.instanceMatrix.needsUpdate = true
+      mesh.instanceMatrix.needsUpdate = true
+      geo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(aSeed, 1))
+      geo.setAttribute('aQI', new THREE.InstancedBufferAttribute(aQI, 1))
+      geo.setAttribute('aQJ', new THREE.InstancedBufferAttribute(aQJ, 1))
+      scene.add(mesh)
+      quads = mesh
+    }
+
+    let raf = 0
+    let alive = true
+    let last = performance.now()
+    let lastActive = 0
+    let clockT = Math.random() * 10
+    let dirty = false
+    const wake = () => {
+      lastActive = performance.now()
+      dirty = true
+    }
+
+    // Measure the document, size the canvas to it, frame it exactly.
+    const layout = () => {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const docH = Math.max(document.documentElement.scrollHeight, vh)
+      const worldH = (docH * BASE_H) / vh
+      dist = worldH / (2 * TAN_HALF) + 2
+      renderer.setSize(vw, docH, false)
+      canvas.style.height = `${docH}px`
+      camera.aspect = vw / docH
+      camera.updateProjectionMatrix()
+      const fog = scene.fog as THREE.FogExp2
+      fog.density = 0.345 / dist
+      quadUniforms.uDepthK.value = 0.345 / dist
+      buildLattice(worldH)
+      camera.position.set(CAMX, CAMY, dist)
+      camera.lookAt(0, 0.4, -4)
+      wake()
     }
 
     const renderStill = () => {
       const fog = scene.fog as THREE.FogExp2
       fog.color.set(TINTS[xs.route].fog)
       renderer.setClearColor(fog.color, 1)
-      camera.position.set(...CAM)
+      camera.position.set(CAMX, CAMY, dist)
       camera.lookAt(0, 0.4, -4)
       renderer.render(scene, camera)
     }
 
-    const resize = () => {
-      renderer.setSize(window.innerWidth, window.innerHeight, false)
-      camera.aspect = window.innerWidth / window.innerHeight
-      camera.updateProjectionMatrix()
-      dirty = true
-    }
     // cursor steering: pointer (and touch-drag) aim the camera
     const pm = { x: 0, y: 0 }
     const steer = (clientX: number, clientY: number) => {
       pm.x = clientX / window.innerWidth - 0.5
       pm.y = clientY / window.innerHeight - 0.5
     }
-    const onPointerMove = (e: PointerEvent) => steer(e.clientX, e.clientY)
+    const onPointerMove = (e: PointerEvent) => {
+      steer(e.clientX, e.clientY)
+      wake()
+    }
     const onTouchSteer = (e: TouchEvent) => {
       const t = e.touches[0]
       if (t) steer(t.clientX, t.clientY)
+      wake()
     }
+    const onScroll = () => wake()
     window.addEventListener('pointermove', onPointerMove, { passive: true })
     window.addEventListener('touchmove', onTouchSteer, { passive: true })
-    let raf = 0
-    let alive = true
-    let last = performance.now()
-    let clockT = Math.random() * 10
-    let dirty = false
-    resize()
-    window.addEventListener('resize', resize)
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    let rzT = 0
+    const onResize = () => {
+      window.clearTimeout(rzT)
+      rzT = window.setTimeout(() => {
+        layout()
+        if (reduced) renderStill()
+      }, 200)
+    }
+    window.addEventListener('resize', onResize)
     const onHash = () => {
-      dirty = true
-      renderStill()
+      // route pages differ in length and the new chunk mounts after the
+      // hash flips — measure now and again once content lands.
+      layout()
+      if (reduced) renderStill()
+      window.clearTimeout(tLate1)
+      window.clearTimeout(tLate2)
+      window.setTimeout(() => {
+        if (!alive) return
+        layout()
+        if (reduced) renderStill()
+      }, 600)
     }
     window.addEventListener('hashchange', onHash)
     const onLost = (e: Event) => {
@@ -241,29 +302,38 @@ export default function ShiftWorld() {
     }
     const onRestored = () => {
       canvas.style.visibility = ''
+      layout()
       renderStill()
     }
     canvas.addEventListener('webglcontextlost', onLost, false)
     canvas.addEventListener('webglcontextrestored', onRestored, false)
 
-    renderStill()
+    layout()
+    if (reduced) renderStill()
+    // the lazy route chunk mounts after us — re-measure once content lands.
+    const tLate1 = window.setTimeout(() => {
+      layout()
+      if (reduced) renderStill()
+    }, 800)
+    const tLate2 = window.setTimeout(() => {
+      layout()
+      if (reduced) renderStill()
+    }, 2500)
 
-    // index-only drift: slow cursor steer + micro-sway. Scroll never
-    // touches the camera — no zoom, no dolly. Everywhere else sleeps.
+    // render-on-demand: paint on wake, sleep 1.5s after last activity.
+    // scroll never moves the camera — the page pans over the long slip.
     const frame = (now: number) => {
       if (!alive) return
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       const live = xs.route === 'enter' && !reduced && !document.hidden
-      if (live) {
-        clockT += dt
-      }
-      if ((live || dirty) && !document.hidden) {
+      if (!document.hidden && (dirty || (live && now - lastActive < SLEEP_MS))) {
         if (live) {
+          clockT += dt
           // cursor aims gently, micro-sway breathes underneath
-          const tx = CAM[0] + pm.x * 1.6 + Math.sin(clockT * 0.21) * 0.07
-          const ty = CAM[1] - pm.y * 1.0 + Math.sin(clockT * 0.16 + 1) * 0.05
-          const tz = CAM[2] + Math.cos(clockT * 0.13) * 0.07
+          const tx = CAMX + pm.x * 1.6 + Math.sin(clockT * 0.21) * 0.07
+          const ty = CAMY - pm.y * 1.0 + Math.sin(clockT * 0.16 + 1) * 0.05
+          const tz = dist + Math.cos(clockT * 0.13) * 0.07
           camera.position.x += (tx - camera.position.x) * 0.02
           camera.position.y += (ty - camera.position.y) * 0.02
           camera.position.z += (tz - camera.position.z) * 0.02
@@ -283,15 +353,21 @@ export default function ShiftWorld() {
       get route() {
         return xs.route
       },
-      quads,
+      get quads() {
+        return quads
+      },
     }
 
     return () => {
       alive = false
       cancelAnimationFrame(raf)
+      window.clearTimeout(rzT)
+      window.clearTimeout(tLate1)
+      window.clearTimeout(tLate2)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('touchmove', onTouchSteer)
-      window.removeEventListener('resize', resize)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
       window.removeEventListener('hashchange', onHash)
       canvas.removeEventListener('webglcontextlost', onLost, false)
       canvas.removeEventListener('webglcontextrestored', onRestored, false)
@@ -306,5 +382,5 @@ export default function ShiftWorld() {
     }
   }, [])
 
-  return <canvas ref={ref} className="world-fixed" aria-hidden="true" />
+  return <canvas ref={ref} className="world-slip" aria-hidden="true" />
 }
