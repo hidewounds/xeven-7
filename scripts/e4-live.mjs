@@ -20,11 +20,11 @@ let ready = false;
 for (let i = 1; i <= 36; i++) {
   const probe = await browser.newPage();
   try {
-    // new-build marker: single-stop rail exists only in the stripped index
+    // new-build marker: single-stop rail + living field label
     await probe.goto(`${URL}/#/enter`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await probe.waitForTimeout(2500);
-    ready = await probe.evaluate(() => document.querySelectorAll('.ruler-stop').length === 1 && !!document.querySelector('.hero-mark'));
-    console.log(`try ${i}: stripped=${ready}`);
+    ready = await probe.evaluate(() => document.querySelectorAll('.ruler-stop').length === 1 && (window.__shiftworld?.label === 'XEVEN'));
+    console.log(`try ${i}: labels=${ready}`);
     if (ready) { await probe.close(); break; }
   } catch (e) {
     console.log(`try ${i}: ${String(e).split('\n')[0]}`);

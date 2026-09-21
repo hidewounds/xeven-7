@@ -3,20 +3,28 @@ import * as THREE from 'three'
 import { xs } from '../app/store'
 import type { Route } from '../app/store'
 
-/* SHIFTWORLD III — the diamond field, and only the field. Instanced diamond
- * panels with in-shader hairlines, breathing shimmer, RGB channel tint,
- * fingertip air, liquid press, roaming cinema. No rails, no packets, no
- * beacons, no stars, no solids, no blobs. Pointer steers parallax + stir on
- * desktop; touch-drag steers and tap presses on cursorless devices.
- * Per-route haze retint + waypoint camera kept. Discipline kept: DPR caps,
- * 6s idle sleep, hidden-tab pause, single-frame reduced stand-down, full
- * dispose, context-loss handling. */
+/* SHIFTWORLD IV — diamond mosaic + living labels. One attached tile field
+ * (edge-to-edge diamonds, RGB tint, shimmer, cinema, fingertip air) that
+ * moves ONLY on index; every other route gets a single frozen frame. Each
+ * page's designation floats inside the field itself as a canvas-texture
+ * wordmark (XEVEN / WORLDS / ABOUT / …), bobbing gently while live.
+ * Touch-drag steers + stirs, tap presses. Discipline kept: DPR caps, idle
+ * sleep, hidden-tab pause, single-frame reduced stand-down, full dispose. */
 
 const VOID = new THREE.Color(0x06090f)
 const HALF = 14
 const GAP = 0.5
 const BOW = 2.2
 const IDLE_MS = 6000
+
+const LABELS: Record<Route, string> = {
+  enter: 'XEVEN',
+  worlds: 'WORLDS',
+  about: 'ABOUT',
+  features: 'FEATURES',
+  pricing: 'PRICING',
+  demo: 'DEMO',
+}
 
 const TINTS: Record<Route, { fog: number }> = {
   enter: { fog: 0x06090f },
@@ -68,7 +76,7 @@ export default function ShiftWorld() {
     key.position.set(4, 7, 5)
     scene.add(key)
 
-    // ---- instanced diamond panels: all life in-shader ----
+    // ---- attached diamond mosaic: edge-to-edge tiles, one draw ----
     const QUAD = GAP * 3.2
     const CELLS = Math.floor((2 * HALF) / QUAD)
     const NQ = CELLS * CELLS
@@ -137,18 +145,15 @@ export default function ShiftWorld() {
         float hash(float n) { return fract(sin(n) * 43758.5453); }
         void main() {
           vec3 col = vec3(0.008, 0.009, 0.012);
-          // hairline borders: definition only, never glow
           vec2 e = fwidth(vUv);
           vec2 b = min(vUv, 1.0 - vUv);
           float bl = max(
             1.0 - smoothstep(0.0, e.x * 1.5 + 1e-4, b.x),
             1.0 - smoothstep(0.0, e.y * 1.5 + 1e-4, b.y));
           col += vec3(1.0) * bl * 0.16;
-          // breathing shimmer, scroll-kindled
           float wave = 0.03 + 0.04 * (0.5 + 0.5 * sin(uTime * 1.5 - (vWorld.x * 0.14 + vWorld.y * 0.05) + vSeed * 6.28));
           float glow = wave * (1.0 + uVel * 0.3);
           col += vec3(1.0) * glow * uShowcase;
-          // fingertip air: pointer/touch presence bends the medium
           float wspd = min(1.0, length(uWakeVel) * 0.35);
           vec2 flow = vec2(0.0);
           for (int i = 0; i < 5; i++) {
@@ -161,14 +166,6 @@ export default function ShiftWorld() {
             flow += (swirl * 0.35 + ldir * (ripple - 0.5) * 0.3) * lfall;
           }
           flow *= wspd;
-          float air = 0.0;
-          vec2 wpos = vWorld.xy + flow * 0.5;
-          for (int i = 0; i < 5; i++) {
-            vec2 adp = wpos - uTrail[i].xy;
-            air += exp(-dot(adp, adp) / 1.3) * uTrail[i].z;
-          }
-          float breathe = 0.85 + 0.15 * sin(uTime * 6.0 + vWorld.x * 8.0 + vWorld.y * 6.0);
-          // RGB channel-dominant tint, slow drift
           float tt = uTime * uDrift;
           vec2 gpos = vWorld.xy * 0.35 + flow;
           vec3 theme = vec3(
@@ -178,8 +175,6 @@ export default function ShiftWorld() {
           theme = mix(vec3(0.35), theme, 0.55);
           // press/flow warp the tint only — no light is ever added here
           col += theme * uThemeAmt * 0.6 * uShowcase;
-          col += theme * uThemeAmt * (0.6 + air * 1.6) * uShowcase;
-          // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
           float gate = mod(vQI * 7.0 + vQJ * 13.0 + slot * 5.0, 89.0);
@@ -203,7 +198,6 @@ export default function ShiftWorld() {
             }
             col += vec3(1.0) * cine * a * uShowcase;
           }
-          // manual haze fade (matches scene fog)
           float depth = length(vWorld - cameraPosition);
           float f = exp(-pow(depth * 0.03, 2.0));
           col = mix(uVoid, col, f);
@@ -225,13 +219,58 @@ export default function ShiftWorld() {
           const wx = uc * c - vc * c
           const wy = uc * c + vc * c
           dummy.position.set(wx, wy - 1.6, bowed(wx, 0) - 0.02)
-          dummy.scale.set(QUAD - 0.06, QUAD - 0.06, 1)
+          dummy.scale.set(QUAD, QUAD, 1)
           dummy.rotation.set(0, 0, Math.PI / 4)
           dummy.updateMatrix()
           quads.setMatrixAt(i, dummy.matrix)
         }
       }
       quads.instanceMatrix.needsUpdate = true
+    }
+
+    // ---- living wordmark: each page's designation floats in the field ----
+    const labelCanvas = document.createElement('canvas')
+    labelCanvas.width = 1024
+    labelCanvas.height = 256
+    const labelTex = new THREE.CanvasTexture(labelCanvas)
+    labelTex.colorSpace = THREE.SRGBColorSpace
+    const labelMat = new THREE.MeshBasicMaterial({
+      map: labelTex,
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false,
+    })
+    const label = new THREE.Mesh(new THREE.PlaneGeometry(11, 2.75), labelMat)
+    label.position.set(0, 1.6, -2)
+    scene.add(label)
+    // subpages: label sinks low and dims so DOM headlines stay clean
+    let labelY = 1.6
+    const poseLabel = () => {
+      const hero = xs.route === 'enter'
+      labelY = hero ? 1.6 : 0.4
+      labelMat.opacity = hero ? 0.9 : 0.32
+      label.position.y = labelY
+    }
+    poseLabel()
+    const drawLabel = () => {
+      const ctx = labelCanvas.getContext('2d')
+      if (!ctx) return
+      ctx.clearRect(0, 0, 1024, 256)
+      ctx.fillStyle = '#e8edee'
+      ctx.font = '400 150px Anton, "Arial Narrow", sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      try {
+        ;(ctx as unknown as { letterSpacing: string }).letterSpacing = '12px'
+      } catch {
+        /* older canvas: tracking unsupported, word still draws */
+      }
+      ctx.fillText(LABELS[xs.route], 512, 134)
+      labelTex.needsUpdate = true
+    }
+    drawLabel()
+    if (document.fonts) {
+      void document.fonts.ready.then(() => drawLabel())
     }
 
     // ---- presence feed: pointer AND touch drive the same uniforms ----
@@ -267,11 +306,23 @@ export default function ShiftWorld() {
     const camTarget = new THREE.Vector3(...STOPS[xs.route])
     const pm = { x: 0, y: 0 }
     let stir = 0
+    let lastRoute = xs.route
+    let dirty = true
+
+    const applyRoute = () => {
+      fogTarget.set(TINTS[xs.route].fog)
+      camTarget.set(...STOPS[xs.route])
+      camera.position.copy(camTarget)
+      drawLabel()
+      poseLabel()
+      dirty = true
+    }
 
     const resize = () => {
       renderer.setSize(window.innerWidth, window.innerHeight, false)
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
+      dirty = true
     }
     resize()
     window.addEventListener('resize', resize)
@@ -301,7 +352,6 @@ export default function ShiftWorld() {
     const onGone = () => {
       bInside = false
     }
-    // touch spatial: drag steers + stirs, tap presses
     const onTouchMove = (e: TouchEvent) => {
       const t = e.touches[0]
       if (!t) return
@@ -317,6 +367,13 @@ export default function ShiftWorld() {
       stir = 1
       wake()
     }
+    const onHash = () => {
+      if (xs.route !== lastRoute) {
+        lastRoute = xs.route
+        applyRoute()
+      }
+      wake()
+    }
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerdown', onDown, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: true })
@@ -324,6 +381,7 @@ export default function ShiftWorld() {
     window.addEventListener('pointerleave', onGone, { passive: true })
     window.addEventListener('blur', onGone)
     window.addEventListener('wheel', wake, { passive: true })
+    window.addEventListener('hashchange', onHash)
     const onVis = () => {
       last = performance.now()
     }
@@ -334,20 +392,34 @@ export default function ShiftWorld() {
     }
     const onRestored = () => {
       canvas.style.visibility = ''
-      if (reduced) renderer.render(scene, camera)
+      dirty = true
+      if (reduced) {
+        camera.lookAt(0, 0.4, -4)
+        renderer.render(scene, camera)
+        dirty = false
+      }
     }
     canvas.addEventListener('webglcontextlost', onLost, false)
     canvas.addEventListener('webglcontextrestored', onRestored, false)
+
+    const renderStill = () => {
+      const fog = scene.fog as THREE.FogExp2
+      fog.color.copy(fogTarget)
+      renderer.setClearColor(fog.color, 1)
+      camera.position.copy(camTarget)
+      camera.lookAt(camera.position.x * 0.4, 0.4, -4)
+      label.position.y = labelY
+      renderer.render(scene, camera)
+      dirty = false
+    }
 
     const frame = (now: number) => {
       if (!alive) return
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
-      if (!document.hidden && now - lastInput < IDLE_MS) {
+      const live = xs.route === 'enter' && !reduced
+      if (live && !document.hidden && now - lastInput < IDLE_MS) {
         clockT += dt
-        const tint = TINTS[xs.route]
-        fogTarget.set(tint.fog)
-        camTarget.set(...STOPS[xs.route])
         const fog = scene.fog as THREE.FogExp2
         fog.color.lerp(fogTarget, 1 - Math.pow(0.002, dt))
         renderer.setClearColor(fog.color, 1)
@@ -356,7 +428,6 @@ export default function ShiftWorld() {
         camera.position.z += (camTarget.z - camera.position.z) * 0.06
         camera.lookAt(camera.position.x * 0.4, 0.4, -4)
 
-        // presence: unproject once, lay samples, drain
         ndc.set((btx / window.innerWidth) * 2 - 1, -(bty / window.innerHeight) * 2 + 1)
         raycaster.setFromCamera(ndc, camera)
         if (raycaster.ray.intersectPlane(plane, hit)) {
@@ -375,21 +446,35 @@ export default function ShiftWorld() {
         }
 
         stir = Math.max(0, stir - dt * 1.4)
+        // label breathes while live
+        label.position.y = labelY + Math.sin(clockT * 0.8) * 0.18
+        label.rotation.y = Math.sin(clockT * 0.4) * 0.06
         quadUniforms.uTime.value = clockT
         quadUniforms.uVel.value = Math.min(1, xs.vel * 1.5) * 0.3 + stir * 0.25
         renderer.render(scene, camera)
+        dirty = false
+      } else if (dirty && !document.hidden) {
+        renderStill()
       }
       raf = requestAnimationFrame(frame)
     }
 
     if (reduced) {
-      camera.lookAt(0, 0.4, -4)
-      renderer.render(scene, camera)
+      renderStill()
     } else {
       raf = requestAnimationFrame(frame)
     }
 
-    ;(window as unknown as { __shiftworld?: object }).__shiftworld = { quads }
+    ;(window as unknown as { __shiftworld?: object }).__shiftworld = {
+      get label() {
+        return LABELS[xs.route]
+      },
+      quads,
+      setQuads: (v: boolean) => {
+        quads.visible = v
+        dirty = true
+      },
+    }
 
     return () => {
       alive = false
@@ -402,9 +487,11 @@ export default function ShiftWorld() {
       window.removeEventListener('blur', onGone)
       window.removeEventListener('wheel', wake)
       window.removeEventListener('resize', resize)
+      window.removeEventListener('hashchange', onHash)
       document.removeEventListener('visibilitychange', onVis)
       canvas.removeEventListener('webglcontextlost', onLost, false)
       canvas.removeEventListener('webglcontextrestored', onRestored, false)
+      labelTex.dispose()
       scene.traverse((o) => {
         const mesh = o as THREE.Mesh
         if (mesh.geometry) mesh.geometry.dispose()

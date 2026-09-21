@@ -22,7 +22,7 @@ page.on('pageerror', (e) => errors.push(String(e)));
 page.on('response', (r) => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
 
 const checks = {
-  enter: { sel: ['.hero-mark', '.ruler-stop'], shot: 's-enter.png' },
+  enter: { sel: ['canvas.world-fixed'], shot: 's-enter.png' },
   worlds: { sel: ['.station', '.station-chips span'], shot: 's-worlds.png' },
   about: { sel: ['.proc-row h3'], shot: 's-about.png' },
   features: { sel: ['.kb-demo input', '.team-chip'], shot: 's-features.png' },
@@ -50,7 +50,7 @@ red.on('pageerror', (e) => errors.push(`[reduced] ${String(e)}`));
 await red.goto(`${URL}/#/enter`, { waitUntil: 'load' });
 await red.waitForTimeout(2000);
 M.reduced = await red.evaluate(() => ({
-  hero: !!document.querySelector('.hero-mark'),
+  canvas: !!document.querySelector('canvas.world-fixed'),
   overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 }));
 await red.screenshot({ path: `${OUT}/s-enter-reduced.png` });

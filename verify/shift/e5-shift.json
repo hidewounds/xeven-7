@@ -3,8 +3,7 @@
     "enter": {
       "overflowX": 0,
       "h1": null,
-      ".hero-mark": 1,
-      ".ruler-stop": 1
+      "canvas.world-fixed": 1
     },
     "worlds": {
       "overflowX": 0,
@@ -37,7 +36,7 @@
     }
   },
   "reduced": {
-    "hero": true,
+    "canvas": true,
     "overflowX": 0
   },
   "errors": []

@@ -74,7 +74,7 @@ canvas.world-fixed {
 }
 
 .tb-nav a:hover { color: var(--bone); }
-.tb-nav a.active { color: var(--bone); border-bottom-color: var(--glow); }
+.tb-nav a.active { color: var(--candy); border-bottom-color: var(--candy); }
 
 .tb-right { display: flex; align-items: center; gap: var(--s24); }
 
@@ -140,7 +140,7 @@ canvas.world-fixed {
 .mnav.open a:nth-child(5) { transition-delay: 240ms; }
 .mnav.open a:nth-child(6) { transition-delay: 300ms; }
 .mnav.open a:nth-child(7) { transition-delay: 360ms; }
-.mnav a.active { color: var(--glow); }
+.mnav a.active { color: var(--candy); }
 
 /* ---------- ruler rail: survey instrument, left edge ---------- */
 .ruler {
@@ -614,7 +614,6 @@ canvas.world-fixed {
   .ruler { display: none; }
   .page { padding: var(--s64) var(--s16) calc(var(--s96) + 60px); }
   .st-hero { padding-bottom: var(--s32); min-height: 100svh; }
-  .hero-mark { font-size: clamp(56px, 22vw, 120px); }
   .tease-grid { grid-template-columns: 1fr; }
   .tier-grid { grid-template-columns: 1fr; }
   .pg { grid-template-columns: 1fr; }
@@ -662,25 +661,6 @@ canvas.world-fixed {
   border-radius: 50%;
 }
 
-/* ---------- floating hero mark ---------- */
-.hero-mark {
-  font-family: var(--disp);
-  font-size: clamp(64px, 14vw, 190px);
-  line-height: 0.9;
-  letter-spacing: 0.02em;
-  margin: 0;
-  background: linear-gradient(100deg, var(--bone) 20%, var(--candy) 52%, var(--glow) 80%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: hero-float 7s ease-in-out infinite;
-}
-
-@keyframes hero-float {
-  0%, 100% { transform: translateY(0) rotate(-0.4deg); }
-  50% { transform: translateY(-14px) rotate(0.4deg); }
-}
-
 /* ---------- route weather: one accent moment per route ---------- */
 .weather {
   position: fixed;
@@ -721,7 +701,6 @@ canvas.world-fixed {
 
 /* ---------- reduced motion: full stand-down ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .hero-mark { animation: none; }
   .intro-veil { transition: none; }
   .dust-char { opacity: 1; filter: none; transform: none; animation: none; }
   .dust-motes { display: none; }
