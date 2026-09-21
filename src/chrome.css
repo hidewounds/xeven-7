@@ -737,6 +737,26 @@ canvas.world-fixed {
 /* anchor targets clear the floating topbar when jumped to */
 .st-hero, .zone, .fin { scroll-margin-top: 24px; }
 
+/* ---------- 100/10 pass: proof lines, receipts, timers (additive only) ----------
+   Background (ShiftWorld canvas, field-mark, weather, grain, glass) untouched. */
+.live-line { display: flex; align-items: center; gap: var(--s8); justify-content: center; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--glow); box-shadow: 0 0 0 5px rgba(77, 243, 255, 0.14); animation: live-pulse 2s infinite; flex: none; }
+.live-dot.mint { background: var(--glow); box-shadow: 0 0 0 5px rgba(77, 243, 255, 0.14); }
+.live-dot.ember { background: var(--candy); box-shadow: 0 0 0 5px rgba(255, 111, 174, 0.14); }
+@keyframes live-pulse { 0%, 100% { box-shadow: 0 0 0 5px rgba(77, 243, 255, 0.14); } 50% { box-shadow: 0 0 0 9px rgba(77, 243, 255, 0); } }
+.scroll-cue { color: var(--faint); font-size: 10px; }
+.station-time { position: absolute; top: var(--s16); right: var(--s16); z-index: 1; color: var(--muted); background: rgba(3, 5, 8, 0.55); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+.receipt-line { color: var(--faint); font-size: 11px; }
+.ledger-mini { display: flex; flex-direction: column; gap: var(--s8); margin: var(--s16) 0 var(--s32); }
+.ledger-mini p { display: flex; align-items: center; gap: var(--s12); margin: 0; }
+.row-body { animation: row-in 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes row-in { from { opacity: 0; transform: translateY(12px); } }
+button.team-chip { background: transparent; color: inherit; cursor: pointer; transition: border-color var(--d-fast) ease, color var(--d-fast) ease; }
+button.team-chip:hover { border-color: var(--glow); }
+.team-chip.on { border-color: var(--glow); color: var(--glow); }
+.hold-timer { color: var(--glow); margin: 0 0 var(--s24); }
+.foot-copy { margin: var(--s16) 0 0; color: var(--faint); font-size: 10px; }
+
 /* ---------- reduced motion: full stand-down ---------- */
 @media (prefers-reduced-motion: reduce) {
   .intro-veil { transition: none; }
@@ -746,4 +766,11 @@ canvas.world-fixed {
   .mnav a { opacity: 1; translate: none; transition: none; }
   .pill:hover, .tease:hover, .tier:hover { transform: none; }
   .tb-burger i { transition: none; }
+  .live-dot { animation: none; }
+  .row-body { animation: none; }
+}
+
+/* ---------- widget clearance: external XEVEN widget floats bottom-right ---------- */
+@media (max-width: 900px) {
+  .sitefoot { padding-bottom: 76px; }
 }

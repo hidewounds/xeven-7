@@ -12,7 +12,7 @@ export default function Pricing() {
 
   return (
     <div className="page">
-      <p className="mono">PRICING — WHAT THE SHIFT COSTS</p>
+      <p className="mono">WAGES — WHAT THE SHIFT COSTS</p>
       <h1 className="page-title">One employee, four wages.</h1>
       <div className="bill-toggle" role="group" aria-label="Billing period">
         <button

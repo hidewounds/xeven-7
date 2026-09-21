@@ -114,7 +114,7 @@ export const PLANS: Plan[] = [
     m: 79,
     setup: 199,
     inc: ['10k conversations', '200 knowledge items', 'Chrono booking', 'Echo English voice'],
-    exc: ['Voice channel', 'Multilanguage', 'Custom rules'],
+    exc: ['Voice channel', 'Multi-language', 'Custom rules'],
   },
   {
     n: 'Scale',

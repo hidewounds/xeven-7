@@ -6,15 +6,14 @@ import { INSTRUMENTS, KB, KB_EMPTY, SKILLS } from '../data/product'
 
 const CopilotDemo = lazy(() => import('../components/CopilotDemo'))
 
-function KBDemo() {
-  const [q, setQ] = useState('')
+function KBDemo({ q, onQ }: { q: string; onQ: (v: string) => void }) {
   const f = q.toLowerCase().trim()
   const hits = KB.filter((k) => !f || `${k.t} ${k.c} ${k.k}`.toLowerCase().includes(f))
   return (
     <div className="kb-demo">
       <input
         value={q}
-        onChange={(e) => setQ(e.target.value)}
+        onChange={(e) => onQ(e.target.value)}
         placeholder="Try: returns, shipping, booking…"
         autoComplete="off"
         aria-label="Search the knowledge index"
@@ -36,9 +35,18 @@ function KBDemo() {
 
 export default function Features() {
   const [open, setOpen] = useState<number | null>(0)
+  const [kbq, setKbq] = useState('')
+  const skillQuery: Record<string, string> = {
+    Support: 'returns',
+    Sales: 'trial',
+    Shopping: 'shipping',
+    Advisor: 'voice',
+    Booking: 'booking',
+    Leads: 'booking',
+  }
   return (
     <div className="page">
-      <p className="mono">FEATURES — WHAT IT DOES</p>
+      <p className="mono">MOVES — WHAT IT DOES</p>
       <h1 className="page-title">Don’t read features. Open them.</h1>
       <div className="rows">
         {INSTRUMENTS.map((r, i) => (
@@ -65,7 +73,7 @@ export default function Features() {
               </span>
             </button>
             {open === i && (
-              <div>
+              <div className="row-body">
                 <p style={{ color: 'var(--muted)', margin: 'var(--s8) 0' }}>{r.d}</p>
                 <p className="mono">{r.s}</p>
               </div>
@@ -74,15 +82,22 @@ export default function Features() {
         ))}
       </div>
       <p className="mono">SKILLS — ONE WIDGET, SIX TRADES</p>
-      <div className="team">
+      <div className="team" role="group" aria-label="Filter knowledge by skill">
         {SKILLS.map((s) => (
-          <span key={s} className="team-chip" data-cursor>
+          <button
+            key={s}
+            type="button"
+            className={`team-chip${kbq === skillQuery[s] ? ' on' : ''}`}
+            data-cursor
+            aria-pressed={kbq === skillQuery[s]}
+            onClick={() => setKbq(kbq === skillQuery[s] ? '' : skillQuery[s])}
+          >
             {s}
-          </span>
+          </button>
         ))}
       </div>
       <p className="mono">KNOWLEDGE — VERIFIED OR SILENT</p>
-      <KBDemo />
+      <KBDemo q={kbq} onQ={setKbq} />
       <p className="mono">COPILOT — COMMAND THIS PAGE</p>
       <p className="page-lede">
         One script gives this page its own AI operator. Bring any OpenAI-compatible key — or a local

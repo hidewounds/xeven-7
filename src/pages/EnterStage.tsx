@@ -42,6 +42,10 @@ export default function EnterStage() {
       <section className="st-hero hero-center" id="top" aria-label="XEVEN">
         <h1 className="sr-only">{PRODUCT.hero}</h1>
         <p className="hero-sub">{PRODUCT.sub}</p>
+        <p className="mono live-line" aria-live="polite">
+          <span className="live-dot" aria-hidden="true" /> LIVE — 12,408 CHATS THIS WEEK
+        </p>
+        <p className="mono scroll-cue" aria-hidden="true">SCROLL — THE FIELD KEEPS TIME</p>
       </section>
       <section className="zone" id="anatomy" aria-label="Field anatomy">
         <p className="mono zone-kicker rv">ANATOMY OF THE FIELD</p>

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { T } from '../motion'
 import { hashQuery } from '../app/store'
@@ -26,7 +26,19 @@ export default function Demo() {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
   const [honey, setHoney] = useState('')
+  const [heldAt, setHeldAt] = useState(() => Date.now())
+  const [now, setNow] = useState(() => Date.now())
+  const [refCode, setRefCode] = useState('')
   const card = useRef<HTMLDivElement>(null!)
+
+  /* Chrono-style 5-minute hold on the picked slot. Resets on slot change. */
+  useEffect(() => {
+    if (status === 'sent') return
+    const t = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(t)
+  }, [status])
+  const heldLeft = Math.max(0, 300 - Math.floor((now - heldAt) / 1000))
+  const heldLabel = `${Math.floor(heldLeft / 60)}:${String(heldLeft % 60).padStart(2, '0')}`
 
   const problems = () => {
     if (!name.trim()) return 'Tell us your name.'
@@ -60,6 +72,7 @@ export default function Demo() {
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       gsap.fromTo(card.current, { scale: 0.98 }, { scale: 1, duration: T.panel, ease: T.expo })
+      setRefCode(`XVN-${Math.random().toString(36).slice(2, 6).toUpperCase()}`)
       setStatus('sent')
     } catch {
       setStatus('error')
@@ -107,6 +120,7 @@ export default function Demo() {
             <p>
               {focus} — {slot}. We’ll reach out in hours to train XEVEN.
             </p>
+            {refCode && <p className="mono">TICKET {refCode} — HELD LIKE CHRONO HOLDS.</p>}
           </div>
         ) : (
           <form onSubmit={submit} noValidate>
@@ -142,7 +156,7 @@ export default function Demo() {
               WORK EMAIL
               <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" type="email" autoComplete="email" required disabled={status === 'sending'} />
             </label>
-            <div className="pills" role="group" aria-label="Demo slot" style={{ marginBottom: 'var(--s24)' }}>
+            <div className="pills" role="group" aria-label="Demo slot" style={{ marginBottom: 'var(--s12)' }}>
               {DEMO_SLOTS.map((s) => (
                 <button
                   key={s}
@@ -151,12 +165,19 @@ export default function Demo() {
                   aria-pressed={slot === s}
                   data-cursor
                   disabled={status === 'sending'}
-                  onClick={() => setSlot(s)}
+                  onClick={() => {
+                    setSlot(s)
+                    setHeldAt(Date.now())
+                    setNow(Date.now())
+                  }}
                 >
                   {s}
                 </button>
               ))}
             </div>
+            <p className="mono hold-timer" aria-live="polite">
+              HELD {heldLabel} — LIKE CHRONO DOES
+            </p>
             {error && (
               <p className="form-error" role="alert">
                 {error}

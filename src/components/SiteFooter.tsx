@@ -31,6 +31,7 @@ export default function SiteFooter({ route }: { route: Route }) {
           <a className="foot-mail" href="mailto:hello@xeven.world">
             HELLO@XEVEN.WORLD
           </a>
+          <p className="mono foot-copy">© 2026 XEVEN — VERIFIED OR SILENT.</p>
         </div>
       </div>
     </footer>

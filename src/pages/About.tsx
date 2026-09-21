@@ -28,6 +28,12 @@ export default function About() {
           </div>
         ))}
       </div>
+      <p className="mono">AUDIT — RECEIPTS, NOT PROMISES</p>
+      <div className="ledger-mini" aria-label="Audited actions">
+        <p className="mono"><span className="live-dot mint" aria-hidden="true" /> CHECKED STOCK — VERIFIED, ANSWERED</p>
+        <p className="mono"><span className="live-dot ember" aria-hidden="true" /> HELD TUE 3PM — 5:00, CONFLICT-CHECKED</p>
+        <p className="mono"><span className="live-dot mint" aria-hidden="true" /> CONFIRMED IN 2 TAPS — NO HOLD MUSIC</p>
+      </div>
       <div className="team" aria-label="Standing promises">
         {TRUSTLINE.map((t) => (
           <span key={t} className="team-chip">
