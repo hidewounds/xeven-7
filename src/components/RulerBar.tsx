@@ -5,14 +5,7 @@ import type { Route } from '../app/store'
 /* RulerBar — index ONLY. Tracks the index sections (scroll-spy), jumps on
    tap. Renders nothing on any other route. */
 
-const STOPS = [
-  { id: 'top', short: '00', label: 'Top' },
-  { id: 'title', short: '01', label: 'Title' },
-  { id: 'caps', short: '02', label: 'Capabilities' },
-  { id: 'worlds', short: '03', label: 'Worlds' },
-  { id: 'process', short: '04', label: 'Process' },
-  { id: 'departure', short: '05', label: 'Departure' },
-]
+const STOPS = [{ id: 'top', short: '00', label: 'Top' }]
 
 export default function RulerBar({ route }: { route: Route }) {
   const [active, setActive] = useState('top')

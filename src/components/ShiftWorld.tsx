@@ -168,7 +168,6 @@ export default function ShiftWorld() {
             air += exp(-dot(adp, adp) / 1.3) * uTrail[i].z;
           }
           float breathe = 0.85 + 0.15 * sin(uTime * 6.0 + vWorld.x * 8.0 + vWorld.y * 6.0);
-          col += vec3(1.0) * air * wspd * 0.16 * breathe * uShowcase;
           // RGB channel-dominant tint, slow drift
           float tt = uTime * uDrift;
           vec2 gpos = vWorld.xy * 0.35 + flow;
@@ -177,6 +176,8 @@ export default function ShiftWorld() {
             0.5 + 0.5 * sin(gpos.y * 2.3 + tt * 0.12 + 2.1),
             0.5 + 0.5 * sin((gpos.x + gpos.y) * 1.6 + tt * 0.1 + 4.2));
           theme = mix(vec3(0.35), theme, 0.55);
+          // press/flow warp the tint only — no light is ever added here
+          col += theme * uThemeAmt * 0.6 * uShowcase;
           col += theme * uThemeAmt * (0.6 + air * 1.6) * uShowcase;
           // roaming cinema: sparse panels on a 7s clock
           float slot = floor(uTime / 7.0);

@@ -224,7 +224,7 @@ canvas.world-fixed {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   gap: var(--s24);
   padding-bottom: var(--s64);
 }
@@ -679,40 +679,6 @@ canvas.world-fixed {
 @keyframes hero-float {
   0%, 100% { transform: translateY(0) rotate(-0.4deg); }
   50% { transform: translateY(-14px) rotate(0.4deg); }
-}
-
-/* ---------- dust-forming words (post-orb arrivals only) ---------- */
-.dust-word { display: inline-block; white-space: nowrap; }
-
-.dust-char {
-  display: inline-block;
-  opacity: 0;
-  filter: blur(10px);
-  transform: translateY(14px);
-  animation: dust-settle 750ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes dust-settle {
-  to { opacity: 1; filter: blur(0); transform: translateY(0); }
-}
-
-.dust-motes { position: relative; height: 0; }
-
-.dust-motes i {
-  position: absolute;
-  bottom: 0;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--glow);
-  opacity: 0;
-  animation: mote-rise 2.2s ease-out forwards;
-}
-
-@keyframes mote-rise {
-  0% { opacity: 0; transform: translateY(0); }
-  25% { opacity: 0.9; }
-  100% { opacity: 0; transform: translateY(-130px); }
 }
 
 /* ---------- route weather: one accent moment per route ---------- */

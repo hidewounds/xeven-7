@@ -2,10 +2,9 @@
   "routes": {
     "enter": {
       "overflowX": 0,
-      "h1": "THE AI EMPLOYEE FOR BUSINESS WEBSITES ",
-      ".ledger-row": 4,
-      ".tease": 3,
-      ".t-row": 9
+      "h1": null,
+      ".hero-mark": 1,
+      ".ruler-stop": 1
     },
     "worlds": {
       "overflowX": 0,

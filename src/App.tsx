@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
@@ -8,16 +8,14 @@ import SiteFooter from './components/SiteFooter'
 import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
-/* SHIFT — app shell. Hash routes, lazy pages, Lenis heartbeat, orb intro on
-   index fresh loads ONLY. No loaders anywhere else: route shifts are instant
-   app-swipes (incoming page slides in, no veil, no delay). */
+/* SHIFT — app shell. Hash routes, lazy pages, Lenis heartbeat. No loaders,
+   no veils: every route renders instantly with an app-swipe entrance. */
 const EnterStage = lazy(() => import('./pages/EnterStage'))
 const Worlds = lazy(() => import('./pages/Worlds'))
 const About = lazy(() => import('./pages/About'))
 const Features = lazy(() => import('./pages/Features'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const Demo = lazy(() => import('./pages/Demo'))
-const Gate = lazy(() => import('./pages/Gate'))
 const ShiftWorld = lazy(() => import('./components/ShiftWorld'))
 
 gsap.registerPlugin(ScrollTrigger)
@@ -25,8 +23,6 @@ ScrollTrigger.config({ ignoreMobileResize: true })
 
 export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash())
-  const [intro, setIntro] = useState(() => routeFromHash() === 'enter')
-  const [bloomed, setBloomed] = useState(false)
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const lenis = useRef<Lenis | null>(null)
 
@@ -84,13 +80,6 @@ export default function App() {
 
   // instant app-swipe: no veil, no delay
   useEffect(() => {
-    const onBloom = () => setBloomed(true)
-    window.addEventListener('xeven:orb-bloom', onBloom)
-    return () => window.removeEventListener('xeven:orb-bloom', onBloom)
-  }, [])
-
-  useEffect(() => {
-    // instant app-swipe: no veil, no delay
     navBus.go = (to: Route, query?: string) => {
       const hash = query ? `#/${to}?${query}` : `#/${to}`
       if (to === xs.route && window.location.hash === hash) return
@@ -110,17 +99,6 @@ export default function App() {
     else lenis.current?.scrollTo(0, { immediate: true })
   }, [route, reduced])
 
-  const finishIntro = useCallback(() => {
-    xs.entered = true
-    setIntro(false)
-  }, [])
-
-  useEffect(() => {
-    if (!lenis.current) return
-    if (intro) lenis.current.stop()
-    else lenis.current.start()
-  }, [intro])
-
   return (
     <div className="xp" id="top">
       <a className="skip" href="#main">
@@ -134,7 +112,7 @@ export default function App() {
       <div className="weather" data-route={route} aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <div className="glass-finish" aria-hidden="true" />
-      <main id="main" key={route} className={intro && !bloomed ? 'pre-bloom' : 'page-swipe'}>
+      <main id="main" key={route} className="page-swipe">
         <Suspense fallback={null}>
           {route === 'enter' && <EnterStage />}
           {route === 'worlds' && <Worlds />}
@@ -147,7 +125,6 @@ export default function App() {
       <Suspense fallback={null}>
         <SiteFooter route={route} />
       </Suspense>
-      {intro && <Gate onEnter={finishIntro} />}
     </div>
   )
 }

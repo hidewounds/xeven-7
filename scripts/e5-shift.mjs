@@ -22,7 +22,7 @@ page.on('pageerror', (e) => errors.push(String(e)));
 page.on('response', (r) => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
 
 const checks = {
-  enter: { sel: ['.ledger-row', '.tease', '.t-row'], shot: 's-enter.png' },
+  enter: { sel: ['.hero-mark', '.ruler-stop'], shot: 's-enter.png' },
   worlds: { sel: ['.station', '.station-chips span'], shot: 's-worlds.png' },
   about: { sel: ['.proc-row h3'], shot: 's-about.png' },
   features: { sel: ['.kb-demo input', '.team-chip'], shot: 's-features.png' },
