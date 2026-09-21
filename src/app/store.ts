@@ -5,22 +5,11 @@ export type Route = 'enter' | 'worlds' | 'about' | 'features' | 'pricing' | 'dem
 export interface XStore {
   route: Route
   reduced: boolean
-  /** cursor hover intensity 0..1 for the trail FBO */
-  intensity: number
-  entered: boolean
-  /** enter-page scroll progress 0..1 for the stage scene */
-  scrollV: number
-  /** smoothed scroll velocity 0..1 */
-  vel: number
 }
 
 export const xs: XStore = {
   route: 'enter',
   reduced: false,
-  intensity: 0,
-  entered: false,
-  scrollV: 0,
-  vel: 0,
 }
 
 /** Animated navigation bus — App registers the curtain-wipe version. */

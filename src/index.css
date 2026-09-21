@@ -66,6 +66,18 @@ html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
 ::-webkit-scrollbar-thumb:hover { background: var(--glow); }
 
 /* shared type atoms */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .mono {
   font-family: var(--mono);
   font-size: 11px;

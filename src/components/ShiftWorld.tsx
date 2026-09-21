@@ -45,7 +45,7 @@ export default function ShiftWorld() {
   useEffect(() => {
     const canvas = ref.current
     const coarse = window.matchMedia('(pointer: coarse)').matches
-    const reduced = xs.reduced
+    const reduced = xs.reduced || window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let renderer: THREE.WebGLRenderer
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, alpha: false, powerPreference: 'low-power' })
@@ -89,13 +89,9 @@ export default function ShiftWorld() {
     }
     const quadUniforms = {
       uTime: { value: 0 },
-      uTrail: { value: Array.from({ length: 5 }, () => new THREE.Vector3(9999, 9999, 0)) },
-      uWakeVel: { value: new THREE.Vector2(0, 0) },
-      uVel: { value: 0 },
       uShowcase: { value: 1 },
       uVoid: { value: new THREE.Vector3(0.0235, 0.0353, 0.0588) },
       uThemeAmt: { value: 0.22 },
-      uDrift: { value: 0 },
     }
     const quadMat = new THREE.ShaderMaterial({
       uniforms: quadUniforms,
@@ -120,13 +116,9 @@ export default function ShiftWorld() {
       `,
       fragmentShader: `
         uniform float uTime;
-        uniform vec3 uTrail[5];
-        uniform vec2 uWakeVel;
-        uniform float uVel;
         uniform float uShowcase;
         uniform vec3 uVoid;
         uniform float uThemeAmt;
-        uniform float uDrift;
         varying vec2 vUv;
         varying vec3 vWorld;
         varying float vSeed;
@@ -142,9 +134,9 @@ export default function ShiftWorld() {
             1.0 - smoothstep(0.0, e.y * 1.5 + 1e-4, b.y));
           col += vec3(1.0) * bl * 0.16;
           float wave = 0.03 + 0.04 * (0.5 + 0.5 * sin(uTime * 1.5 - (vWorld.x * 0.14 + vWorld.y * 0.05) + vSeed * 6.28));
-          float glow = wave * (1.0 + uVel * 0.3);
+          float glow = wave;
           col += vec3(1.0) * glow * uShowcase;
-          float tt = uTime * uDrift;
+          float tt = 0.0;
           vec2 gpos = vWorld.xy * 0.35;
           vec3 theme = vec3(
             0.5 + 0.5 * sin(gpos.x * 2.1 + tt * 0.15),
@@ -258,10 +250,14 @@ export default function ShiftWorld() {
       renderer.setClearColor(fog.color, 1)
       camera.position.set(...CAM)
       camera.lookAt(0, 0.4, -4)
-      // index mark floats centered; subpages hang high behind kickers
+      // index mark floats centered; subpages hang high behind kickers.
+      // narrow portraits shrink the wordmark so it never crops.
       const hero = xs.route === 'enter'
       label.position.y = hero ? 1.4 : 4.6
       labelMat.opacity = hero ? 0.9 : 0.22
+      const aspect = window.innerWidth / Math.max(1, window.innerHeight)
+      const ls = Math.min(1, aspect / 1.1)
+      label.scale.set(ls, ls, 1)
       drawLabel()
       renderer.render(scene, camera)
     }

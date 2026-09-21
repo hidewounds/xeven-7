@@ -21,15 +21,15 @@ function loadConfig(): CopilotConfig {
     if (raw) {
       const p = JSON.parse(raw) as Partial<CopilotConfig>
       return {
-        model: typeof p.model === 'string' && p.model ? p.model : 'qwen3.5-plus',
-        baseURL: typeof p.baseURL === 'string' && p.baseURL ? p.baseURL : 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        model: typeof p.model === 'string' && p.model ? p.model : 'gpt-4o-mini',
+        baseURL: typeof p.baseURL === 'string' && p.baseURL ? p.baseURL : '',
         apiKey: typeof p.apiKey === 'string' ? p.apiKey : '',
       }
     }
   } catch {
     /* corrupted storage — fall through to defaults */
   }
-  return { model: 'qwen3.5-plus', baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', apiKey: '' }
+  return { model: 'gpt-4o-mini', baseURL: '', apiKey: '' }
 }
 
 const SUGGESTIONS = [
@@ -121,7 +121,7 @@ export default function CopilotDemo() {
         <>
           <label>
             MODEL
-            <input value={cfg.model} onChange={(e) => save({ ...cfg, model: e.target.value })} placeholder="qwen3.5-plus" autoComplete="off" aria-label="Model name" />
+            <input value={cfg.model} onChange={(e) => save({ ...cfg, model: e.target.value })} placeholder="gpt-4o-mini" autoComplete="off" aria-label="Model name" />
           </label>
           <label>
             ENDPOINT

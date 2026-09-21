@@ -38,6 +38,7 @@ export default function RulerBar({ route }: { route: Route }) {
           <button
             className={`ruler-stop${active === s.id ? ' on' : ''}`}
             aria-label={s.label}
+            aria-current={active === s.id ? true : undefined}
             onClick={() => scrollBus.scrollTo?.(`#${s.id}`)}
           >
             {s.short}

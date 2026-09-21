@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { TRIAL } from '../data/product'
+import { PRODUCT, TRIAL } from '../data/product'
 import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -39,7 +39,10 @@ export default function EnterStage() {
 
   return (
     <div className="page">
-      <section className="st-hero hero-center" id="top" aria-label="XEVEN" />
+      <section className="st-hero hero-center" id="top" aria-label="XEVEN">
+        <h1 className="sr-only">{PRODUCT.hero}</h1>
+        <p className="hero-sub">{PRODUCT.sub}</p>
+      </section>
       <section className="zone" id="anatomy" aria-label="Field anatomy">
         <p className="mono zone-kicker rv">ANATOMY OF THE FIELD</p>
         <h2 className="zone-title rv">Built from four moves.</h2>

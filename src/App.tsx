@@ -113,7 +113,7 @@ export default function App() {
       <div className="grain" aria-hidden="true" />
       <div className="glass-finish" aria-hidden="true" />
       <main id="main" key={route} className="page-swipe">
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="page-boot" aria-hidden="true" />}>
           {route === 'enter' && <EnterStage />}
           {route === 'worlds' && <Worlds />}
           {route === 'about' && <About />}
@@ -122,9 +122,7 @@ export default function App() {
           {route === 'demo' && <Demo />}
         </Suspense>
       </main>
-      <Suspense fallback={null}>
-        <SiteFooter route={route} />
-      </Suspense>
+      <SiteFooter route={route} />
     </div>
   )
 }

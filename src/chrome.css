@@ -5,8 +5,12 @@
 /* ---------- shell ---------- */
 .xp { position: relative; min-height: 100svh; display: flex; flex-direction: column; }
 
-main { flex: 1; display: flex; flex-direction: column; }
+main { flex: 1 0 auto; display: flex; flex-direction: column; min-height: 60svh; }
 main > .page { width: 100%; }
+
+/* route-chunk loading reserve: keeps the footer pinned low while the
+   lazy page loads, so refresh never flashes the footer at the top */
+.page-boot { min-height: 60svh; }
 
 /* app-swipe: incoming route slides in, no veil, no lag */
 .page-swipe > .page { animation: page-in 480ms cubic-bezier(0.22, 1, 0.36, 1); }
@@ -584,8 +588,10 @@ canvas.world-fixed {
 .vid-meta p { margin: 0; }
 .vid-meta span { color: var(--faint); }
 
-/* ---------- footer ---------- */
-.sitefoot { border-top: 1px solid var(--line); margin-top: var(--s96); }
+/* ---------- footer: pinned to the document bottom via the flex shell.
+   margin-top:auto absorbs short-page slack; the .page bottom padding
+   keeps the content gap, so no magic margin needed. ---------- */
+.sitefoot { border-top: 1px solid var(--line); margin-top: auto; }
 
 .foot-grid {
   max-width: 1200px;

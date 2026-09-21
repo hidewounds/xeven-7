@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NAV_LINKS } from '../nav'
 import { navBus } from '../app/store'
 import type { Route } from '../app/store'
@@ -7,10 +7,31 @@ import type { Route } from '../app/store'
 
 export default function TopBar({ route }: { route: Route }) {
   const [open, setOpen] = useState(false)
+  const burger = useRef<HTMLButtonElement>(null!)
   const go = (to: Route) => {
     setOpen(false)
     navBus.go?.(to)
   }
+
+  // overlay a11y: Escape closes, background scroll locks, focus moves
+  // into the menu on open and back to the burger on close.
+  useEffect(() => {
+    if (!open) return
+    const btn = burger.current
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const first = document.querySelector<HTMLElement>('.mnav.open a')
+    first?.focus()
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+      btn?.focus()
+    }
+  }, [open])
 
   return (
     <>
@@ -53,6 +74,7 @@ export default function TopBar({ route }: { route: Route }) {
             BOOK A DEMO
           </a>
           <button
+            ref={burger}
             className={`tb-burger${open ? ' open' : ''}`}
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}

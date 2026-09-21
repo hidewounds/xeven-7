@@ -25,6 +25,7 @@ export default function Demo() {
   const [slot, setSlot] = useState(DEMO_SLOTS[0])
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
+  const [honey, setHoney] = useState('')
   const card = useRef<HTMLDivElement>(null!)
 
   const problems = () => {
@@ -35,6 +36,7 @@ export default function Demo() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (honey) return
     const problem = problems()
     if (problem) {
       setError(problem)
@@ -50,8 +52,10 @@ export default function Demo() {
           name: name.trim(),
           email: email.trim(),
           focus,
-          slot: `${slot} — held, like Chrono does`,
+          slot,
           ...(plan ? { plan } : {}),
+          _honey: honey,
+          _captcha: false,
         }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -106,6 +110,14 @@ export default function Demo() {
           </div>
         ) : (
           <form onSubmit={submit} noValidate>
+            <input
+              value={honey}
+              onChange={(e) => setHoney(e.target.value)}
+              aria-hidden="true"
+              tabIndex={-1}
+              autoComplete="off"
+              style={{ position: 'absolute', opacity: 0, height: 0 }}
+            />
             <p className="mono" style={{ margin: '0 0 var(--s12)' }}>What should we focus on?</p>
             <div className="pills" role="group" aria-label="Demo focus" style={{ marginBottom: 'var(--s24)' }}>
               {DEMO_FOCUS.map((d) => (
