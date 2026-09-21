@@ -3,12 +3,12 @@ import * as THREE from 'three'
 import { xs } from '../app/store'
 import type { Route } from '../app/store'
 
-/* SHIFTWORLD VI — a long diamond corridor. The mosaic tiles edge-to-edge
- * and recedes in depth layers; on index, page scroll dollies the camera
- * down the corridor (scrubbed, reversible, per-section stops ahead). The
- * route wordmark is NOT here — the fixed FieldMark overlay owns titles so
- * they stay pixel-locked while the field moves. Subpages: one frozen
- * hold. Nothing chases the pointer except a slow camera steer. */
+/* SHIFTWORLD VI — a deep diamond corridor. The mosaic tiles edge-to-edge
+ * and recedes in static depth layers. The camera holds one position:
+ * scroll never zooms or dollies the field. The route wordmark is NOT
+ * here — the fixed FieldMark overlay owns titles. Subpages and index
+ * share the same frozen hold; only a slow pointer steer + micro-sway
+ * breathes. Per-route haze retint kept (color mood, not motion). */
 
 const VOID = new THREE.Color(0x06090f)
 const HALF = 14
@@ -227,7 +227,6 @@ export default function ShiftWorld() {
     let alive = true
     let last = performance.now()
     let clockT = Math.random() * 10
-    let dolly = 0
     let dirty = false
     resize()
     window.addEventListener('resize', resize)
@@ -249,9 +248,8 @@ export default function ShiftWorld() {
 
     renderStill()
 
-    // index-only drift: slow cursor steer + scroll dolly down the corridor.
-    // dolly is a pure function of scroll progress (smoothed), so the
-    // journey is scrub-reversible and interruptible; subpages sleep.
+    // index-only drift: slow cursor steer + micro-sway. Scroll never
+    // touches the camera — no zoom, no dolly. Everywhere else sleeps.
     const frame = (now: number) => {
       if (!alive) return
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -262,17 +260,14 @@ export default function ShiftWorld() {
       }
       if ((live || dirty) && !document.hidden) {
         if (live) {
-          const max = document.documentElement.scrollHeight - window.innerHeight
-          const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
-          dolly += (p - dolly) * 0.08
           // cursor aims gently, micro-sway breathes underneath
           const tx = CAM[0] + pm.x * 1.6 + Math.sin(clockT * 0.21) * 0.07
-          const ty = CAM[1] - pm.y * 1.0 + Math.sin(clockT * 0.16 + 1) * 0.05 - dolly * 0.8
-          const tz = CAM[2] - dolly * 5.0 + Math.cos(clockT * 0.13) * 0.07
+          const ty = CAM[1] - pm.y * 1.0 + Math.sin(clockT * 0.16 + 1) * 0.05
+          const tz = CAM[2] + Math.cos(clockT * 0.13) * 0.07
           camera.position.x += (tx - camera.position.x) * 0.02
           camera.position.y += (ty - camera.position.y) * 0.02
           camera.position.z += (tz - camera.position.z) * 0.02
-          camera.lookAt(camera.position.x * 0.4, 0.4 - dolly * 0.4, -4 - dolly * 4)
+          camera.lookAt(camera.position.x * 0.4, 0.4, -4)
           quadUniforms.uTime.value = clockT
         }
         renderer.render(scene, camera)

@@ -7,7 +7,6 @@ import RulerBar from './components/RulerBar'
 import SiteFooter from './components/SiteFooter'
 import FieldMark from './components/FieldMark'
 import XLoader from './components/XLoader'
-import FootBar from './components/FootBar'
 import { bootBus, navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
 
@@ -28,8 +27,8 @@ export default function App() {
   const [route, setRoute] = useState<Route>(() => routeFromHash())
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   // XLoader veil is derived, never set synchronously in an effect:
-  // readyFor trails route until the page signals mount (900ms min dwell)
-  // or the 3s failsafe fires. All state updates below are async.
+  // readyFor trails route until the page signals mount (400ms min dwell)
+  // or the 1.5s failsafe fires. All state updates below are async.
   const [readyFor, setReadyFor] = useState<Route | null>(null)
   const veil = !reduced && readyFor !== route
   const routeRef = useRef<Route>(route)
@@ -110,7 +109,7 @@ export default function App() {
   }, [route, reduced])
 
   // XLoader veil wiring: stamp the route change, arm the page-ready
-  // signal (min 900ms dwell) and the 3s failsafe. Reduced motion never
+  // signal (min 400ms dwell) and the 1.5s failsafe. Reduced motion never
   // veils — content just appears.
   useEffect(() => {
     if (reduced) return
@@ -121,10 +120,10 @@ export default function App() {
       if (routeRef.current === captured) fn()
     }, ms)
     bootBus.ready = () => {
-      const wait = Math.max(0, 900 - (performance.now() - t0.current))
+      const wait = Math.max(0, 400 - (performance.now() - t0.current))
       later(() => setReadyFor(captured), wait)
     }
-    const tMax = later(() => setReadyFor(captured), 3000)
+    const tMax = later(() => setReadyFor(captured), 1500)
     return () => {
       window.clearTimeout(tMax)
       if (bootBus.ready) bootBus.ready = undefined
@@ -146,7 +145,7 @@ export default function App() {
       <div className="weather" data-route={route} aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <div className="glass-finish" aria-hidden="true" />
-      <main id="main" key={route} className="page-swipe">
+      <main id="main" key={route} className="page-swipe" tabIndex={-1}>
         <Suspense fallback={<div className="page-boot" aria-hidden="true" />}>
           {route === 'enter' && <EnterStage />}
           {route === 'worlds' && <Worlds />}
@@ -157,7 +156,6 @@ export default function App() {
         </Suspense>
       </main>
       <SiteFooter route={route} />
-      <FootBar route={route} />
     </div>
   )
 }

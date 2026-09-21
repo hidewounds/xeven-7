@@ -3,7 +3,7 @@
    backdrop-filter anywhere — solid veils only. */
 
 /* ---------- shell ---------- */
-.xp { position: relative; min-height: 100svh; display: flex; flex-direction: column; padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+.xp { position: relative; min-height: 100svh; display: flex; flex-direction: column; }
 
 main { flex: 1 0 auto; display: flex; flex-direction: column; min-height: 60svh; }
 main > .page { width: 100%; }
@@ -43,11 +43,12 @@ canvas.world-fixed {
     linear-gradient(to bottom, rgba(3, 5, 8, 0.25), transparent 22%);
 }
 
-/* ---------- field mark: fixed route wordmark over the diamonds.
-   Pixel-locked to the viewport — never scrolls, bobs, or steers with
-   the camera. Hollow SVG outline; gradient on index, bright cyan off it. */
+/* ---------- field mark: route wordmark fixed to the top of every page.
+   One position, one system — never scrolls, never steers. Hollow SVG
+   outline; gradient on index, bright cyan off it. */
 .field-mark {
   position: fixed;
+  top: 64px;
   left: 0;
   right: 0;
   z-index: 5;
@@ -56,21 +57,18 @@ canvas.world-fixed {
   justify-content: center;
 }
 
-.field-mark.hero { top: 50%; transform: translateY(-50%); }
-.field-mark.sub { top: 72px; }
-
-.field-mark svg { width: min(1060px, 94vw); height: auto; display: block; }
-.field-mark.sub svg { width: min(640px, 80vw); }
+.field-mark svg { width: min(720px, 84vw); height: auto; display: block; }
 
 .field-mark-text {
   font-family: var(--disp);
   font-size: 200px;
   fill: none;
   letter-spacing: 14px;
+  stroke-width: 2.5;
 }
 
 .field-mark.hero .field-mark-text { stroke-width: 3; }
-.field-mark.sub .field-mark-text { stroke-width: 2; opacity: 0.6; }
+.field-mark.sub .field-mark-text { opacity: 0.65; }
 
 /* ---------- XLoader: the loading interface. Lone revolving X. ---------- */
 .xloader {
@@ -93,42 +91,6 @@ canvas.world-fixed {
 
 @keyframes x-spin {
   to { transform: rotate(360deg); }
-}
-
-/* ---------- footbar: slim fixed bar on every page ---------- */
-.footbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: var(--z-ui);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s16);
-  padding: var(--s8) var(--s24) calc(var(--s8) + env(safe-area-inset-bottom));
-  background: rgba(6, 9, 15, 0.86);
-  border-top: 1px solid var(--line);
-}
-
-.footbar-mark {
-  font-family: var(--disp);
-  font-size: 18px;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-}
-
-.footbar-pos { white-space: nowrap; }
-
-.footbar-cta {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: var(--glow);
-  text-decoration: none;
-  padding: var(--s8) 0;
-  border-bottom: 1px solid var(--glow);
-  white-space: nowrap;
 }
 
 /* ---------- top bar: content floats, zero bar chrome ---------- */
@@ -617,6 +579,9 @@ canvas.world-fixed {
 
 .tier:hover { border-color: var(--line-strong); transform: translateY(-2px); }
 
+/* Growth tier is magnetic — the hook owns translate, CSS must not fight it */
+.tier.hot:hover { transform: none; }
+
 .tier.hot { border-color: var(--glow); }
 
 .tier h3 { font-family: var(--disp); font-size: 34px; margin: 0; }
@@ -710,6 +675,7 @@ canvas.world-fixed {
   .st-hero { padding-bottom: var(--s32); min-height: 100svh; }
   .tease-grid { grid-template-columns: 1fr; }
   .tier-grid { grid-template-columns: 1fr; }
+  .station-art { height: 220px; }
   .pg { grid-template-columns: 1fr; }
   .t-row { grid-template-columns: 1fr; gap: var(--s8); }
   .foot-grid { grid-template-columns: 1fr; }
