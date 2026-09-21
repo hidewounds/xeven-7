@@ -246,6 +246,10 @@ canvas.world-fixed {
 
 .hero-cta-row { display: flex; gap: 0; flex-wrap: wrap; }
 
+.hero-center { align-items: center; text-align: center; }
+.hero-center .hero-cta-row { justify-content: center; }
+.hero-center .ledger { width: 100%; max-width: 640px; text-align: left; }
+
 /* live board: what the shift is doing right now */
 .ledger {
   border-top: 1px solid var(--line);
@@ -381,8 +385,62 @@ canvas.world-fixed {
   padding: var(--s8) var(--s16);
 }
 
-/* ---------- rows / teams / kb (features + about grammar) ---------- */
-.rows { display: flex; flex-direction: column; }
+/* ---------- replay console (watch-only chat) ---------- */
+.pg-main {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--veil);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pg-status {
+  display: flex;
+  align-items: center;
+  gap: var(--s12);
+  padding: var(--s16) var(--s24);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.pg-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s12);
+  padding: var(--s24);
+  min-height: 300px;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.msg { max-width: 82%; padding: var(--s12) var(--s16); border-radius: 14px; font-size: 15px; line-height: 1.5; }
+
+.msg.bot { align-self: flex-start; background: var(--fog); border: 1px solid var(--line); }
+
+.msg.user { align-self: flex-end; background: var(--glow); color: #06231b; }
+
+.msg.typing { color: var(--faint); font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; }
+
+.pg-composer { display: flex; gap: var(--s12); padding: var(--s16) var(--s24) var(--s24); }
+
+.pg-composer input {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0 var(--s24);
+  min-height: 48px;
+  color: var(--bone);
+  font: inherit;
+}
+
+.pg-composer input:disabled { opacity: 0.6; }
+
+/* ---------- rows / teams / kb (features + about grammar) ---------- */.rows { display: flex; flex-direction: column; }
 
 .proc-row { padding: var(--s24) 0; border-top: 1px solid var(--line); }
 .proc-row:last-child { border-bottom: 1px solid var(--line); }
@@ -547,7 +605,7 @@ canvas.world-fixed {
   inset: 0;
   background: var(--void);
   opacity: 1;
-  transition: opacity 650ms ease;
+  transition: opacity 1400ms ease;
 }
 
 .orb-intro.bloom .intro-veil { opacity: 0; }

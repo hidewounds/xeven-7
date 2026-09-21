@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { INSTRUMENTS, PRODUCT, TELEMETRY, TRIAL } from '../data/product'
+import DemoChat from '../components/DemoChat'
 import { navigate, xs } from '../app/store'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -101,9 +102,14 @@ export default function EnterStage() {
 
   return (
     <div className="page" ref={root}>
-      <section className="st-hero" id="top">
+      <section className="st-hero hero-center" id="top">
         <p className="hero-mark" aria-hidden="true">XEVEN</p>
         <p className="mono rv">XEVEN — THE NIGHT SHIFT</p>
+        <Ledger />
+        <p className="mono rv" aria-hidden="true">SCROLL TO ENTER ↓</p>
+      </section>
+
+      <section className="zone" id="title" aria-label="Title">
         <h1 className="hero-title rv" aria-label={PRODUCT.hero}>
           {dust
             ? PRODUCT.hero.split(' ').map((word, wi) => (
@@ -135,7 +141,14 @@ export default function EnterStage() {
             See the worlds
           </button>
         </div>
-        <Ledger />
+      </section>
+
+      <section className="zone" id="chat" aria-label="Live replay">
+        <p className="mono zone-kicker rv">WATCH IT WORK</p>
+        <h2 className="zone-title rv">A shift, replayed.</h2>
+        <div className="rv">
+          <DemoChat />
+        </div>
       </section>
 
       <section className="zone" id="caps" aria-label="Capabilities">

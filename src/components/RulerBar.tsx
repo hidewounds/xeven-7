@@ -7,10 +7,11 @@ import type { Route } from '../app/store'
 
 const STOPS = [
   { id: 'top', short: '00', label: 'Top' },
-  { id: 'caps', short: '01', label: 'Capabilities' },
-  { id: 'worlds', short: '02', label: 'Worlds' },
-  { id: 'process', short: '03', label: 'Process' },
-  { id: 'departure', short: '04', label: 'Departure' },
+  { id: 'title', short: '01', label: 'Title' },
+  { id: 'caps', short: '02', label: 'Capabilities' },
+  { id: 'worlds', short: '03', label: 'Worlds' },
+  { id: 'process', short: '04', label: 'Process' },
+  { id: 'departure', short: '05', label: 'Departure' },
 ]
 
 export default function RulerBar({ route }: { route: Route }) {

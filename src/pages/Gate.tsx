@@ -1,16 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
 
-/* Gate — the BLOOM intro (index fresh loads only). No overlay page: the veil
-   starts opaque over the live field, the swarm thinks in the middle, then
-   everything inverts — veil lifts, orb particles scatter outward and fade,
-   the field ignites beneath them, and the index (mounted in front from the
-   start) fades in with dust words landing on the living field.
-   Click skips to the bloom. Reduced: still + fast exit. */
+/* Gate — the CREATURE intro (index fresh loads only). A living orb built from
+   three systems that real organisms and ferrofluid sculptures share:
+   1. SPIKES — rim tendrils extending/retracting along radial field lines,
+      gated by traveling waves (never still, never symmetric).
+   2. PULSE — jellyfish contract/release asymmetry (fast squash, slow refill)
+      plus a metachronal wave running around the circumference.
+   3. BODY — heterogeneous filamented interior: bright forward-scattering
+      core, dark absorption mid-band, ember inclusions, specular glints
+      arcing over the rim, reflection pool beneath.
+   Arc: BREATHE → SURGE → BLOOM (one synchronous startle contraction, then
+   scatter into the field + veil lift + index fade + dust). Click skips.
+   No counter. Reduced: one still, fast exit. */
 
-const WORDS = ['GATHER', 'DIFFUSE', 'BLOOM']
-const N = 560
+const WORDS = ['BREATHE', 'SURGE', 'BLOOM']
+const N = 620
 
 interface P {
+  kind: 0 | 1 | 2 | 3 // body | spike | core | glint
   a: number
   r: number
   sp: number
@@ -19,7 +26,7 @@ interface P {
   wob: number
   size: number
   col: string
-  core: boolean
+  core: number
   dx: number
   dy: number
 }
@@ -33,22 +40,36 @@ function makeSwarm(seedR: number): P[] {
     return (s - 1) / 2147483646
   }
   return Array.from({ length: N }, () => {
+    const u = rnd()
+    const kind: P['kind'] = u < 0.52 ? 0 : u < 0.78 ? 1 : u < 0.93 ? 2 : 3
     const core = rnd()
     const a = rnd() * Math.PI * 2
     return {
+      kind,
       a,
-      r: 0.1 + 0.9 * Math.pow(rnd(), 0.5),
-      sp: 0.3 + rnd() * 0.9,
+      core,
+      r: kind === 2 ? 0.05 + 0.22 * rnd() : 0.15 + 0.85 * Math.pow(rnd(), 0.55),
+      sp: 0.25 + rnd() * 0.9,
       dir: rnd() < 0.7 ? 1 : -1,
       tilt: (rnd() - 0.5) * 0.9,
       wob: rnd() * Math.PI * 2,
-      size: core > 0.94 ? 1.7 : 0.6 + rnd() * 1.2,
-      col: core > 0.968 ? '#4df3ff' : core > 0.9 ? '#ffe3ef' : BODY[Math.floor(rnd() * BODY.length)],
-      core: core > 0.9,
+      size: kind === 3 ? 1.1 + rnd() * 0.6 : kind === 2 ? 1.5 : 0.6 + rnd() * 1.2,
+      col:
+        kind === 3
+          ? core > 0.5 ? '#ffffff' : '#4df3ff'
+          : kind === 2
+            ? core > 0.6 ? '#ffe3ef' : '#ff2d78'
+            : BODY[Math.floor(rnd() * BODY.length)],
       dx: Math.cos(a),
       dy: Math.sin(a),
     }
   })
+}
+
+// fast contract, slow refill — jellyfish asymmetry + metachronal offset
+function pulseAt(t: number, angle: number): number {
+  const ph = (((t * 0.9 - angle / (Math.PI * 2)) * 0.5) % 1 + 1) % 1
+  return ph < 0.35 ? ph / 0.35 : 1 - (ph - 0.35) / 0.65
 }
 
 export default function Gate({ onEnter }: { onEnter: () => void }) {
@@ -57,7 +78,6 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
   const [reduced] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
-  const [n, setN] = useState(() => (reduced ? 100 : 0))
   const [wi, setWi] = useState(0)
   const [bloom, setBloom] = useState(false)
 
@@ -69,9 +89,8 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
   const toBloom = () => {
     if (done.current) return
     setBloom(true)
-    setN(100)
     window.dispatchEvent(new CustomEvent('xeven:orb-bloom'))
-    window.setTimeout(finish, reduced ? 0 : 950)
+    window.setTimeout(finish, reduced ? 0 : 1450)
   }
 
   useEffect(() => {
@@ -93,7 +112,7 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
     let raf = 0
     const t0 = performance.now()
 
-    const drawSwarm = (t: number, breathe: number, alpha: number, scatter: number) => {
+    const drawSwarm = (t: number, breathe: number, alpha: number, scatter: number, startle: number) => {
       ctx.globalCompositeOperation = 'source-over'
       ctx.fillStyle = 'rgba(6, 9, 15, 0.3)'
       ctx.fillRect(0, 0, S, S)
@@ -102,7 +121,51 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
       const tumble = t * 0.35
       const ct = Math.cos(tumble)
       const st = Math.sin(tumble)
+      // global squash from the base pulse (contract fast, refill slow)
+      const gp = pulseAt(t, 0)
+      const squashY = 1 - 0.13 * gp * (1 - startle * 0.5)
+      const squashX = 1 + 0.07 * gp * (1 - startle * 0.5)
+      const startleSuck = 1 - startle * 0.3
       for (const p of swarm) {
+        const wob = 1 + 0.07 * Math.sin(t * 1.6 + p.wob)
+        if (p.kind === 1) {
+          // SPIKES: extend along radial field lines, gated by traveling wave
+          const wave = Math.pow(Math.max(0, Math.sin(3 * p.a - t * 2.3)), 2)
+          const met = 0.4 + 0.6 * pulseAt(t, p.a)
+          const env = wave * met * (1 - startle * 0.85)
+          if (env < 0.03 && scatter <= 0) continue
+          const r0 = R * breathe * 0.9 * startleSuck
+          const len = R * (0.04 + 0.34 * env) * breathe
+          const x0 = cx + Math.cos(p.a) * r0
+          const y0 = cy + Math.sin(p.a) * r0 * squashY
+          const x1 = cx + Math.cos(p.a) * (r0 + len) + p.dx * scatter
+          const y1 = cy + Math.sin(p.a) * (r0 + len) * squashY + p.dy * scatter
+          ctx.strokeStyle = p.col
+          ctx.globalAlpha = alpha * Math.min(1, 0.25 + env)
+          ctx.lineWidth = p.size * (0.7 + env * 0.9)
+          ctx.beginPath()
+          ctx.moveTo(x0, y0)
+          ctx.lineTo(x1, y1)
+          ctx.stroke()
+          continue
+        }
+        if (p.kind === 3) {
+          // GLINTS: fast bright sparks arcing over the rim
+          const ga = p.a + t * (1.6 + p.sp) * p.dir
+          const gr = R * breathe * 0.97 * startleSuck
+          const x = cx + Math.cos(ga) * gr * squashX + p.dx * scatter
+          const y = cy + Math.sin(ga) * gr * squashY + p.dy * scatter
+          const tw = 0.5 + 0.5 * Math.sin(t * 7 + p.wob)
+          ctx.strokeStyle = p.col
+          ctx.globalAlpha = alpha * tw
+          ctx.lineWidth = p.size
+          ctx.beginPath()
+          ctx.moveTo(x - 2, y)
+          ctx.lineTo(x + 2, y)
+          ctx.stroke()
+          continue
+        }
+        // BODY + CORE: tumbled disc with depth shading
         const ang = p.a + t * p.sp * p.dir * 0.85
         const ox = Math.cos(ang) * p.r
         const oy = Math.sin(ang) * p.r * Math.cos(p.tilt)
@@ -110,20 +173,16 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
         const rx = ox * ct - oz * st
         const rz = ox * st + oz * ct
         const depth = 0.5 + 0.5 * (rz / Math.max(p.r, 1e-3))
-        const bright = 0.3 + 0.7 * depth
-        const wob = 1 + 0.07 * Math.sin(t * 1.6 + p.wob)
-        const rr = p.r * R * breathe * wob
-        const bx = (rx / Math.max(p.r, 1e-3)) * rr
-        const by = (oy / Math.max(p.r, 1e-3)) * rr * 0.94 + Math.sin(t * 1.2 + p.wob) * 2.5
-        // scatter: positions fly outward along their birth direction
-        const sx = bx + p.dx * scatter * R * 2.2
-        const sy = by + p.dy * scatter * R * 2.2
-        const x = cx + sx
-        const y = cy + sy
+        const bright = p.kind === 2 ? 0.75 + 0.45 * depth : 0.3 + 0.7 * depth
+        const rr = p.r * R * breathe * wob * startleSuck
+        const bx = (rx / Math.max(p.r, 1e-3)) * rr * squashX
+        const by = (oy / Math.max(p.r, 1e-3)) * rr * squashY + Math.sin(t * 1.2 + p.wob) * 2.5
         const edge = Math.min(1, Math.hypot(bx, by) / (R * breathe))
         const rim = edge > 0.78 ? (edge - 0.78) * 3.2 : 0
+        const x = cx + bx + p.dx * scatter
+        const y = cy + by + p.dy * scatter
         ctx.strokeStyle = p.col
-        ctx.globalAlpha = alpha * Math.min(1, bright * (p.core ? 1 : 0.85) + rim * 0.7)
+        ctx.globalAlpha = alpha * Math.min(1, bright + rim * 0.7)
         ctx.lineWidth = p.size * (0.55 + 0.65 * depth) * (1 + rim * 0.8)
         ctx.beginPath()
         ctx.moveTo(x - Math.cos(ang) * 3 * p.sp, y - Math.sin(ang) * 3 * p.sp)
@@ -147,29 +206,31 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
     }
 
     if (reduced) {
-      drawSwarm(1.2, 0.9, 1, 0)
+      drawSwarm(1.2, 0.9, 1, 0, 0)
       const t = window.setTimeout(toBloom, 400)
       return () => window.clearTimeout(t)
     }
-    let bloomT = -1
+    let bloomed = false
+    let bloomT = 0
     const step = (now: number) => {
-      const p = Math.min(1, (now - t0) / 2400)
-      setN(Math.floor(p * 100))
+      const p = Math.min(1, (now - t0) / 2600)
       setWi(p < 0.45 ? 0 : p < 0.8 ? 1 : 2)
       if (p < 1) {
         const breathe = p < 0.45 ? 1 - (p / 0.45) * 0.2 : 0.8 + ((p - 0.45) / 0.35) * 0.9
-        drawSwarm((now - t0) / 1000, breathe, 1, 0)
+        drawSwarm((now - t0) / 1000, breathe, 1, 0, 0)
         raf = requestAnimationFrame(step)
         return
       }
-      // bloom: scatter + fade over ~750ms
-      if (bloomT < 0) {
-        bloomT = 0
+      if (!bloomed) {
+        bloomed = true
         toBloom()
       }
+      // startle: one synchronous contraction, then scatter into the field
+      // bloom: slow scatter into the field over ~1.2s while the veil breathes out
       bloomT += 1 / 60
-      const k = Math.min(1, bloomT / 0.75)
-      drawSwarm((now - t0) / 1000, 1.7, 1 - k, k * k)
+      const k = Math.min(1, bloomT / 1.2)
+      const startle = k < 0.2 ? k / 0.2 : Math.max(0, 1 - (k - 0.2) / 0.25)
+      drawSwarm((now - t0) / 1000, 1.7, 1 - k, k * k, startle)
       if (k >= 1) return
       raf = requestAnimationFrame(step)
     }
@@ -194,9 +255,7 @@ export default function Gate({ onEnter }: { onEnter: () => void }) {
         <div className="orb-creature" aria-hidden="true">
           <canvas ref={canvas} className="orb-canvas" width={300} height={300} />
         </div>
-        <p className="intro-count">
-          {String(n).padStart(3, '0')} — {WORDS[wi]}
-        </p>
+        <p className="intro-count">{WORDS[wi]}</p>
       </div>
     </div>
   )
