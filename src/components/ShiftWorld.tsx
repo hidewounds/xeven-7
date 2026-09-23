@@ -6,8 +6,8 @@ import type { Route } from '../app/store'
 /* SHIFTWORLD VI — a deep diamond corridor that travels WITH the scroll.
  * Page scroll pans the camera vertically through the lattice (no zoom,
  * no dolly) on every route, so the background moves with the content.
- * Reversible and smoothed. The route wordmark is NOT here — the fixed
- * FieldMark overlay owns titles. A slow pointer steer breathes underneath. */
+ * Reversible and smoothed. Route titles stay in the readable page content;
+ * the field remains purely atmospheric. A slow pointer steer breathes underneath. */
 
 const VOID = new THREE.Color(0x06090f)
 const HALF = 14

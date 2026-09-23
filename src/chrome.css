@@ -30,25 +30,6 @@ canvas.world-fixed {
     linear-gradient(to bottom, rgba(3, 5, 8, 0.25), transparent 22%);
 }
 
-/* floating route wordmark — viewport-locked, never scrolls */
-.field-mark {
-  position: fixed; left: 0; right: 0;
-  z-index: 5; pointer-events: none;
-  display: flex; justify-content: center;
-}
-.field-mark.hero { top: 50%; transform: translateY(-50%); }
-.field-mark.sub { top: 72px; }
-.field-mark svg { width: min(1060px, 94vw); height: auto; display: block; }
-.field-mark.sub svg { width: min(640px, 80vw); }
-.field-mark-text {
-  font-family: var(--disp);
-  font-size: 200px;
-  fill: none;
-  letter-spacing: 14px;
-}
-.field-mark.hero .field-mark-text { stroke-width: 3; }
-.field-mark.sub .field-mark-text { stroke-width: 2; opacity: 0.6; }
-
 /* one accent moment per route */
 .weather { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
 .weather[data-route='worlds'] { background: radial-gradient(100% 42% at 50% 100%, rgba(255, 111, 174, 0.12), transparent 70%); }
@@ -345,7 +326,13 @@ button.team-chip:hover { border-color: var(--glow); }
 .hold-timer { color: var(--glow); margin: 0 0 var(--s24); font-variant-numeric: tabular-nums; }
 
 /* ================= footer ================= */
-.sitefoot { border-top: 1px solid var(--line); margin-top: auto; }
+.sitefoot {
+  position: relative;
+  z-index: var(--z-type);
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+  background: var(--void);
+}
 .foot-grid {
   max-width: 1200px; margin: 0 auto;
   padding: var(--s64) var(--s24);

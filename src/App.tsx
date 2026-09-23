@@ -5,7 +5,6 @@ import Lenis from 'lenis'
 import TopBar from './components/TopBar'
 import RulerBar from './components/RulerBar'
 import SiteFooter from './components/SiteFooter'
-import FieldMark from './components/FieldMark'
 import Cursor from './components/Cursor'
 import { navBus, routeFromHash, scrollBus, unknownHash, xs } from './app/store'
 import type { Route } from './app/store'
@@ -122,7 +121,6 @@ export default function App() {
       <Suspense fallback={null}>
         <ShiftWorld />
       </Suspense>
-      <FieldMark route={route} />
       <div className="weather" data-route={route} aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <div className="glass-finish" aria-hidden="true" />
