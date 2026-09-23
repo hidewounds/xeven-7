@@ -405,3 +405,89 @@ button.team-chip:hover { border-color: var(--glow); }
   .scroll-cue::after { animation: none; }
   .row-body, .faq-a { animation: none; }
 }
+
+
+/* ================= Signal / Depth experience ================= */
+.home-page { position: relative; }
+.signal-hero {
+  min-height: min(920px, 100svh); position: relative; display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 1.05fr);
+  align-items: center; gap: clamp(32px, 6vw, 96px); padding: 96px 0 72px;
+}
+.signal-hero-copy { position: relative; z-index: 2; max-width: 640px; }
+.hero-kicker { color: var(--glow); margin-bottom: 24px; }
+.signal-title { max-width: 680px; margin: 0; font-family: var(--disp); font-size: clamp(58px, 8vw, 132px); line-height: 0.88; letter-spacing: -0.02em; text-wrap: balance; }
+.signal-lede { max-width: 52ch; margin: 28px 0 28px; color: var(--muted); font-size: clamp(18px, 2vw, 24px); line-height: 1.35; }
+.hero-proof { display: flex; align-items: center; gap: 10px; color: var(--muted); margin-top: 26px; }
+.signal-hero-art { position: relative; z-index: 1; min-width: 0; }
+.signal-diagram { position: relative; width: 100%; max-width: 680px; margin-left: auto; border: 1px solid var(--line); background: linear-gradient(135deg, rgba(14,26,32,.86), rgba(6,9,15,.48)); padding: clamp(16px, 3vw, 32px); overflow: hidden; }
+.signal-diagram::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0 48%, rgba(77,243,255,.06) 48.2% 48.5%, transparent 48.7% 100%); pointer-events: none; }
+.signal-diagram svg { display: block; width: 100%; height: auto; overflow: visible; }
+.signal-grid { fill: none; stroke: rgba(232,237,238,.10); stroke-width: 1; stroke-dasharray: 2 10; }
+.signal-trace { fill: none; stroke: url(#signal-gradient); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 10 14; animation: signal-dash 10s linear infinite; }
+.signal-trace-b { animation-duration: 14s; animation-direction: reverse; opacity: .55; }
+.signal-node { fill: var(--void); stroke: var(--glow); stroke-width: 2; }
+.node-d { stroke: var(--ember); }
+.signal-core { fill: rgba(6,9,15,.82); stroke: var(--glow); stroke-width: 1.5; }
+.signal-core-label { fill: var(--bone); font-family: var(--disp); font-size: 18px; letter-spacing: 2px; }
+.signal-core-sub { fill: var(--muted); font-family: var(--mono); font-size: 8px; letter-spacing: 1.8px; }
+.signal-caption { display: flex; align-items: center; gap: 10px; padding-top: 14px; color: var(--faint); }
+@keyframes signal-dash { to { stroke-dashoffset: -240; } }
+.hero-index { position: absolute; bottom: 20px; left: 0; right: 0; display: flex; justify-content: space-between; color: var(--faint); }
+.signal-chapter-intro { display: grid; grid-template-columns: 1fr minmax(0, 1.2fr); gap: 32px; padding: 128px 0 48px; border-top: 1px solid var(--line); }
+.signal-chapter-intro .zone-title { margin: 0; }
+.signal-chapter-intro .page-lede { margin: 0; }
+.signal-chapters { border-top: 1px solid var(--line); }
+.signal-chapter { display: grid; grid-template-columns: 120px minmax(0, 1fr) minmax(180px, .7fr); gap: 32px; align-items: start; padding: 40px 0; border-bottom: 1px solid var(--line); }
+.signal-chapter-index { display: flex; align-items: center; gap: 14px; color: var(--glow); }
+.chapter-line { width: 52px; height: 1px; background: var(--glow); opacity: .6; }
+.signal-chapter-body h3 { margin: 4px 0 6px; font-family: var(--disp); font-size: clamp(46px, 7vw, 96px); line-height: .86; letter-spacing: -.01em; }
+.signal-chapter-short { margin: 0 0 12px; color: var(--bone); font-size: 20px; }
+.signal-chapter-detail { max-width: 48ch; margin: 0; color: var(--muted); }
+.signal-chapter-receipt { justify-self: end; max-width: 26ch; color: var(--faint); line-height: 1.5; padding-top: 8px; }
+.signal-state-2 .signal-chapter-index, .signal-state-2 .signal-chapter-receipt { color: var(--moon); }
+.signal-state-3 .signal-chapter-index, .signal-state-3 .signal-chapter-receipt { color: var(--glow); }
+.signal-state-4 .signal-chapter-index, .signal-state-4 .signal-chapter-receipt { color: var(--ember); }
+.signal-proof-section { padding: 128px 0 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .95fr); gap: 28px 64px; align-items: end; }
+.signal-proof-section > :first-child { grid-column: 1 / -1; }
+.signal-receipt { max-width: none; }
+.signal-proof-note { border-top: 1px solid var(--line); padding-top: 16px; }
+.signal-proof-note > .mono { margin: 0 0 14px; }
+.proof-note-row { display: flex; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); padding: 13px 0; color: var(--muted); font-family: var(--mono); font-size: 10px; letter-spacing: .16em; }
+.proof-note-row strong { color: var(--bone); font-weight: 500; }
+.signal-finale { border-top: 1px solid var(--line); padding-top: 128px; }
+.tb-nav a { display: inline-flex; flex-direction: column; gap: 2px; }
+.tb-nav a small { font-family: var(--mono); font-size: 7px; letter-spacing: .12em; color: var(--faint); text-transform: uppercase; }
+.mnav a { display: flex; flex-direction: column; gap: 4px; }
+.mnav a small { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .signal-hero { min-height: auto; grid-template-columns: 1fr; gap: 48px; padding-top: 96px; padding-bottom: 72px; }
+  .signal-title { font-size: clamp(54px, 15vw, 92px); }
+  .signal-hero-art { order: 2; }
+  .signal-diagram { max-width: none; }
+  .hero-index { position: static; grid-column: 1; margin-top: 8px; }
+  .signal-chapter-intro { grid-template-columns: 1fr; padding-top: 88px; }
+  .signal-chapter { grid-template-columns: 72px 1fr; gap: 20px; }
+  .signal-chapter-receipt { grid-column: 2; justify-self: start; padding-top: 0; }
+  .signal-proof-section { grid-template-columns: 1fr; padding-top: 88px; }
+  .signal-proof-section > :first-child { grid-column: auto; }
+  .signal-finale { padding-top: 88px; }
+}
+
+@media (max-width: 560px) {
+  .signal-title { font-size: clamp(48px, 15vw, 72px); }
+  .signal-lede { font-size: 18px; }
+  .signal-diagram { padding: 10px; }
+  .signal-core-label { font-size: 14px; }
+  .signal-core-sub { font-size: 6px; }
+  .signal-chapter { grid-template-columns: 1fr; gap: 12px; padding: 28px 0; }
+  .signal-chapter-index { min-height: 30px; }
+  .signal-chapter-body h3 { font-size: 60px; }
+  .signal-chapter-receipt { grid-column: auto; }
+  .hero-index { font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-trace { animation: none; }
+}

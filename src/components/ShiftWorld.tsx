@@ -141,12 +141,11 @@ export default function ShiftWorld() {
           col += vec3(1.0) * glow * uShowcase;
           float tt = 0.0;
           vec2 gpos = vWorld.xy * 0.35;
-          vec3 theme = vec3(
-            0.5 + 0.5 * sin(gpos.x * 2.1 + tt * 0.15),
-            0.5 + 0.5 * sin(gpos.y * 2.3 + tt * 0.12 + 2.1),
-            0.5 + 0.5 * sin((gpos.x + gpos.y) * 1.6 + tt * 0.1 + 4.2));
-          theme = mix(vec3(0.35), theme, 0.55);
-          col += theme * uThemeAmt * 0.6 * uShowcase;
+          vec3 signal = vec3(0.30, 0.95, 1.0);
+          vec3 warmth = vec3(1.0, 0.18, 0.10);
+          float drift = 0.5 + 0.5 * sin(gpos.x * 1.7 + gpos.y * 1.1 + uTime * 0.08);
+          vec3 theme = mix(signal, warmth, smoothstep(0.72, 0.98, drift));
+          col += theme * uThemeAmt * 0.55 * uShowcase;
           float slot = floor(uTime / 7.0);
           float lp = fract(uTime / 7.0);
           float gate = mod(vQI * 7.0 + vQJ * 13.0 + slot * 5.0, 89.0);

@@ -60,7 +60,8 @@ export default function TopBar({ route }: { route: Route }) {
                   go(l.to)
                 }}
               >
-                {l.label}
+                <span>{l.label}</span>
+                <small aria-hidden="true">{l.to === 'worlds' ? 'situations' : l.to === 'about' ? 'why it works' : l.to === 'features' ? 'capabilities' : l.to === 'pricing' ? 'plans' : ''}</small>
               </a>
             ))}
           </nav>
@@ -99,7 +100,8 @@ export default function TopBar({ route }: { route: Route }) {
               go(l.to)
             }}
           >
-            {l.label}
+            <span>{l.label}</span>
+            <small>{l.to === 'enter' ? 'Start here' : l.to === 'worlds' ? 'See the situations' : l.to === 'about' ? 'Why it works' : l.to === 'features' ? 'Product capabilities' : l.to === 'pricing' ? 'Plans and pricing' : 'Talk to the team'}</small>
           </a>
         ))}
       </nav>

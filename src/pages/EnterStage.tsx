@@ -1,101 +1,120 @@
-import { PRODUCT, TRANSCRIPTS, TRIAL } from '../data/product'
+import { PROOF, PRODUCT, TELEMETRY, TRANSCRIPTS, TRIAL } from '../data/product'
 import { navigate } from '../app/store'
 import Reveal from '../components/Reveal'
 import ProofStats from '../components/ProofStats'
 
-/* SHIFT — the night shift, explained in one scroll. Empty hero viewport over
-   the living XEVEN mark, proof numbers, the field's anatomy, one receipt
-   from the floor, then departure. Section ids feed the ruler scroll-spy. */
-
-const ANATOMY = [
-  { n: '01', t: 'Hairlines', d: 'Every diamond outlined, never glowing. Boundaries, not decoration.' },
-  { n: '02', t: 'RGB drift', d: 'Channel weather phases across the grid — green to red to violet, always moving on index.' },
-  { n: '03', t: 'Cinema clock', d: 'Sparse panels light on a seven-second loop. The field keeps its own time.' },
-  { n: '04', t: 'Hollow mark', d: 'The word hangs in the field itself, outlined and weightless — never laid on top.' },
+const SIGNAL_STATES = [
+  { label: 'HEAR', short: 'Context enters', detail: 'Every message read for intent, situation and history — not just keywords.' },
+  { label: 'HOLD', short: 'Memory stays', detail: 'Names, sizes, budgets and carts are recalled mid-sentence, per customer.' },
+  { label: 'ANSWER', short: 'Knowledge grounds', detail: 'XEVEN answers from what it can verify. Where it cannot, it stays silent.' },
+  { label: 'EARN', short: 'Action lands', detail: 'Slots held. Carts recovered. Browsers become buyers.' },
 ]
 
 const RECEIPT = TRANSCRIPTS[0]
 
+function SignalDiagram() {
+  return (
+    <div className="signal-diagram" aria-label="Signal moves from context to action">
+      <svg viewBox="0 0 640 520" role="img" aria-hidden="true">
+        <defs>
+          <linearGradient id="signal-gradient" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stopColor="#4df3ff" stopOpacity="0.1" />
+            <stop offset="0.5" stopColor="#4df3ff" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#ff4d2e" stopOpacity="0.7" />
+          </linearGradient>
+          <filter id="signal-glow"><feGaussianBlur stdDeviation="5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+        </defs>
+        <path className="signal-grid" d="M48 80H590M48 180H590M48 280H590M48 380H590M48 480H590M100 36V484M220 36V484M340 36V484M460 36V484M580 36V484" />
+        <path className="signal-trace signal-trace-a" d="M54 380 C150 380 140 140 244 140 S330 420 420 320 S500 120 586 120" />
+        <path className="signal-trace signal-trace-b" d="M54 180 C120 180 160 420 256 420 S360 90 454 180 S520 380 586 380" />
+        <circle className="signal-node node-a" cx="54" cy="380" r="8" />
+        <circle className="signal-node node-b" cx="244" cy="140" r="8" />
+        <circle className="signal-node node-c" cx="420" cy="320" r="8" />
+        <circle className="signal-node node-d" cx="586" cy="120" r="12" filter="url(#signal-glow)" />
+        <circle className="signal-core" cx="340" cy="260" r="42" />
+        <text className="signal-core-label" x="340" y="256" textAnchor="middle">XEVEN</text>
+        <text className="signal-core-sub" x="340" y="276" textAnchor="middle">VERIFIED → ACTION</text>
+      </svg>
+      <div className="signal-caption mono"><span className="live-dot" aria-hidden="true" /> SIGNAL / DEPTH · 04 STATES</div>
+    </div>
+  )
+}
+
 export default function EnterStage() {
   return (
-    <div className="page">
-      <section className="st-hero hero-center" id="top" aria-label="XEVEN">
-        <h1 className="sr-only">{PRODUCT.hero}</h1>
-        <p className="hero-sub">{PRODUCT.sub}</p>
-        <p className="mono live-line" aria-live="polite">
-          <span className="live-dot" aria-hidden="true" /> LIVE — 12,408 CHATS THIS WEEK
-        </p>
-        <div className="hero-cta-row">
-          <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>
-            Book a demo →
-          </button>
-          <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('worlds')}>
-            Walk the worlds
-          </button>
-        </div>
-        <p className="mono scroll-cue" aria-hidden="true">SCROLL — THE FIELD KEEPS TIME</p>
-      </section>
-
-      <Reveal>
-        <ProofStats />
-      </Reveal>
-
-      <section className="zone" id="anatomy" aria-label="Field anatomy">
-        <Reveal>
-          <p className="mono zone-kicker">ANATOMY OF THE FIELD</p>
-          <h2 className="zone-title">Built from four moves.</h2>
-        </Reveal>
-        {ANATOMY.map((r) => (
-          <Reveal key={r.n} className="t-row">
-            <span className="t-n">{r.n}</span>
-            <div>
-              <h3>{r.t}</h3>
-              <p>{r.d}</p>
+    <div className="page home-page">
+      <section className="signal-hero" id="top" aria-labelledby="hero-title">
+        <div className="signal-hero-copy">
+          <Reveal>
+            <p className="mono hero-kicker">XEVEN / SIGNAL TO DEPTH / 00</p>
+            <h1 id="hero-title" className="signal-title">THE AI EMPLOYEE FOR BUSINESS WEBSITES.</h1>
+            <p className="signal-lede">{PRODUCT.sub} {PRODUCT.trial}</p>
+            <div className="hero-cta-row">
+              <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>Book a demo →</button>
+              <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('features')}>Open the moves</button>
             </div>
+            <p className="mono hero-proof"><span className="live-dot" aria-hidden="true" /> 12,408 CHATS THIS WEEK · 0 INVENTED PRICES</p>
           </Reveal>
-        ))}
+        </div>
+        <Reveal className="signal-hero-art">
+          <SignalDiagram />
+        </Reveal>
+        <div className="hero-index mono" aria-label="Scroll narrative chapters">
+          <span>SCROLL TO TRACE THE SIGNAL</span><span>01 — 04</span>
+        </div>
       </section>
 
-      <section className="zone" aria-label="One receipt from the floor">
+      <Reveal><ProofStats /></Reveal>
+
+      <section className="signal-chapter-intro" aria-labelledby="chapter-title">
         <Reveal>
-          <p className="mono zone-kicker">ONE RECEIPT FROM THE FLOOR</p>
-          <h2 className="zone-title">Not a promise. A shift log.</h2>
+          <p className="mono">THE OPERATING SYSTEM / ONE CONTINUOUS EXPERIENCE</p>
+          <h2 id="chapter-title" className="zone-title">From signal to action.</h2>
+          <p className="page-lede">XEVEN reads the room before it replies. Trace the four states that turn a website visit into a useful next move.</p>
         </Reveal>
-        <Reveal className="receipt">
-          <div className="receipt-head">
-            <span className="live-dot mint" aria-hidden="true" />
-            {RECEIPT.room} · {RECEIPT.time}
-          </div>
-          <div className="receipt-lines">
-            {RECEIPT.lines.map((l, i) => (
-              <div key={i} className={`msg-row ${l.who === 'XEVEN' ? 'bot' : 'user'}`}>
-                <span className="msg-who">{l.who}</span>
-                {l.text}
+      </section>
+
+      <section className="signal-chapters" aria-label="XEVEN signal states">
+        {SIGNAL_STATES.map((state, i) => {
+          const telemetry = TELEMETRY[i]
+          return (
+            <Reveal key={state.label} className={`signal-chapter signal-state-${i + 1}`}>
+              <div className="signal-chapter-index"><span className="mono">0{i + 1}</span><span className="chapter-line" /></div>
+              <div className="signal-chapter-body">
+                <p className="mono">{telemetry.meta}</p>
+                <h3>{state.label}</h3>
+                <p className="signal-chapter-short">{state.short}</p>
+                <p className="signal-chapter-detail">{state.detail}</p>
               </div>
-            ))}
-          </div>
-        </Reveal>
-        <Reveal>
-          <div className="hero-cta-row" style={{ marginTop: 'var(--s24)' }}>
-            <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('worlds')}>
-              See every room →
-            </button>
-          </div>
-        </Reveal>
+              <div className="signal-chapter-receipt mono">{telemetry.d}</div>
+            </Reveal>
+          )
+        })}
       </section>
 
-      <section className="fin" id="finale" aria-label="Departure">
+      <section className="signal-proof-section" aria-labelledby="receipt-title">
+        <Reveal>
+          <p className="mono">ONE RECEIPT FROM THE FLOOR / VERIFIED TRANSCRIPT</p>
+          <h2 id="receipt-title" className="zone-title">Not a promise. A shift log.</h2>
+        </Reveal>
+        <Reveal className="receipt signal-receipt">
+          <div className="receipt-head"><span className="live-dot mint" aria-hidden="true" /> {RECEIPT.room} · {RECEIPT.time}</div>
+          <div className="receipt-lines">{RECEIPT.lines.map((line, i) => <div key={i} className={`msg-row ${line.who === 'XEVEN' ? 'bot' : 'user'}`}><span className="msg-who">{line.who}</span>{line.text}</div>)}</div>
+        </Reveal>
+        <div className="signal-proof-note">
+          <p className="mono">PUBLISHED RECEIPTS</p>
+          {PROOF.map((item) => <div className="proof-note-row" key={item.label}><strong>{item.display}</strong><span>{item.label}</span></div>)}
+        </div>
+      </section>
+
+      <section className="fin signal-finale" id="finale" aria-labelledby="finale-title">
         <Reveal>
           <p className="mono">{TRIAL.kicker}</p>
-          <h2 className="zone-title">{TRIAL.title}</h2>
-          <p className="page-lede">{TRIAL.lede}</p>
+          <h2 id="finale-title" className="zone-title">Give the signal somewhere to go.</h2>
+          <p className="page-lede">{TRIAL.title} {TRIAL.lede} {PRODUCT.trial}</p>
           <div className="hero-cta-row" style={{ marginTop: 'var(--s24)' }}>
-            <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>
-              Book a demo →
-            </button>
-            <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('worlds')}>
-              See the worlds
-            </button>
+            <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>Book a demo →</button>
+            <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('worlds')}>Walk the worlds</button>
           </div>
         </Reveal>
       </section>
