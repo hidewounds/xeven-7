@@ -23,11 +23,14 @@ export default function TopBar({ route }: { route: Route }) {
     document.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    const background = [document.querySelector('main'), document.querySelector('.sitefoot')].filter(Boolean) as HTMLElement[]
+    background.forEach((el) => el.setAttribute('inert', ''))
     const first = document.querySelector<HTMLElement>('.mnav.open a')
     first?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prev
+      background.forEach((el) => el.removeAttribute('inert'))
       btn?.focus()
     }
   }, [open])
@@ -44,7 +47,7 @@ export default function TopBar({ route }: { route: Route }) {
             go('enter')
           }}
         >
-          XEVEN
+          <span className="tb-logo-mark" aria-hidden="true">/</span><span>XEVEN</span>
         </a>
         <div className="tb-right">
           <nav className="tb-nav" aria-label="Primary">
@@ -81,6 +84,7 @@ export default function TopBar({ route }: { route: Route }) {
             className={`tb-burger${open ? ' open' : ''}`}
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
+            aria-controls="mobile-navigation"
             onClick={() => setOpen(!open)}
           >
             <i aria-hidden="true" />
@@ -88,7 +92,7 @@ export default function TopBar({ route }: { route: Route }) {
           </button>
         </div>
       </header>
-      <nav className={`mnav${open ? ' open' : ''}`} aria-label="Menu" aria-hidden={!open}>
+      <nav id="mobile-navigation" className={`mnav${open ? ' open' : ''}`} aria-label="Menu" aria-hidden={!open}>
         {NAV_LINKS.map((l) => (
           <a
             key={l.to}

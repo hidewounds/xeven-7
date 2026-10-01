@@ -154,3 +154,13 @@ html { scrollbar-width: thin; scrollbar-color: var(--line-strong) var(--void); }
   transition: top var(--d-fast) ease;
 }
 .skip:focus { top: var(--s16); }
+
+
+/* ================= precision polish ================= */
+.tb-logo { display: inline-flex; align-items: center; gap: 8px; }
+.tb-logo-mark { display: inline-grid; place-items: center; width: 19px; height: 19px; border: 1px solid var(--glow); color: var(--glow); font: 16px/1 var(--mono); transform: skew(-16deg); }
+.pill { position: relative; overflow: hidden; }
+.pill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 34%, rgba(255,255,255,.24) 50%, transparent 66%); transform: translateX(-125%); transition: transform 700ms cubic-bezier(.22,1,.36,1); }
+.pill:hover::after { transform: translateX(125%); }
+.receipt, .form-card, .tier, .station, .kb-demo { box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+@media (prefers-reduced-motion: reduce) { .pill::after { display: none; } }

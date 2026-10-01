@@ -4,118 +4,122 @@ import Reveal from '../components/Reveal'
 import ProofStats from '../components/ProofStats'
 
 const SIGNAL_STATES = [
-  { label: 'HEAR', short: 'Context enters', detail: 'Every message read for intent, situation and history — not just keywords.' },
-  { label: 'HOLD', short: 'Memory stays', detail: 'Names, sizes, budgets and carts are recalled mid-sentence, per customer.' },
-  { label: 'ANSWER', short: 'Knowledge grounds', detail: 'XEVEN answers from what it can verify. Where it cannot, it stays silent.' },
-  { label: 'EARN', short: 'Action lands', detail: 'Slots held. Carts recovered. Browsers become buyers.' },
+  { label: 'HEAR', short: 'Context enters.', detail: 'Every message is read for intent, situation and history — not just keywords.', accent: 'cyan', code: 'INGRESS / 01' },
+  { label: 'HOLD', short: 'Memory stays.', detail: 'Names, sizes, budgets and carts remain available mid-sentence, per customer.', accent: 'moon', code: 'MEMORY / 02' },
+  { label: 'ANSWER', short: 'Knowledge grounds.', detail: 'XEVEN answers from what it can verify. Where it cannot, it stays silent.', accent: 'cyan', code: 'VERIFY / 03' },
+  { label: 'EARN', short: 'Action lands.', detail: 'Slots held. Carts recovered. Browsers become buyers.', accent: 'ember', code: 'ACTION / 04' },
 ]
 
 const RECEIPT = TRANSCRIPTS[0]
 
-function SignalDiagram() {
+function Room() {
   return (
-    <div className="signal-diagram" aria-label="Signal moves from context to action">
-      <svg viewBox="0 0 640 520" role="img" aria-hidden="true">
-        <defs>
-          <linearGradient id="signal-gradient" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0" stopColor="#4df3ff" stopOpacity="0.1" />
-            <stop offset="0.5" stopColor="#4df3ff" stopOpacity="0.9" />
-            <stop offset="1" stopColor="#ff4d2e" stopOpacity="0.7" />
-          </linearGradient>
-          <filter id="signal-glow"><feGaussianBlur stdDeviation="5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-        </defs>
-        <path className="signal-grid" d="M48 80H590M48 180H590M48 280H590M48 380H590M48 480H590M100 36V484M220 36V484M340 36V484M460 36V484M580 36V484" />
-        <path className="signal-trace signal-trace-a" d="M54 380 C150 380 140 140 244 140 S330 420 420 320 S500 120 586 120" />
-        <path className="signal-trace signal-trace-b" d="M54 180 C120 180 160 420 256 420 S360 90 454 180 S520 380 586 380" />
-        <circle className="signal-node node-a" cx="54" cy="380" r="8" />
-        <circle className="signal-node node-b" cx="244" cy="140" r="8" />
-        <circle className="signal-node node-c" cx="420" cy="320" r="8" />
-        <circle className="signal-node node-d" cx="586" cy="120" r="12" filter="url(#signal-glow)" />
-        <circle className="signal-core" cx="340" cy="260" r="42" />
-        <text className="signal-core-label" x="340" y="256" textAnchor="middle">XEVEN</text>
-        <text className="signal-core-sub" x="340" y="276" textAnchor="middle">VERIFIED → ACTION</text>
-      </svg>
-      <div className="signal-caption mono"><span className="live-dot" aria-hidden="true" /> SIGNAL / DEPTH · 04 STATES</div>
+    <div className="architecture-room" role="img" aria-label="XEVEN signal room: context resolves into verified action">
+      <div className="room-topline"><span>ROOM 04</span><span>ALWAYS ON / 24:7</span></div>
+      <div className="room-skyline" aria-hidden="true">
+        <i /><i /><i /><i /><i /><i /><i /><i />
+      </div>
+      <div className="room-axis room-axis-x" aria-hidden="true" />
+      <div className="room-axis room-axis-y" aria-hidden="true" />
+      <div className="room-floor" aria-hidden="true">
+        <span /><span /><span /><span /><span />
+      </div>
+      <div className="room-core">
+        <span className="room-core-orbit orbit-a" />
+        <span className="room-core-orbit orbit-b" />
+        <span className="room-core-orbit orbit-c" />
+        <div className="room-core-dot" />
+        <strong>XEVEN</strong>
+        <small>VERIFIED → ACTION</small>
+      </div>
+      <div className="room-signal signal-one"><b>01</b><span>CONTEXT</span></div>
+      <div className="room-signal signal-two"><b>02</b><span>MEMORY</span></div>
+      <div className="room-signal signal-three"><b>03</b><span>KNOWLEDGE</span></div>
+      <div className="room-readout readout-a"><span>WEEKLY SIGNAL</span><strong>12,408</strong></div>
+      <div className="room-readout readout-b"><span>TRUST STATE</span><strong>0 INVENTED</strong></div>
+      <div className="room-readout readout-c"><span>TRIAL</span><strong>14 DAYS</strong></div>
+      <div className="room-stamp mono">SIGNAL / IN MOTION <span>↗</span></div>
+      <div className="room-scan" aria-hidden="true" />
     </div>
   )
 }
 
+function RailMark({ index, active = false }: { index: string; active?: boolean }) {
+  return <span className={`rail-mark${active ? ' active' : ''}`}><b>{index}</b><i /></span>
+}
+
 export default function EnterStage() {
   return (
-    <div className="page home-page">
-      <section className="signal-hero" id="top" aria-labelledby="hero-title">
-        <div className="signal-hero-copy">
+    <div className="page home-page architecture-page">
+      <section className="architecture-hero" id="top" aria-labelledby="hero-title">
+        <div className="hero-rail mono"><RailMark index="00" active /><span>ENTRY / SIGNAL ROOM</span><span>SCROLL TO MOVE THROUGH THE SYSTEM</span></div>
+        <div className="architecture-hero-copy">
           <Reveal>
-            <p className="mono hero-kicker">XEVEN / SIGNAL TO DEPTH / 00</p>
-            <h1 id="hero-title" className="signal-title">THE AI EMPLOYEE FOR BUSINESS WEBSITES.</h1>
-            <p className="signal-lede">{PRODUCT.sub} {PRODUCT.trial}</p>
+            <p className="mono hero-kicker">XEVEN / AI EMPLOYEE / BUSINESS WEBSITES</p>
+            <h1 id="hero-title" className="architecture-title"><span>MAKE</span><span>EVERY VISIT</span><em>COUNT.</em></h1>
+            <p className="architecture-lede">{PRODUCT.sub} <b>{PRODUCT.trial}</b></p>
             <div className="hero-cta-row">
-              <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>Book a demo →</button>
-              <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('features')}>Open the moves</button>
+              <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>Book a demo <span>↗</span></button>
+              <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('features')}>Open the moves <span>↘</span></button>
             </div>
-            <p className="mono hero-proof"><span className="live-dot" aria-hidden="true" /> 12,408 CHATS THIS WEEK · 0 INVENTED PRICES</p>
+            <div className="hero-proofline"><span className="live-dot" aria-hidden="true" /> <span>12,408 chats this week</span><i /> <span>0 invented prices</span></div>
           </Reveal>
         </div>
-        <Reveal className="signal-hero-art">
-          <SignalDiagram />
+        <Reveal className="architecture-hero-stage"><Room /></Reveal>
+        <div className="hero-footnote mono"><span>SCROLL / 01—04</span><span>THE FRONT DOOR, STILL OPEN</span></div>
+      </section>
+
+      <section className="architecture-statement" aria-labelledby="statement-title">
+        <div className="section-index mono"><RailMark index="01" /><span>THE PREMISE</span></div>
+        <Reveal className="statement-copy">
+          <p className="mono">ONE CONTINUOUS EXPERIENCE / NO DEAD ENDS</p>
+          <h2 id="statement-title">A website that <em>keeps working</em> after the room goes quiet.</h2>
+          <p>Visitors arrive with fragments: a size, a deadline, a half-formed question. XEVEN reads the signal, holds the useful parts, and turns the next true thing into action.</p>
         </Reveal>
-        <div className="hero-index mono" aria-label="Scroll narrative chapters">
-          <span>SCROLL TO TRACE THE SIGNAL</span><span>01 — 04</span>
-        </div>
+        <div className="statement-aside"><span className="mono">SYSTEM NOTE / 001</span><strong>Context is the interface.</strong><span>Not another widget. A dependable layer between curiosity and the next move.</span></div>
       </section>
 
       <Reveal><ProofStats /></Reveal>
 
-      <section className="signal-chapter-intro" aria-labelledby="chapter-title">
-        <Reveal>
-          <p className="mono">THE OPERATING SYSTEM / ONE CONTINUOUS EXPERIENCE</p>
-          <h2 id="chapter-title" className="zone-title">From signal to action.</h2>
-          <p className="page-lede">XEVEN reads the room before it replies. Trace the four states that turn a website visit into a useful next move.</p>
-        </Reveal>
-      </section>
-
-      <section className="signal-chapters" aria-label="XEVEN signal states">
-        {SIGNAL_STATES.map((state, i) => {
-          const telemetry = TELEMETRY[i]
-          return (
-            <Reveal key={state.label} className={`signal-chapter signal-state-${i + 1}`}>
-              <div className="signal-chapter-index"><span className="mono">0{i + 1}</span><span className="chapter-line" /></div>
-              <div className="signal-chapter-body">
-                <p className="mono">{telemetry.meta}</p>
-                <h3>{state.label}</h3>
-                <p className="signal-chapter-short">{state.short}</p>
-                <p className="signal-chapter-detail">{state.detail}</p>
-              </div>
-              <div className="signal-chapter-receipt mono">{telemetry.d}</div>
-            </Reveal>
-          )
-        })}
-      </section>
-
-      <section className="signal-proof-section" aria-labelledby="receipt-title">
-        <Reveal>
-          <p className="mono">ONE RECEIPT FROM THE FLOOR / VERIFIED TRANSCRIPT</p>
-          <h2 id="receipt-title" className="zone-title">Not a promise. A shift log.</h2>
-        </Reveal>
-        <Reveal className="receipt signal-receipt">
-          <div className="receipt-head"><span className="live-dot mint" aria-hidden="true" /> {RECEIPT.room} · {RECEIPT.time}</div>
-          <div className="receipt-lines">{RECEIPT.lines.map((line, i) => <div key={i} className={`msg-row ${line.who === 'XEVEN' ? 'bot' : 'user'}`}><span className="msg-who">{line.who}</span>{line.text}</div>)}</div>
-        </Reveal>
-        <div className="signal-proof-note">
-          <p className="mono">PUBLISHED RECEIPTS</p>
-          {PROOF.map((item) => <div className="proof-note-row" key={item.label}><strong>{item.display}</strong><span>{item.label}</span></div>)}
+      <section className="architecture-chapters" aria-labelledby="chapters-title">
+        <div className="chapter-header">
+          <div className="section-index mono"><RailMark index="02" active /><span>OPERATING STATES</span></div>
+          <div><p className="mono">TRACE THE SIGNAL / FOUR MOVES</p><h2 id="chapters-title">From signal to action.</h2></div>
+          <p>Open each state like a room in the system. The signal changes shape, but never loses the plot.</p>
+        </div>
+        <div className="chapter-list">
+          {SIGNAL_STATES.map((state, i) => {
+            const telemetry = TELEMETRY[i]
+            return (
+              <Reveal key={state.label} className={`architecture-chapter chapter-${state.accent}`}>
+                <div className="chapter-index mono"><RailMark index={`0${i + 1}`} active={i === 0} /><span>{state.code}</span></div>
+                <div className="chapter-main"><p className="mono">{telemetry.meta}</p><h3>{state.label}</h3><p className="chapter-short">{state.short}</p><p className="chapter-detail">{state.detail}</p></div>
+                <div className="chapter-geometry" aria-hidden="true"><span className="geo-ring ring-1" /><span className="geo-ring ring-2" /><span className="geo-line" /><b>{String(i + 1).padStart(2, '0')}</b></div>
+                <div className="chapter-receipt mono">{telemetry.d}<span className="receipt-arrow">↗</span></div>
+              </Reveal>
+            )
+          })}
         </div>
       </section>
 
-      <section className="fin signal-finale" id="finale" aria-labelledby="finale-title">
+      <section className="architecture-proof" aria-labelledby="receipt-title">
+        <div className="section-index mono"><RailMark index="03" /><span>PROOF / NOT PROMISE</span></div>
+        <div className="proof-heading"><p className="mono">ONE RECEIPT FROM THE FLOOR / VERIFIED TRANSCRIPT</p><h2 id="receipt-title">The best automation feels <em>human</em> at the edge.</h2></div>
+        <Reveal className="receipt signal-receipt">
+          <div className="receipt-head"><span className="live-dot mint" aria-hidden="true" /> {RECEIPT.room} <span>·</span> {RECEIPT.time}<span className="receipt-status">RESOLVED / 00:42</span></div>
+          <div className="receipt-lines">{RECEIPT.lines.map((line, i) => <div key={i} className={`msg-row ${line.who === 'XEVEN' ? 'bot' : 'user'}`}><span className="msg-who">{line.who}</span>{line.text}</div>)}</div>
+        </Reveal>
+        <div className="proof-ledger"><p className="mono">PUBLISHED RECEIPTS</p>{PROOF.map((item) => <div className="proof-note-row" key={item.label}><strong>{item.display}</strong><span>{item.label}</span></div>)}</div>
+      </section>
+
+      <section className="architecture-finale" id="finale" aria-labelledby="finale-title">
+        <div className="finale-wire" aria-hidden="true"><span /><span /><span /></div>
+        <div className="section-index mono"><RailMark index="04" active /><span>OPEN THE DOOR</span></div>
         <Reveal>
           <p className="mono">{TRIAL.kicker}</p>
-          <h2 id="finale-title" className="zone-title">Give the signal somewhere to go.</h2>
+          <h2 id="finale-title">Give the signal<br /><em>somewhere to go.</em></h2>
           <p className="page-lede">{TRIAL.title} {TRIAL.lede} {PRODUCT.trial}</p>
-          <div className="hero-cta-row" style={{ marginTop: 'var(--s24)' }}>
-            <button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>Book a demo →</button>
-            <button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('worlds')}>Walk the worlds</button>
-          </div>
+          <div className="hero-cta-row"><button className="pill" data-cursor="BOOK" onClick={() => navigate('demo')}>Book a demo <span>↗</span></button><button className="pill pill-ghost" data-cursor="OPEN" onClick={() => navigate('worlds')}>Walk the worlds <span>↘</span></button></div>
         </Reveal>
       </section>
     </div>
