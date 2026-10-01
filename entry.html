@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070707" />
+    <meta name="description" content="Enter Xeven — a kinetic portfolio experience." />
+    <title>Enter / Xeven</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="entry-page">
+    <div class="noise" aria-hidden="true"></div>
+    <canvas class="stars" id="starfield" aria-hidden="true"></canvas>
+    <div class="entry-topbar">
+      <a class="wordmark" href="entry.html" aria-label="Xeven home"><span class="wordmark-mark">×</span>EVEN<span class="wordmark-dot">.</span></a>
+      <span class="topbar-status"><i></i> system online</span>
+      <span class="topbar-code">XP-07 / 2026</span>
+    </div>
+
+    <main class="entry-stage">
+      <div class="entry-copy">
+        <p class="eyebrow">A portfolio in motion <span>↗</span></p>
+        <h1>Make<br /><em>some noise.</em></h1>
+        <p class="entry-intro">Digital worlds, sharp ideas,<br />and the space between them.</p>
+      </div>
+
+      <div class="arcade-wrap" id="arcadeWrap">
+        <div class="arcade-shadow"></div>
+        <div class="arcade-cabinet" id="arcadeCabinet">
+          <div class="cabinet-top-edge"></div>
+          <div class="cabinet-bezel">
+            <div class="screen-glass">
+              <div class="scanlines"></div>
+              <div class="screen-grid"></div>
+              <div class="screen-copy"><span>INSERT PRESENCE</span><b>01</b></div>
+              <canvas class="orb-canvas" id="orbCanvas"></canvas>
+              <div class="screen-glare"></div>
+            </div>
+          </div>
+          <div class="control-deck">
+            <div class="deck-line"></div>
+            <div class="joystick"><span></span><i></i></div>
+            <div class="button-cluster"><b></b><b></b><b></b></div>
+            <span class="deck-label">XEVEN / NIGHTSHIFT</span>
+          </div>
+          <div class="cabinet-lip"><span>XP-07</span><span>EST. 2003</span></div>
+        </div>
+        <div class="arcade-light light-left"></div><div class="arcade-light light-right"></div>
+      </div>
+
+      <div class="entry-action">
+        <p>Explore the archive <span>↓</span></p>
+        <button class="enter-button" id="enterButton" type="button"><span class="button-ring"></span><span>Enter</span><span class="button-arrow">↗</span></button>
+      </div>
+    </main>
+
+    <footer class="entry-footer"><span>Scroll to calibrate</span><div class="footer-line"></div><span>Sound optional · volume 01</span></footer>
+    <script src="entry.js"></script>
+  </body>
+</html>
