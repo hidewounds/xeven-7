@@ -48,9 +48,25 @@ function RailMark({ index, active = false }: { index: string; active?: boolean }
   return <span className={`rail-mark${active ? ' active' : ''}`}><b>{index}</b><i /></span>
 }
 
+const MONTAGE_SHOTS = [
+  { code: '01 / ORBIT', title: 'Ideas in orbit.', copy: 'The first signal is always a point of light.', kind: 'orbit' },
+  { code: '02 / ARCHITECTURE', title: 'Make the invisible legible.', copy: 'Systems become spaces. Spaces become instinct.', kind: 'structure' },
+  { code: '03 / TENSION', title: 'Hold the frame.', copy: 'A little friction makes the next move feel earned.', kind: 'tension' },
+  { code: '04 / RELEASE', title: 'Give the signal somewhere to go.', copy: 'XEVEN turns attention into an action you can verify.', kind: 'release' },
+]
+
+function MontageSequence() {
+  return <section className="montage-sequence" aria-label="XEVEN visual montage">
+    {MONTAGE_SHOTS.map((shot) => <article className={`montage-shot montage-${shot.kind}`} key={shot.code}>
+      <div className="montage-shot-inner"><div className="montage-meta mono"><span>{shot.code}</span><span>SCROLL / PLAY</span></div><div className="montage-art" aria-hidden="true"><span className="montage-core" /><span className="montage-wire wire-a" /><span className="montage-wire wire-b" /><span className="montage-plane plane-a" /><span className="montage-plane plane-b" /><span className="montage-particle particle-a" /><span className="montage-particle particle-b" /></div><div className="montage-copy"><p className="mono">XEVEN / FIELD NOTE</p><h2>{shot.title}</h2><p>{shot.copy}</p></div><span className="montage-progress mono">{shot.code.split(' / ')[0]} <i /> 04</span></div>
+    </article>)}
+  </section>
+}
+
 export default function EnterStage() {
   return (
     <div className="page home-page architecture-page">
+      <MontageSequence />
       <section className="architecture-hero" id="top" aria-labelledby="hero-title">
         <div className="hero-rail mono"><RailMark index="00" active /><span>ENTRY / SIGNAL ROOM</span><span>SCROLL TO MOVE THROUGH THE SYSTEM</span></div>
         <div className="architecture-hero-copy">

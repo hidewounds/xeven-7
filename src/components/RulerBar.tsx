@@ -14,7 +14,7 @@ const STOPS = [
 export default function RulerBar({ route }: { route: Route }) {
   const [active, setActive] = useState('top')
   useEffect(() => {
-    if (route !== 'enter') return
+    if (route !== 'index') return
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -30,7 +30,7 @@ export default function RulerBar({ route }: { route: Route }) {
     return () => io.disconnect()
   }, [route])
 
-  if (route !== 'enter') return null
+  if (route !== 'index') return null
   return (
     <ol className="ruler" aria-label="Index sections">
       {STOPS.map((s) => (

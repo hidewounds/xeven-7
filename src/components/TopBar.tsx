@@ -40,18 +40,18 @@ export default function TopBar({ route }: { route: Route }) {
       <header className="tb">
         <a
           className="tb-logo"
-          href="#/enter"
+          href="#/index"
           data-cursor="SHIFT"
           onClick={(e) => {
             e.preventDefault()
-            go('enter')
+            go('index')
           }}
         >
           <span className="tb-logo-mark" aria-hidden="true">/</span><span>XEVEN</span>
         </a>
         <div className="tb-right">
           <nav className="tb-nav" aria-label="Primary">
-            {NAV_LINKS.filter((l) => l.to !== 'enter' && l.to !== 'demo').map((l) => (
+            {NAV_LINKS.filter((l) => l.to !== 'index' && l.to !== 'demo').map((l) => (
               <a
                 key={l.to}
                 href={`#/${l.to}`}
@@ -93,7 +93,7 @@ export default function TopBar({ route }: { route: Route }) {
         </div>
       </header>
       <nav id="mobile-navigation" className={`mnav${open ? ' open' : ''}`} aria-label="Menu" aria-hidden={!open}>
-        {NAV_LINKS.map((l) => (
+        {[{ to: 'entry' as Route, label: 'Entry', short: '—' }, ...NAV_LINKS].map((l) => (
           <a
             key={l.to}
             href={`#/${l.to}`}
@@ -105,7 +105,7 @@ export default function TopBar({ route }: { route: Route }) {
             }}
           >
             <span>{l.label}</span>
-            <small>{l.to === 'enter' ? 'Start here' : l.to === 'worlds' ? 'See the situations' : l.to === 'about' ? 'Why it works' : l.to === 'features' ? 'Product capabilities' : l.to === 'pricing' ? 'Plans and pricing' : 'Talk to the team'}</small>
+            <small>{l.to === 'entry' ? 'Start here' : l.to === 'index' ? 'Portfolio home' : l.to === 'worlds' ? 'See the situations' : l.to === 'about' ? 'Why it works' : l.to === 'features' ? 'Product capabilities' : l.to === 'pricing' ? 'Plans and pricing' : 'Talk to the team'}</small>
           </a>
         ))}
       </nav>

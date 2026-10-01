@@ -1,6 +1,6 @@
 /* Shared mutable experience store. Plain object — never React state in hot paths. */
 
-export type Route = 'enter' | 'worlds' | 'about' | 'features' | 'pricing' | 'demo'
+export type Route = 'entry' | 'index' | 'worlds' | 'about' | 'features' | 'pricing' | 'demo'
 
 export interface XStore {
   route: Route
@@ -8,7 +8,7 @@ export interface XStore {
 }
 
 export const xs: XStore = {
-  route: 'enter',
+  route: 'entry',
   reduced: false,
 }
 
@@ -33,11 +33,11 @@ export function hashQuery(key: string): string | null {
   return new URLSearchParams(q.split('#')[0]).get(key)
 }
 
-const KNOWN: Route[] = ['enter', 'worlds', 'about', 'features', 'pricing', 'demo']
+const KNOWN: Route[] = ['entry', 'index', 'worlds', 'about', 'features', 'pricing', 'demo']
 
 export function routeFromHash(): Route {
   const h = window.location.hash.replace(/^#\/?/, '').split('?')[0]
-  return (KNOWN.includes(h as Route) ? h : 'enter') as Route
+  return (KNOWN.includes(h as Route) ? h : 'entry') as Route
 }
 
 /** True for non-empty unknown `#/route` hashes — the 404 case.

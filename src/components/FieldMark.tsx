@@ -6,7 +6,8 @@ import type { Route } from '../app/store'
    index, bright cyan on subpages. Decorative — screen readers ignore it. */
 
 const LABELS: Record<Route, string> = {
-  enter: 'XEVEN',
+  entry: 'ENTRY',
+  index: 'XEVEN',
   worlds: 'WORLDS',
   about: 'MANUAL',
   features: 'MOVES',
@@ -15,7 +16,7 @@ const LABELS: Record<Route, string> = {
 }
 
 export default function FieldMark({ route }: { route: Route }) {
-  const hero = route === 'enter'
+  const hero = route === 'index'
   return (
     <div className={`field-mark${hero ? ' hero' : ' sub'}`} aria-hidden="true">
       <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid meet">

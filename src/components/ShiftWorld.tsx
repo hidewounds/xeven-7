@@ -17,7 +17,8 @@ const BOW = 2.2
 const PAN = 4
 
 const TINTS: Record<Route, { fog: number }> = {
-  enter: { fog: 0x06090f },
+  entry: { fog: 0x05050a },
+  index: { fog: 0x06090f },
   worlds: { fog: 0x0d0a08 },
   about: { fog: 0x0a0d12 },
   features: { fog: 0x081114 },
@@ -267,7 +268,7 @@ export default function ShiftWorld() {
       if (!alive) return
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
-      const live = xs.route === 'enter' && !reduced && !document.hidden
+      const live = xs.route === 'index' && !reduced && !document.hidden
       if (live) {
         clockT += dt
       }

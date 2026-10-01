@@ -11,7 +11,8 @@ import type { Route } from './app/store'
 
 /* SHIFT — app shell. Hash routes, lazy pages, Lenis heartbeat. No loaders,
    no veils: every route renders instantly with an app-swipe entrance. */
-const EnterStage = lazy(() => import('./pages/EnterStage'))
+const EnterStage = lazy(() => import('./pages/IndexStage'))
+const EntryGate = lazy(() => import('./pages/EntryGate'))
 const Worlds = lazy(() => import('./pages/Worlds'))
 const About = lazy(() => import('./pages/About'))
 const Features = lazy(() => import('./pages/Features'))
@@ -20,7 +21,8 @@ const Demo = lazy(() => import('./pages/Demo'))
 const ShiftWorld = lazy(() => import('./components/ShiftWorld'))
 
 const ROUTE_TITLES: Record<Route, string> = {
-  enter: 'XEVEN — The AI Employee for Business Websites',
+  entry: 'Enter XEVEN — A Portfolio in Motion',
+  index: 'XEVEN — The AI Employee for Business Websites',
   worlds: 'Worlds — One Employee, Every Kind of Shop · XEVEN',
   about: 'Manual — Not Just a Widget · XEVEN',
   features: 'Moves — Don’t Read Features. Open Them. · XEVEN',
@@ -75,7 +77,7 @@ export default function App() {
   useEffect(() => {
     const settle = () => {
       if (unknownHash()) {
-        window.location.replace(`#/enter`)
+        window.location.replace(`#/entry`)
         return
       }
       if (window.location.hash !== '' && !window.location.hash.startsWith('#/')) return
@@ -111,7 +113,7 @@ export default function App() {
   }, [route, reduced])
 
   return (
-    <div className="xp" id="top">
+    <div className={`xp xp-${route}`} id="top">
       <a className="skip" href="#main">
         Skip to content
       </a>
@@ -126,7 +128,8 @@ export default function App() {
       <div className="glass-finish" aria-hidden="true" />
       <main id="main" key={route} className="page-swipe">
         <Suspense fallback={<div className="page-boot" aria-hidden="true" />}>
-          {route === 'enter' && <EnterStage />}
+          {route === 'entry' && <EntryGate />}
+          {route === 'index' && <EnterStage />}
           {route === 'worlds' && <Worlds />}
           {route === 'about' && <About />}
           {route === 'features' && <Features />}
