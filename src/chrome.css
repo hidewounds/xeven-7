@@ -593,3 +593,13 @@ button.team-chip:hover { border-color: var(--glow); }
 @keyframes montage-breathe { 0%,100% { transform: translate3d(0,0,0) scale(.96); } 50% { transform: translate3d(0,-14px,0) scale(1.03); } } @keyframes montage-ring { 0%,100% { transform: rotate(58deg) scaleY(.26) translateX(0); } 50% { transform: rotate(70deg) scaleY(.22) translateX(12px); } } @keyframes plane-drift { 0%,100% { translate: 0 0; } 50% { translate: 12px -18px; } } @keyframes particle-drift { 0%,100% { transform: translate(0,0); opacity: .4; } 50% { transform: translate(24px,-30px); opacity: 1; } } @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 800px) { .entry-composition { display: flex; flex-direction: column; justify-content: center; align-items: stretch; gap: 22px; padding-top: 92px; } .entry-copy { padding: 0; } .entry-copy h1 { font-size: 19vw; } .arcade-hero { width: min(80vw, 430px); align-self: center; } .entry-cta { align-self: flex-end; padding: 0; } .entry-baseline { display: none; } .entry-skip { bottom: 20px; } .montage-shot { min-height: 94svh; padding: 0 7vw; } .montage-shot-inner { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 2vh; padding: 90px 0 70px; } .montage-copy { order: 2; } .montage-copy h2 { font-size: 14vw; } .montage-art { order: 1; width: min(83vw, 520px); align-self: center; } .montage-progress { bottom: 22px; } }
 @media (prefers-reduced-motion: reduce) { .entry-constellation i, .entry-ring, .montage-core, .montage-wire, .montage-plane, .montage-particle { animation: none; } .entry-page.is-entering .arcade-screen, .entry-page.is-entering .arcade-cabinet, .entry-page.is-entering .portal-orb { animation-duration: 1ms; } }
+
+.montage-sequence { --montage-progress: 0; }
+.montage-shot { --scene-light: 0; }
+.montage-shot::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: calc(var(--scene-light) * .34); background: radial-gradient(38% 50% at 68% 48%, var(--glow), transparent 72%); mix-blend-mode: screen; transition: opacity .2s linear; }
+.montage-shot-inner { transform: translateZ(0); }
+.montage-art { will-change: transform, opacity; transform-style: preserve-3d; }
+.montage-copy { will-change: transform, opacity, letter-spacing; }
+.montage-sequence[data-scene='1'] .montage-shot::after { background: radial-gradient(42% 55% at 68% 44%, rgba(77,243,255,.9), transparent 72%); }
+.montage-sequence[data-scene='2'] .montage-shot::after { background: radial-gradient(42% 55% at 68% 44%, rgba(255,111,174,.7), transparent 72%); }
+.montage-sequence[data-scene='3'] .montage-shot::after { background: radial-gradient(42% 55% at 68% 44%, rgba(77,243,255,.9), transparent 72%); }

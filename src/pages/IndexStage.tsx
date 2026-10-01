@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import { PROOF, PRODUCT, TELEMETRY, TRANSCRIPTS, TRIAL } from '../data/product'
 import { navigate } from '../app/store'
 import Reveal from '../components/Reveal'
@@ -56,7 +58,39 @@ const MONTAGE_SHOTS = [
 ]
 
 function MontageSequence() {
-  return <section className="montage-sequence" aria-label="XEVEN visual montage">
+  const ref = useRef<HTMLElement>(null!)
+  useEffect(() => {
+    const root = ref.current
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const shots = gsap.utils.toArray<HTMLElement>('.montage-shot', root)
+    const ctx = gsap.context(() => {
+      const director = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 1.2,
+          onUpdate: (self) => {
+            root.style.setProperty('--montage-progress', self.progress.toFixed(4))
+            root.dataset.scene = String(Math.min(shots.length - 1, Math.floor(self.progress * shots.length)))
+          },
+        },
+      })
+      shots.forEach((shot, index) => {
+        const art = shot.querySelector<HTMLElement>('.montage-art')
+        const copy = shot.querySelector<HTMLElement>('.montage-copy')
+        const start = index / shots.length
+        const end = (index + 1) / shots.length
+        director.to(shot, { '--scene-light': 1, duration: .16 }, start)
+        director.fromTo(art, { rotateY: -12, z: -80, scale: .84, opacity: .35 }, { rotateY: 10, z: 80, scale: 1.06, opacity: 1, ease: 'none', duration: end - start }, start)
+        director.fromTo(copy, { y: 80, opacity: .15, letterSpacing: '.12em' }, { y: -20, opacity: 1, letterSpacing: '-.01em', ease: 'none', duration: (end - start) * .72 }, start + .04)
+      })
+    }, root)
+    return () => ctx.revert()
+  }, [])
+
+  return <section ref={ref} className="montage-sequence" aria-label="XEVEN visual montage">
     {MONTAGE_SHOTS.map((shot) => <article className={`montage-shot montage-${shot.kind}`} key={shot.code}>
       <div className="montage-shot-inner"><div className="montage-meta mono"><span>{shot.code}</span><span>SCROLL / PLAY</span></div><div className="montage-art" aria-hidden="true"><span className="montage-core" /><span className="montage-wire wire-a" /><span className="montage-wire wire-b" /><span className="montage-plane plane-a" /><span className="montage-plane plane-b" /><span className="montage-particle particle-a" /><span className="montage-particle particle-b" /></div><div className="montage-copy"><p className="mono">XEVEN / FIELD NOTE</p><h2>{shot.title}</h2><p>{shot.copy}</p></div><span className="montage-progress mono">{shot.code.split(' / ')[0]} <i /> 04</span></div>
     </article>)}

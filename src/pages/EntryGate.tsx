@@ -27,7 +27,7 @@ export default function EntryGate() {
           </div>
           <div className="portal-orb" aria-hidden="true"><ArcadeOrb /></div>
         </section>
-        <section className="entry-cta"><p className="mono">EXPLORE THE ARCHIVE <span>↓</span></p><button className="entry-enter" onClick={enter} disabled={entering} data-cursor="ENTER"><span className="entry-ring" /><span>{entering ? 'OPEN' : 'ENTER'}</span><b>↗</b></button></section>
+        <section className="entry-cta"><p className="mono">OPEN THE INDEX <span>↓</span></p><button className="entry-enter" onClick={enter} disabled={entering} data-cursor="INDEX"><span className="entry-ring" /><span>{entering ? 'OPEN' : 'INDEX'}</span><b>↗</b></button></section>
       </main>
       <footer className="entry-baseline mono"><span>SCROLL TO CALIBRATE</span><i /><span>SOUND OPTIONAL · VOLUME 01</span></footer>
       <a className="entry-skip" href="#/index" onClick={(e) => { e.preventDefault(); navigate('index') }}>Skip intro ↗</a>
