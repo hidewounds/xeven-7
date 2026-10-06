@@ -1,0 +1,55 @@
+FABRICATE PROMPT — XEVEN offline site to 100/100 (design-only, no integration, ignore live-backend working or not)
+
+Context:
+You are editing the XEVEN-Complete-Website source project.
+- Stack: Next.js source in `source/` (app/, components/, lib/, public/, scripts/). Offline live build = 6 static files at root (index, platform, demo, plans, about, contact.html) + assets/ beside them.
+- Product: XEVEN — Conversations beyond the screen. AI platform: Knowledge + Memory + Chrono scheduling + Echo voice. Handheld transparent device + spider mascot are CONCEPT VISUALS, not hardware for sale.
+- Demo is SCRIPTED preview with sample data (shopping/support/booking). No real appointments, no customer data, no live calendar/mic.
+- Plans (USD guide, no payment on site, sales confirms): Launch $29/mo + $99 setup (1000 conv, 50 knowledge, no Chrono/Echo), Growth $79/mo + $199 setup (10000 conv, 200 knowledge, Chrono+Echo English), Scale $199/mo + $499 setup (50000 conv, 500 knowledge, +voice/multilang/10 rules), Custom bespoke. Contact: hello@xeven.world, prefill via ?plan= and ?scenario=.
+- Hard constraints (do not break): file:// safe — classic script only, no JS modules, no dynamic imports, no fetch, no server needed. Keep assets/ next to HTML. Keep query params (?plan=, ?scenario=). No fabricated testimonials/figures. Respect reduced-motion + Skip intro (session key xeven-reference-intro-v3). No snap-scroll. After edits run: node scripts/check-experience.mjs, node scripts/check-offline.mjs, then rebuild with node scripts/export-offline.mjs /absolute/output.
+
+Goal:
+Apply ALL changes below in source/, keep design system (near-black space, chrome handheld, thin white type, pale-blue trails, rainbow only on stick rings, spider intro). This is the full 100-point list.
+
+A. POSITIONING (kill confusion)
+1. continuous-home.tsx hero: add 1 line under sub: "XEVEN is software for your website. Handheld + spider are concept visuals, not hardware for sale."
+2. experience-shell.tsx footer: same 1-line disclaimer + hello@xeven.world + "No payment taken here."
+3. Keep H1 "Conversations beyond the screen" + honest sub.
+
+B. PRICING (lib/xeven-content.ts PLANS + plans-page.tsx)
+4. Add yearly + trial to PLANS data: yearly = -20% + free setup, trial = "14-day sample sandbox, $0".
+5. plans-page.tsx cards show: $/mo + yearly total + per-conversation math (Launch ~$0.03, Growth ~$0.008, Scale ~$0.004). Setup line = "$99 setup, credited on annual" (199/499 same pattern).
+6. Move note ABOVE Enquire buttons: "USD guide. Taxes/terms confirmed with sales. No payment taken here."
+7. Custom card: "From Scale + scope. e.g. extra rules, languages, voice channels — agreed with sales." Keep ?plan= prefill to contact.
+
+C. DEMO (lib/xeven-content.ts SCENARIOS + demo-page.tsx)
+8. Add 4th scenario lead-qual (same shape: question/facts/answer/outcome): Q about qualifying 200 chats/week, facts Intent/lead-qual + Knowledge/6 expertise areas + Boundary/need hours + handoff, answer with 2 follow-ups, no fake booking.
+9. demo-page.tsx: permanent top pill on ALL tabs: "Scripted preview with sample data — no real appointment, no customer data." Memory toggle ON by default for shopping (Alex size-9 moment).
+10. Show each scenario outcome line directly under chat bubble (currently too low).
+
+D. PLATFORM TRUST (platform-page.tsx + FAQ in xeven-content.ts)
+11. Per-module PLAN TAG: Knowledge all (50/200/500), Memory all (allowed fields), Chrono Growth+, Echo Growth+ voice, Scale +multilang.
+12. Add retention table: Field | Kept | Control — Explicit preference until Forget via remember/forget, Behavior signal session-only separate from facts, DPA on request via hello@xeven.world.
+13. FAQ +2: "Is the handheld for sale? No — concept visual, XEVEN is software." + "What counts as 1 conversation / 1 knowledge item?" 1-line each.
+14. Add honest sample box: "Sample policy: unworn 30-day exchange. Sample schedule: Fri 14:00/15:30 UTC." No invented stats.
+
+E. CONTACT (contact-page.tsx + lib/enquiry.ts)
+15. Keep copy + download + mailto (offline-safe). Status after download stays: "Saved. No message sent — email it to hello@xeven.world when ready."
+16. Add optional fields website + monthly chats to values/body/mailto for sizing.
+17. Show SALES_EMAIL as clickable + plain text.
+
+F. UX/A11Y/PERF
+18. Spider intro: prefers-reduced-motion = skip entirely. Keep Skip + session-complete + footer Replay only.
+19. Keyboard: 4 flow cards, tabs, dialog focus-trapped, Esc closes.
+20. Images: *-small.webp mobile, full webp desktop, preload hero only.
+21. Keep file:// build clean: run check scripts, no new deps.
+
+Acceptance:
+- All 6 pages open via file://, assets load, ?plan=Growth and ?scenario=shopping survive navigation.
+- Demo tabs (shopping/support/booking/lead-qual) + memory toggle + outcome lines visible.
+- Pricing shows monthly/yearly/per-conv + setup-credited + USD/sales note above buttons.
+- Retention table + hardware disclaimer + scripted pill present.
+- check-experience.mjs and check-offline.mjs pass, export-offline.mjs produces 6 HTML + assets.
+- Output: unified diff / patched files + rebuild notes. Do not invent testimonials, prices, or backend behavior.
+
+Attached: full source/ folder (or XEVEN-Complete-Website 3.zip). Start with lib/xeven-content.ts, then plans/demo/platform/contact pages, then shell/intro, then verify + export.

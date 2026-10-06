@@ -1,0 +1,26 @@
+XEVEN — COMPLETE OFFLINE WEBSITE
+
+1. Extract the entire ZIP first. Do not open HTML inside a ZIP viewer.
+2. Open index.html in an up-to-date browser.
+3. Keep the assets folder alongside all six HTML pages.
+
+No installation, server, internet connection, account, API key or build step is required to explore the website. Fonts, images, the dimensional spider geometry, page code and animations are local.
+
+The ready-to-open edition uses the same React components, content, styles, console artwork and motion choreography as the hosted site. It uses a classic script, with no dynamic imports or fetch requests. Ordinary page clicks use smooth app-style transitions and file-safe fragment history; the address can contain #/contact or another route. Browser Back/Forward work. Links also name real HTML files for direct entry or opening in a new tab. Plan, billing and scenario details are retained.
+
+The website is silent and full motion is always enabled. The spider entrance plays on every fresh homepage load, even after earlier visits. Skip, Escape and Replay remain available. WebGL2 renders the actual articulated model; if graphics initialization fails, a transparent vector projection of that same geometry is shown. No white backing field is used for the spider.
+
+The guided chatbot is a labelled scripted demonstration, not a live AI service. Enquiries can be downloaded as text offline. Opening email uses your mail app; sending needs connectivity. Clipboard permissions vary for local files, so manual copy and download remain available.
+
+Responsive layouts, GPU capabilities, browser lighting/font rendering and performance vary between computers. All source assets/styles are included; pixel-identical rendering across every device is not guaranteed.
+
+BRAND
+The brand folder contains transparent SVG logo masters, the standalone 3D spider GLB, dimension/animation notes, geometry validation and an asset preview. REBUILD-NOTES.md lists the changes and rebuild steps.
+
+SOURCE
+The source folder contains the complete editable project, original references/assets, package lock, build scripts, licenses and design notes. It is optional for viewing. To develop it, use Node.js 22.13+ and the package manager in source/package.json, install dependencies and follow the documented scripts. Runtime dependencies are already bundled in assets/app.js; node_modules and credentials are excluded from editable source.
+
+To rebuild the offline edition from source:
+node scripts/export-offline.mjs /absolute/output/folder
+
+The original hosted Site identity and account access controls are not part of the portable copy.

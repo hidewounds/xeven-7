@@ -1,0 +1,30 @@
+{
+  "project": "XEVEN \u2014 dimensional spider and console portal",
+  "date": "2026-10-06",
+  "source_commit": "0ac36db9991299fa5210188c1425ae9da72f3dd1",
+  "baseline_commit": "b214ac1eaa511a284d2ca3300da90e182bc27c03",
+  "entry": "index.html",
+  "pages": [
+    "index.html",
+    "platform.html",
+    "about.html",
+    "plans.html",
+    "demo.html",
+    "contact.html"
+  ],
+  "viewing_requires_server": false,
+  "viewing_requires_network": false,
+  "motion": "always on; no audio",
+  "intro": "5.2 seconds on every fresh homepage mount/reload; Skip/Escape/Replay available",
+  "validation": {
+    "typescript": "passed",
+    "production_build": "passed",
+    "behavior_checks": 10,
+    "offline_dom_checks": 16,
+    "geometry_and_glb": "passed",
+    "real_browser_gpu_visual_qa": "unavailable"
+  },
+  "spider_model": "brand/xeven-spider.glb",
+  "source": "source/",
+  "notes": "WebGL2 renders the model. A matching transparent vector fallback appears if graphics cannot initialize. Browser/GPU/viewport differences are possible."
+}
