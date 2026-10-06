@@ -37,6 +37,12 @@ export default function ContinuousHome() {
     returnFocus = useRef<HTMLElement | null>(null),
     checkedIntro = useRef(false);
   const finishIntro = useCallback(() => {
+    try {
+      window.sessionStorage.setItem("xeven-intro-done", "1");
+      window.localStorage.setItem("xeven-intro-at", String(Date.now()));
+    } catch {
+      /* private mode — intro simply replays next refresh */
+    }
     window.scrollTo({ top: 0, behavior: "instant" });
     setIntro(false);
     requestAnimationFrame(() =>
@@ -46,8 +52,26 @@ export default function ContinuousHome() {
   useEffect(() => {
     if (!ready || checkedIntro.current) return;
     checkedIntro.current = true;
+    // The intro plays on a fresh index load — first visit or browser
+    // refresh — or after the visit has timed out (25 minutes since the last
+    // completed intro). In-page navigation back to `/` never replays it.
+    let played = false;
+    let last = 0;
+    try {
+      played = window.sessionStorage.getItem("xeven-intro-done") === "1";
+      last = Number(window.localStorage.getItem("xeven-intro-at") || 0);
+    } catch {
+      played = false;
+      last = 0;
+    }
+    const navType =
+      performance.getEntriesByType("navigation")[0] as
+        | PerformanceNavigationTiming
+        | undefined;
+    const reloaded = navType?.type === "reload";
+    const timedOut = !last || Date.now() - last > 25 * 60 * 1000;
     window.scrollTo({ top: 0, behavior: "instant" });
-    setIntro(true);
+    if (!played || reloaded || timedOut) setIntro(true);
   }, [ready]);
   function replay() {
     window.scrollTo({ top: 0, behavior: "instant" });

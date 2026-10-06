@@ -6,8 +6,8 @@ const origin = "https://xeven-spatial-studio.guddaaa.chatgpt.site";
 export const metadata: Metadata = {
   metadataBase: new URL(origin),
   title: {
-    default: "XEVEN — Conversations beyond the screen",
-    template: "%s · XEVEN",
+    default: "XEVEN",
+    template: "XEVEN",
   },
   description:
     "An AI agent that connects your business knowledge, customer context, and next steps. Explore XEVEN’s spatial interface, guided demo, and commercial plans.",

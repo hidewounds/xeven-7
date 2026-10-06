@@ -5,12 +5,13 @@ export function pageMetadata(
   description: string,
   path: string,
 ): Metadata {
+  void title;
   return {
-    title,
+    title: "XEVEN",
     description,
     alternates: { canonical: path },
     openGraph: {
-      title: `${title} · XEVEN`,
+      title: `XEVEN`,
       description,
       url: path,
       siteName: "XEVEN",
@@ -26,7 +27,7 @@ export function pageMetadata(
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} · XEVEN`,
+      title: `XEVEN`,
       description,
       images: ["/xeven/social-preview.png"],
     },

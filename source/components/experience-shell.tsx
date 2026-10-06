@@ -4,7 +4,39 @@ import Link from "@/components/transition-link";
 import { HARDWARE_NOTE, SALES_EMAIL } from "@/lib/xeven-content";
 import { PageTransitionProvider } from "./page-transition";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Menu } from "lucide-react";
+import { ArrowUpRight, ArrowUp, Menu, Send } from "lucide-react";
+import type { SVGProps } from "react";
+function InstagramMark(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+function XMark(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" {...props}>
+      <path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.3l-4.9-6.4L5.2 21H2.1l7.3-8.3L2 3h6.4l4.4 5.9L17.8 3zm-1.1 16.1h1.7L7.4 4.8H5.6l11.1 14.3z" />
+    </svg>
+  );
+}
+function YouTubeMark(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
+      <path d="M10.5 9.8v4.4l4-2.2z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+function LinkedInMark(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" {...props}>
+      <path d="M6.9 8.6H3.6V21h3.3V8.6zM5.2 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM12.4 13.4c0-1.1.6-2.3 2.3-2.3 1.6 0 2.2 1.1 2.2 2.6V21h3.3v-7.9c0-3-1.6-4.7-4.3-4.7-1.7 0-2.9.9-3.5 1.9V8.6h-3.3V21h3.3v-7.6z" />
+    </svg>
+  );
+}
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 type Experience = { ready: boolean; reduced: false; quality: "full" };
@@ -68,12 +100,22 @@ export function Header({
   cinematic?: boolean;
 }) {
   const [menu, setMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    if (!cinematic) return;
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [cinematic]);
   return (
     <>
       <Link className="skip-link" href="#main-content">
         Skip to content
       </Link>
-      <header className={`global-header ${cinematic ? "story-header" : ""}`}>
+      <header
+        className={`global-header ${cinematic ? "story-header" : ""} ${cinematic && scrolled ? "scrolled" : ""}`}
+      >
         <Link href="/" className="brand" aria-label="Xeven home">
           <Wordmark />
         </Link>
@@ -136,6 +178,50 @@ export function Header({
     </>
   );
 }
+const SOCIALS = [
+  { label: "Instagram", Icon: InstagramMark },
+  { label: "X", Icon: XMark },
+  { label: "YouTube", Icon: YouTubeMark },
+  { label: "LinkedIn", Icon: LinkedInMark },
+];
+function Newsletter() {
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
+  return (
+    <form
+      className="newsletter-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+          setNote("That email does not parse — try again.");
+          return;
+        }
+        setNote("");
+        window.location.href = `mailto:${SALES_EMAIL}?subject=${encodeURIComponent("XEVEN updates")}&body=${encodeURIComponent(`Please send XEVEN updates to ${email.trim()}.`)}`;
+      }}
+    >
+      <label htmlFor="newsletter-email">Field notes, occasionally.</label>
+      <div>
+        <input
+          id="newsletter-email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@company.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+        <button type="submit" aria-label="Subscribe by email">
+          <Send size={16} />
+        </button>
+      </div>
+      {note ? (
+        <p role="alert">{note}</p>
+      ) : (
+        <p>Opens your mail app — nothing subscribes silently.</p>
+      )}
+    </form>
+  );
+}
 export function Footer({
   onReplay,
   cinematic = false,
@@ -143,6 +229,7 @@ export function Footer({
   onReplay?: () => void;
   cinematic?: boolean;
 }) {
+  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   return (
     <footer
       id="site-footer"
@@ -178,15 +265,19 @@ export function Footer({
                 Make it yours <ArrowUpRight size={17} />
               </Link>
             </div>
-            <nav aria-label="Footer navigation">
-              {links.map((link) => (
-                <Link key={link.href} href={link.href}>
-                  {link.label}
-                </Link>
-              ))}
-              <Link href="/demo">Guided demo</Link>
-              <Link href="/contact">Contact sales</Link>
-            </nav>
+            <div className="footer-social">
+              <p className="eyebrow">Elsewhere</p>
+              <div className="social-logos">
+                {SOCIALS.map(({ label, Icon }) => (
+                  <span key={label} title={`${label} — coming soon`}>
+                    <Icon />
+                    <span className="sr-only">{label} (coming soon)</span>
+                  </span>
+                ))}
+              </div>
+              <p className="social-note">Profiles open here soon.</p>
+            </div>
+            <Newsletter />
             <div
               className="footer-signature"
               aria-hidden={cinematic || undefined}
@@ -217,6 +308,13 @@ export function Footer({
             <span>© 2026 XEVEN</span>
             <span>AI PLATFORM · HANDHELD INTERFACE CONCEPT</span>
             <span>ONE THREAD. MORE POSSIBILITY.</span>
+            <button
+              className="setting-button"
+              type="button"
+              onClick={toTop}
+            >
+              Back to top <ArrowUp size={14} />
+            </button>
           </div>
         </div>
       </div>

@@ -29,6 +29,10 @@ for (const name of [
 ])
   await rm(join(output, name), { recursive: true, force: true });
 const packageRoots = new Set();
+// NOTE (Windows fix): Vite module ids always use forward slashes while
+// fileURLToPath returns backslashes here — compare normalized paths or the
+// rewrite below silently never runs and the export keeps absolute URLs.
+const rootPosix = root.replace(/\\/g, "/");
 const assetPrefix = {
   name: "xeven-file-safe-assets",
   transform(code, id) {
@@ -41,10 +45,11 @@ const assetPrefix = {
         prefix + parts.slice(0, parts[0].startsWith("@") ? 2 : 1).join("/"),
       );
     }
+    const normId = id.replace(/\\/g, "/");
     if (
-      !id.startsWith(root) ||
-      id.includes("node_modules") ||
-      !/\.[jt]sx?$/.test(id)
+      !normId.startsWith(rootPosix) ||
+      normId.includes("node_modules") ||
+      !/\.[jt]sx?$/.test(normId)
     )
       return;
     return { code: code.replaceAll("/xeven/", "./assets/xeven/"), map: null };
