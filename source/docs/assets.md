@@ -25,3 +25,11 @@ All runtime assets are local. Offline viewing embeds both WOFF fonts and bundles
 The updated dimensional redesign supersedes the earlier exact-trace/flat-engraving implementation. `docs/spider-identity.md` documents its proportions, cavity and intro alignment; `docs/spider-model-validation.json` records geometry and GLB validation. Both logo projection SVGs and small icons contain no raster background or remote resource.
 
 Offline `licenses/` collects notices from the compiled dependency packages, including Three.js and font licensing. These packages retain their original licenses. Editable source retains the original references and assets.
+
+## Current Orb edition (supersedes uses described above)
+
+- `console.webp` and `console-small.webp` now use the generated icy-cyan/graphite revision, with existing registration and alpha preserved. Exact editing brief: `console-orb-prompt.txt`.
+- `lib/orb-model.ts` supplies all live orb geometry; no model download or texture fetch is required.
+- `components/architecture-scene.tsx` supplies the live hall, materials, camera and lighting. The previous fragment/horizon imagery is no longer rendered.
+- Only the spider logo vectors and favicons are used. The spider illustration/intro renderers were removed. The old geometry master and design studies remain solely as brand-authoring history.
+- The supplied orb video informed the new visual language. It is not embedded or downloaded by the website.

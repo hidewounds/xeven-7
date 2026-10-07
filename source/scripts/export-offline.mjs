@@ -29,13 +29,10 @@ for (const name of [
 ])
   await rm(join(output, name), { recursive: true, force: true });
 const packageRoots = new Set();
-// NOTE (Windows fix): Vite module ids always use forward slashes while
-// fileURLToPath returns backslashes here — compare normalized paths or the
-// rewrite below silently never runs and the export keeps absolute URLs.
-const rootPosix = root.replace(/\\/g, "/");
 const assetPrefix = {
   name: "xeven-file-safe-assets",
-  transform(code, id) {
+  transform(code, rawId) {
+    const id = rawId.replaceAll("\\", "/");
     const marker = "/node_modules/";
     const index = id.lastIndexOf(marker);
     if (index >= 0) {
@@ -45,11 +42,10 @@ const assetPrefix = {
         prefix + parts.slice(0, parts[0].startsWith("@") ? 2 : 1).join("/"),
       );
     }
-    const normId = id.replace(/\\/g, "/");
     if (
-      !normId.startsWith(rootPosix) ||
-      normId.includes("node_modules") ||
-      !/\.[jt]sx?$/.test(normId)
+      !id.startsWith(root.replaceAll("\\", "/")) ||
+      id.includes("node_modules") ||
+      !/\.[jt]sx?$/.test(id)
     )
       return;
     return { code: code.replaceAll("/xeven/", "./assets/xeven/"), map: null };
@@ -103,8 +99,25 @@ await cp(join(root, "public/xeven"), join(output, "assets/xeven"), {
 });
 for (const name of ["favicon.svg", "favicon-32.png", "apple-touch-icon.png"])
   await cp(join(root, "public", name), join(output, "assets", name));
-// The prior model is an archived design study, not a runtime dependency.
-await rm(join(output, "assets/xeven/console.glb"), { force: true });
+// Only current runtime imagery is distributed to the viewer.
+const runtimeAssets = new Set([
+  "orb-poster.webp",
+  "fragment.webp",
+  "fragment-small.webp",
+  "horizon.webp",
+  "horizon-small.webp",
+  "console.webp",
+  "console-small.webp",
+  "logo-spider.svg",
+  "logo-lockup.svg",
+  "logo-spider-light.svg",
+  "social-preview.png",
+  "social-preview.svg",
+]);
+for (const name of await readdir(join(output, "assets/xeven"))) {
+  if (!runtimeAssets.has(name))
+    await rm(join(output, "assets/xeven", name), { force: true });
+}
 const routes = [
   ["/", "index.html", "XEVEN — Conversations beyond the screen"],
   ["/platform", "platform.html", "The platform · XEVEN"],
@@ -117,56 +130,42 @@ for (const [route, file, title] of routes) {
   await writeFile(
     join(output, file),
     `<!doctype html>
-<html lang="en" data-page="${route}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><meta name="description" content="XEVEN connects business knowledge, customer context, and next steps."><title>${title}</title><link rel="icon" href="./assets/favicon.svg"><link rel="stylesheet" href="./assets/style.css"></head><body><div id="app"></div><noscript><p style="padding:40px;color:white;background:#030507;font:18px Arial">Enable JavaScript to explore XEVEN. For commercial access, email hello@xeven.world.</p></noscript><script defer src="./assets/app.js"></script></body></html>\n`,
+<html lang="en" data-page="${route}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><meta name="description" content="XEVEN connects business knowledge, customer context, and next steps."><title>XEVEN</title><link rel="icon" href="./assets/favicon.svg"><link rel="stylesheet" href="./assets/style.css"></head><body><div id="app"></div><noscript><p style="padding:40px;color:white;background:#030507;font:18px Arial">Enable JavaScript to explore XEVEN. For commercial access, email hello@xeven.world.</p></noscript><script defer src="./assets/app.js"></script></body></html>\n`,
   );
 }
-const readme = `XEVEN — COMPLETE OFFLINE WEBSITE
+const readme = `XEVEN — COMPLETE OFFLINE WEBSITE / PARTICLE EDITION
 
-1. Extract the entire ZIP first. Do not open HTML inside a ZIP viewer.
-2. Open index.html in an up-to-date browser.
-3. Keep the assets folder alongside all six HTML pages.
+1. Extract the entire ZIP first.
+2. Open index.html in a current browser.
+3. Keep all six HTML files beside the assets folder.
 
-No installation, server, internet connection, account, API key or build step is required to explore the website. Fonts, images, the dimensional spider geometry, page code and animations are local.
+No server, installation, network connection, account, API key, or build step is needed for viewing. Fonts, console imagery, React, Three.js, geometry, styles, and animations are bundled locally.
 
-The ready-to-open edition uses the same React components, content, styles, console artwork and motion choreography as the hosted site. It uses a classic script, with no dynamic imports or fetch requests. Ordinary page clicks use smooth app-style transitions and file-safe fragment history; the address can contain #/contact or another route. Browser Back/Forward work. Links also name real HTML files for direct entry or opening in a new tab. Plan, billing and scenario details are retained.
+The 6.25-second entrance starts with a compact intact fibrous orb, dissolves it into particles, spreads them across the viewport, and clears their field continuously into Home. No four-part breakup or stretch is used. It plays on a fresh Home load/reload and after 25 minutes of inactivity, never on ordinary page changes. Skip and Escape are available. No sound is used; motion is always enabled.
 
-The website is silent and full motion is always enabled. The spider entrance plays on every fresh homepage load, even after earlier visits. Skip, Escape and Replay remain available. WebGL2 renders the actual articulated model; if graphics initialization fails, a transparent vector projection of that same geometry is shown. No white backing field is used for the spider.
+Ordinary page links swipe within the same document using file-safe hash history. Back/Forward work. New tabs can open the six physical HTML files. The space background continues behind the transparent console display. WebGL2 renders the orb; its reference-based texture is embedded directly to avoid local-file texture restrictions. Animated image/vector fallbacks handle unsupported graphics.
 
-The guided chatbot is a labelled scripted demonstration, not a live AI service. Enquiries can be downloaded as text offline. Opening email uses your mail app; sending needs connectivity. Clipboard permissions vary for local files, so manual copy and download remain available.
+The footer contains socials and a newsletter field, with no page-navigation links. Instagram, X, and LinkedIn are marked Soon until official profile URLs are entered in source/lib/social-links.ts. GitHub opens the existing project repository. Email and the newsletter request open your mail application. Sending requires connectivity; the newsletter has no automatic subscription backend. The chatbot demo is scripted and labelled. It does not call a live AI service or create bookings. Enquiries can be reviewed, copied or downloaded locally. No form silently sends data.
 
-Responsive layouts, GPU capabilities, browser lighting/font rendering and performance vary between computers. All source assets/styles are included; pixel-identical rendering across every device is not guaranteed.
+Runtime assets and source code match the hosted edition. Browser/GPU support, font rasterization, viewport dimensions, and performance can still differ across computers; identical pixels on every device cannot be guaranteed.
 
-BRAND
-The brand folder contains transparent SVG logo masters, the standalone 3D spider GLB, dimension/animation notes, geometry validation and an asset preview. REBUILD-NOTES.md lists the changes and rebuild steps.
+brand/ contains the new flat angular spider logo masters with a transparent X cut-out. The spider is no longer an animated scene or illustration. source/ contains the editable project and archived design studies, package lock, references, scripts and documentation. licenses/ contains dependency notices.
 
-SOURCE
-The source folder contains the complete editable project, original references/assets, package lock, build scripts, licenses and design notes. It is optional for viewing. To develop it, use Node.js 22.13+ and the package manager in source/package.json, install dependencies and follow the documented scripts. Runtime dependencies are already bundled in assets/app.js; node_modules and credentials are excluded from editable source.
+For editing, use Node.js 22.13+ and the package manager in source/package.json. The viewer already includes its runtime dependencies; source/node_modules is intentionally excluded. No credentials, account permissions, or original hosting identity are included.
 
-To rebuild the offline edition from source:
-node scripts/export-offline.mjs /absolute/output/folder
-
-The original hosted Site identity and account access controls are not part of the portable copy.
+Rebuild: node scripts/export-offline.mjs /absolute/output/folder
+See REBUILD-NOTES.md for details.
 `;
 await writeFile(join(output, "START-HERE.txt"), readme);
 await cp(join(root, "docs/rebuild-notes.md"), join(output, "REBUILD-NOTES.md"));
 await mkdir(join(output, "brand"), { recursive: true });
 for (const name of [
-  "spider-engraved.svg",
-  "spider-3d.svg",
-  "spider-front.svg",
-  "xeven-spider.glb",
-  "spider-flat.svg",
   "logo-spider.svg",
   "logo-lockup.svg",
-  "spider-silhouette.svg",
-])
+  "logo-spider-light.svg",
+]) {
   await cp(join(root, "public/xeven", name), join(output, "brand", name));
-for (const name of [
-  "spider-identity.md",
-  "spider-design-preview.png",
-  "spider-model-validation.json",
-])
-  await cp(join(root, "docs", name), join(output, "brand", name));
+}
 // Retain notices for compiled dependencies, without shipping node_modules.
 await mkdir(join(output, "licenses"), { recursive: true });
 for (const directory of packageRoots) {
@@ -202,6 +201,7 @@ const source = join(output, "source");
 await mkdir(source, { recursive: true });
 for (const name of [
   "app",
+  "assets",
   "components",
   "lib",
   "hooks",
@@ -244,7 +244,9 @@ async function inventory(dir) {
     if (entry.isDirectory() && entry.name !== "source") await inventory(path);
     else if (entry.isDirectory()) continue;
     else if (entry.name !== "asset-checksums.json")
-      hashes[relative(output, path)] = createHash("sha256")
+      hashes[relative(output, path).split("\\").join("/")] = createHash(
+        "sha256",
+      )
         .update(await readFile(path))
         .digest("hex");
   }

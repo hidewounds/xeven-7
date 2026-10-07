@@ -35,6 +35,7 @@ export function SpatialWorld({
     const controls =
       consoleNode.querySelector<HTMLElement>(".hardware-controls");
     const chapters = [...root.querySelectorAll<HTMLElement>(".story-chapter")];
+    const chapterProgress = chapters.map(() => 0);
     let width = window.innerWidth,
       height = window.innerHeight,
       metrics: JourneyMetrics = {
@@ -110,6 +111,20 @@ export function SpatialWorld({
       });
       if (hero) hero.style.setProperty("--hero-opacity", String(f.heroOpacity));
       if (content) content.style.opacity = String(f.contentOpacity);
+      chapters.forEach((element, index) => {
+        const progress = Math.max(
+          0,
+          Math.min(
+            1,
+            (current + height - starts[index]) /
+              (height + element.offsetHeight),
+          ),
+        );
+        if (Math.abs(progress - chapterProgress[index]) > 0.001) {
+          element.style.setProperty("--scene-progress", String(progress));
+          chapterProgress[index] = progress;
+        }
+      });
       if (footer) {
         footer.style.setProperty("--footer-reveal", String(f.footerOpacity));
         footer.style.setProperty(
@@ -187,30 +202,9 @@ export function SpatialWorld({
   }, [journey]);
   return (
     <div ref={world} className="persistent-world portal-world">
-      <div className="world-nebula" />
-      <div className="world-stars" />
-      <div className="world-orbit orbit-one" />
-      <div className="world-orbit orbit-two" />
-      {[0, 1, 2, 3].map((index) => (
-        <div key={index} className={`space-fragment fragment-${index}`}>
-          <picture>
-            <source
-              media="(max-width: 700px)"
-              srcSet="/xeven/fragment-small.webp"
-            />
-            <img
-              src="/xeven/fragment.webp"
-              width="1254"
-              height="1254"
-              alt=""
-              loading="lazy"
-            />
-          </picture>
-        </div>
-      ))}
       <div ref={projection} className="footer-projection">
         <i />
-        <span>XEVEN / CONNECTION ESTABLISHED</span>
+        <span>XEVEN</span>
       </div>
       <div ref={device} className="console-poster">
         <Handheld
@@ -220,13 +214,6 @@ export function SpatialWorld({
           priority
           onControl={onControl}
         />
-      </div>
-      <div className="portal-hud" aria-hidden="true">
-        <span>
-          <i /> XEVEN OS
-        </span>
-        <span>KNOWLEDGE / CONTEXT / CONNECTION</span>
-        <b>0{Math.max(1, chapter)} / 03</b>
       </div>
     </div>
   );

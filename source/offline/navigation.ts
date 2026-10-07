@@ -36,7 +36,7 @@ const router = {
     // Native fragment navigation works without a server and preserves Back/Forward.
     window.location.hash = route + destination.search + destination.hash;
     document.documentElement.dataset.page = route;
-    document.title = "XEVEN";
+    document.title = ROUTES[route].title;
   },
   back() {
     window.history.back();

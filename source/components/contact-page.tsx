@@ -113,23 +113,16 @@ export default function ContactPage() {
             <br />
             <span>it yours.</span>
           </h1>
-          <p>
-            Give your business a new way to connect. Choose a plan and prepare
-            an enquiry for the XEVEN team.
-          </p>
+          <p>Choose a plan. Tell us what your business needs.</p>
           <a href={`mailto:${SALES_EMAIL}`} className="sales-email">
             {SALES_EMAIL}
           </a>
-          <p className="sales-email-plain">
-            Email address: <span>{SALES_EMAIL}</span>
-          </p>
           <div className="contact-note">
             <XevenMark />
             <h2>A conversation comes first.</h2>
             <p>
-              Sales can confirm your requirements, configuration, pricing, and
-              the next steps for access. This page prepares an email draft; it
-              does not take payment.
+              Prepare an enquiry. Sales confirms setup, pricing, and access. No
+              payment is taken here.
             </p>
             <Link href="/demo" className="text-link">
               Explore the sample first <ArrowUpRight size={16} />
@@ -293,9 +286,8 @@ export default function ContactPage() {
                 Review your enquiry <ArrowUpRight size={17} />
               </button>
               <p className="form-note">
-                Your details stay on this page until you choose to copy,
-                download, or open the draft in your email app. Final pricing and
-                terms are confirmed with sales.
+                Your details stay here until you copy, download, or open an
+                email draft.
               </p>
             </form>
           ) : (

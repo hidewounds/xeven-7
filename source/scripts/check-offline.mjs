@@ -22,6 +22,7 @@ class LocalOnly extends ResourceLoader {
 }
 async function open(file, query = "", reduced = true, motionOverride = null) {
   const errors = [];
+  const clock = { offset: 0 };
   const downloads = [];
   const blobs = [];
   const vc = new VirtualConsole();
@@ -46,6 +47,9 @@ async function open(file, query = "", reduced = true, motionOverride = null) {
     pretendToBeVisual: true,
     virtualConsole: vc,
     beforeParse(window) {
+      const realNow = window.Date.now.bind(window.Date);
+      window.Date.now = () => realNow() + clock.offset;
+      window.performance.navigation = { type: 1 };
       if (motionOverride)
         Object.defineProperty(window, "localStorage", {
           value: {
@@ -122,6 +126,7 @@ async function open(file, query = "", reduced = true, motionOverride = null) {
     errors,
     downloads,
     blobs,
+    clock,
   };
 }
 const click = (document, text) => {
@@ -150,6 +155,11 @@ for (const name of pages) {
         raw.startsWith("data:")
       )
         continue;
+      if (
+        element.tagName === "A" &&
+        raw === "https://github.com/hidewounds/xeven-7"
+      )
+        continue;
       const url = new URL(raw, page.window.location.href);
       assert.equal(url.protocol, "file:", `Non-local page dependency: ${raw}`);
       await access(fileURLToPath(url));
@@ -176,7 +186,33 @@ for (const name of pages) {
       assert.match(preload.href, /console(?:-small)?\.webp$/);
     assert.match(
       page.document.querySelector("footer").textContent,
-      /No payment/,
+      /SOCIALS.*Instagram.*X.*LinkedIn.*Newsletter/s,
+    );
+    assert.equal(page.document.title, "XEVEN");
+    assert.equal(page.document.querySelector("footer nav"), null);
+    assert.equal(
+      page.document.querySelector(
+        ".handheld img[src*=logo-spider],.demo-console-screen img[src*=logo-spider],.immersed-chat img[src*=logo-spider]",
+      ),
+      null,
+    );
+    assert.ok(page.document.querySelector(".space-world"));
+    assert.equal(
+      page.document.querySelector(
+        ".architecture-world,.context-architecture,.about-architecture",
+      ),
+      null,
+    );
+    assert.equal(page.document.querySelectorAll(".social-pending").length, 3);
+    assert.equal(
+      page.document.querySelector(".spider-mark").getAttribute("src"),
+      "./assets/xeven/logo-spider-light.svg",
+    );
+    assert.equal(
+      page.document.querySelector(
+        ".spider-view,.spider-intro,.home-spider,.about-spider,.app-switch",
+      ),
+      null,
     );
     assert.equal(
       page.errors.length,
@@ -193,25 +229,29 @@ for (const name of pages) {
 {
   const page = await open("index.html", "", false);
   try {
-    const intro = page.document.querySelector(".spider-intro");
+    const intro = page.document.querySelector(".orb-entrance");
     assert.ok(intro, "Entrance is shown on fresh home visit");
     assert.equal(
-      page.document.querySelectorAll(".spider-intro").length,
+      page.document.querySelectorAll(".orb-entrance").length,
       1,
       "Only the dialog owns viewport intro styles",
     );
-    assert.equal(intro.querySelector(".intro-name-reveal").textContent, "EVEN");
-    assert.ok(intro.querySelector(".spider-view"));
+    assert.ok(intro.querySelector(".orb-surface"));
+    assert.equal(intro.querySelectorAll(".orb-image-piece").length, 0);
+    assert.equal(intro.querySelector(".orb-membrane"), null);
+    assert.equal(intro.querySelectorAll(".orb-fallback-tendon").length, 0);
+    assert.equal(intro.querySelectorAll(".orb-fallback-particle").length, 420);
     assert.match(
-      intro.querySelector(".spider-poster").src,
-      /spider-front\.svg$/,
+      intro.querySelector(".orb-intact-poster").src,
+      /orb-poster.webp$/,
     );
-    click(page.document, "Skip introduction");
+    click(page.document, "Skip intro");
     await pause(60);
-    assert.equal(page.document.querySelector(".spider-intro"), null);
-    click(page.document, "Replay");
+    assert.equal(page.document.querySelector(".orb-entrance"), null);
+    page.clock.offset += 25 * 60 * 1000 + 1000;
+    page.window.dispatchEvent(new page.window.Event("pointerdown"));
     await pause(60);
-    assert.ok(page.document.querySelector(".spider-intro"));
+    assert.ok(page.document.querySelector(".orb-entrance"));
     page.document.dispatchEvent(
       new page.window.KeyboardEvent("keydown", {
         key: "Escape",
@@ -219,9 +259,9 @@ for (const name of pages) {
       }),
     );
     await pause(60);
-    assert.equal(page.document.querySelector(".spider-intro"), null);
+    assert.equal(page.document.querySelector(".orb-entrance"), null);
     check(
-      "Dimensional intro uses the model poster plus EVEN, and skip/replay/Escape work",
+      "Particle entrance has an intact orb, skips cleanly, and restarts only after idle timeout",
     );
     const next = page.document.querySelector(
       '[aria-label="Next console workflow"]',
@@ -249,7 +289,7 @@ for (const name of pages) {
 {
   const page = await open("index.html", "", true, "reduced");
   try {
-    assert.ok(page.document.querySelector(".spider-intro"));
+    assert.ok(page.document.querySelector(".orb-entrance"));
     assert.equal(page.document.documentElement.dataset.motion, "full");
     assert.equal(
       page.document.querySelector('[aria-label="Scene rendering quality"]'),
@@ -260,9 +300,9 @@ for (const name of pages) {
       .map((el) => el.textContent)
       .join(" ");
     assert.doesNotMatch(buttons, /Motion (on|off)|Sound (on|off)/);
-    click(page.document, "Skip introduction");
+    click(page.document, "Skip intro");
     await pause(60);
-    assert.equal(page.document.querySelector(".spider-intro"), null);
+    assert.equal(page.document.querySelector(".orb-entrance"), null);
     check(
       "Full motion is fixed and the intro plays despite legacy saved preferences",
     );
@@ -270,7 +310,7 @@ for (const name of pages) {
     page.dom.window.close();
   }
   const reloaded = await open("index.html", "", true, "reduced");
-  assert.ok(reloaded.document.querySelector(".spider-intro"));
+  assert.ok(reloaded.document.querySelector(".orb-entrance"));
   reloaded.dom.window.close();
 }
 
@@ -299,7 +339,6 @@ for (const name of pages) {
       const url = new URL(link.href);
       assert.equal(url.searchParams.get("plan"), plan);
       assert.equal(url.searchParams.get("billing"), "yearly");
-      assert.equal(link.previousElementSibling.className, "plan-sales-note");
     }
     assert.match(
       page.document.querySelector(".trial-band").textContent,
@@ -337,7 +376,7 @@ for (const name of pages) {
     await pause(50);
     assert.match(
       page.document.querySelector('.faq-list [data-state="open"]').textContent,
-      /concept visuals/,
+      /visual concept/,
     );
     check(
       "Platform explains module eligibility, retention controls, and concept hardware",
@@ -555,9 +594,12 @@ for (const name of pages) {
     const home = page.document.querySelector('a[aria-label="Xeven home"]');
     home.click();
     await pause(1100);
-    assert.ok(page.document.querySelector(".spider-intro"));
-    click(page.document, "Skip introduction");
-    await pause(70);
+    assert.equal(
+      page.document.querySelector(".orb-entrance"),
+      null,
+      "Returning from another page must not replay the entrance",
+    );
+    assert.equal(page.document.querySelector(".app-switch"), null);
     page.window.history.back();
     await pause(900);
     assert.ok(page.document.querySelector("#contact-name"));
@@ -572,6 +614,65 @@ for (const name of pages) {
     );
   } finally {
     page.dom.window.close();
+  }
+}
+{
+  const page = await open("index.html");
+  try {
+    click(page.document, "Skip intro");
+    await pause(80);
+    const scene = page.document.querySelector(".space-world");
+    page.document
+      .querySelector('.global-header nav a[href="./platform.html"]')
+      .click();
+    await pause(750);
+    assert.equal(
+      page.document.querySelector(".space-world"),
+      scene,
+      "Persistent world must survive route changes",
+    );
+    page.document.querySelector('a[aria-label="Xeven home"]').click();
+    await pause(750);
+    assert.equal(
+      page.document.querySelector(".orb-entrance"),
+      null,
+      "A reloaded document must not replay on Home remount",
+    );
+    assert.ok(page.document.querySelector(".app-page-frame.page-idle"));
+    const sourceCSS = (await readFile(resolve("app/globals.css"), "utf8"))
+      .replace(/^@import[^;]+;/gm, "")
+      .replace(/@theme inline \{[^}]+\}/s, "");
+    page.document
+      .querySelectorAll('link[rel="stylesheet"]')
+      .forEach((el) => el.remove());
+    const style = page.document.createElement("style");
+    style.textContent = sourceCSS;
+    page.document.head.append(style);
+    assert.equal(
+      page.window.getComputedStyle(
+        page.document.querySelector(".footer-email-field input"),
+      ).pointerEvents,
+      "auto",
+    );
+    const email = page.document.querySelector(".footer-email-field input");
+    email.value = "updates@example.test";
+    assert.equal(email.checkValidity(), true);
+    assert.equal(
+      page.window.getComputedStyle(
+        page.document.querySelector(".global-header"),
+      ).position,
+      "fixed",
+    );
+    assert.equal(
+      page.errors.length,
+      0,
+      page.errors.map((e) => e.message).join("\n"),
+    );
+    check(
+      "Reload → page → Home keeps the same scene, skips the intro and leaves the footer input usable",
+    );
+  } finally {
+    page.window.close();
   }
 }
 const css = await readFile(join(folder, "assets/style.css"), "utf8");

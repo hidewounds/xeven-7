@@ -26,8 +26,7 @@ function App() {
     () => "/" as const,
   );
   useEffect(() => {
-    // The tab always reads XEVEN, on every route.
-    document.title = "XEVEN";
+    document.title = ROUTES[route].title;
   }, [route]);
   const Page = pages[route] || ContinuousHome;
   return (

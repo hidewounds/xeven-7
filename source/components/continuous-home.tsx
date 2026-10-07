@@ -1,7 +1,6 @@
 "use client";
-
 import Link from "@/components/transition-link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -17,66 +16,19 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Footer, Header, useExperience, XevenMark } from "./experience-shell";
+import { Footer, Header } from "./experience-shell";
 import { FLOWS } from "./handheld";
-import { SpiderView } from "./spider-view";
 import { SpatialWorld } from "./spatial-world";
 import { screenContent } from "@/lib/workflows";
-import SpiderIntro from "./spider-intro";
-import { HARDWARE_NOTE } from "@/lib/xeven-content";
+import { ConnectionField } from "./connection-field";
 
 export default function ContinuousHome() {
-  const { ready } = useExperience();
-  const [intro, setIntro] = useState(false),
-    [chapter, setChapter] = useState(0),
+  const [chapter, setChapter] = useState(0),
     [flow, setFlow] = useState(0),
     [reader, setReader] = useState(false),
     [chosenFlow, setChosenFlow] = useState(false);
   const journey = useRef<HTMLDivElement>(null),
-    heading = useRef<HTMLHeadingElement>(null),
-    returnFocus = useRef<HTMLElement | null>(null),
-    checkedIntro = useRef(false);
-  const finishIntro = useCallback(() => {
-    try {
-      window.sessionStorage.setItem("xeven-intro-done", "1");
-      window.localStorage.setItem("xeven-intro-at", String(Date.now()));
-    } catch {
-      /* private mode — intro simply replays next refresh */
-    }
-    window.scrollTo({ top: 0, behavior: "instant" });
-    setIntro(false);
-    requestAnimationFrame(() =>
-      heading.current?.focus({ preventScroll: true }),
-    );
-  }, []);
-  useEffect(() => {
-    if (!ready || checkedIntro.current) return;
-    checkedIntro.current = true;
-    // The intro plays on a fresh index load — first visit or browser
-    // refresh — or after the visit has timed out (25 minutes since the last
-    // completed intro). In-page navigation back to `/` never replays it.
-    let played = false;
-    let last = 0;
-    try {
-      played = window.sessionStorage.getItem("xeven-intro-done") === "1";
-      last = Number(window.localStorage.getItem("xeven-intro-at") || 0);
-    } catch {
-      played = false;
-      last = 0;
-    }
-    const navType =
-      performance.getEntriesByType("navigation")[0] as
-        | PerformanceNavigationTiming
-        | undefined;
-    const reloaded = navType?.type === "reload";
-    const timedOut = !last || Date.now() - last > 25 * 60 * 1000;
-    window.scrollTo({ top: 0, behavior: "instant" });
-    if (!played || reloaded || timedOut) setIntro(true);
-  }, [ready]);
-  function replay() {
-    window.scrollTo({ top: 0, behavior: "instant" });
-    setIntro(true);
-  }
+    returnFocus = useRef<HTMLElement | null>(null);
   function openReader() {
     returnFocus.current = document.activeElement as HTMLElement | null;
     setReader(true);
@@ -123,46 +75,35 @@ export default function ContinuousHome() {
             >
               <div className="chapter-copy">
                 <p className="eyebrow">
-                  <span className="status-dot" /> THE NEXT INTERFACE
+                  <span className="status-dot" /> INTELLIGENCE, IN CONTEXT.
                 </p>
-                <h1 id="hero-title" ref={heading} tabIndex={-1}>
-                  Conversations
+                <h1 id="hero-title">
+                  Beyond
                   <br />
-                  beyond
-                  <br />
-                  <span>the screen.</span>
+                  <span>the ordinary.</span>
                 </h1>
-                <p>
-                  An AI agent that connects your business knowledge, customer
-                  context, and next steps. A better conversation starts here.
-                </p>
+                <p>Your knowledge. A conversation that moves things forward.</p>
                 <Link href="#controls" className="outline-pill">
-                  <ArrowDown size={17} />
-                  Discover XEVEN
+                  <ArrowDown size={17} /> Enter the experience
                 </Link>
-                <p className="concept-caption">{HARDWARE_NOTE}</p>
-              </div>
-
-              <div className="hero-side-note">
-                <span>
-                  Your knowledge.
-                  <br />A new perspective.
-                </span>
-                <i />
+                <p className="concept-caption">AI software. Console concept.</p>
               </div>
               <button className="screen-reader-button" onClick={openReader}>
-                Read the screen <ArrowUpRight size={15} />
+                Open conversation <ArrowUpRight size={15} />
               </button>
               <Link href="#controls" className="story-scroll">
                 <span className="scroll-track">
                   <i />
                 </span>
-                Scroll to explore <ArrowDown size={14} />
+                Scroll to enter <ArrowDown size={14} />
               </Link>
-              <span className="product-edition">CONNECTION STUDY / 007</span>
+              <span className="product-edition">XEVEN / 007</span>
             </section>
-
             <div className="screen-chapters">
+              <div className="screen-atmosphere" aria-hidden="true">
+                <i />
+                <i />
+              </div>
               <section
                 className="story-chapter chapter-controls"
                 id="controls"
@@ -170,37 +111,21 @@ export default function ContinuousHome() {
               >
                 <div className="chapter-copy">
                   <p className="eyebrow">
-                    <b>01</b> THE CONVERSATION
+                    <b>01</b> UNDERSTAND
                   </p>
                   <h2 id="controls-title">
-                    A more
+                    Your world.
                     <br />
-                    human way
-                    <br />
-                    <span>to interact.</span>
+                    <span>Understood.</span>
                   </h2>
-                  <p>
-                    Your customer asks a question. XEVEN brings the right
-                    business information into the moment, then asks for what is
-                    missing.
-                  </p>
+                  <p>The right answer starts with your business knowledge.</p>
                   <Link className="outline-pill" href="/demo?scenario=support">
-                    Try the guided demo <ArrowUpRight size={17} />
+                    Try a conversation <ArrowUpRight size={17} />
                   </Link>
-                  <div className="context-caption">
-                    <span>SAMPLE POLICY</span>
-                    <p>
-                      Unworn. Within 30 days.
-                      <br />
-                      Order details still needed.
-                    </p>
-                  </div>
                 </div>
-
                 <div className="immersed-chat">
                   <div className="immersed-chat-top">
-                    <XevenMark />
-                    <span>XEVEN / CONVERSATION</span>
+                    <span>XEVEN</span>
                     <i />
                   </div>
                   <div className="immersed-message user">
@@ -213,15 +138,9 @@ export default function ContinuousHome() {
                     <span>{shown.tag}</span>
                   </div>
                   <button className="immersed-compose" onClick={openReader}>
-                    A little more context <ArrowUpRight size={18} />
+                    Continue the conversation <ArrowUpRight size={18} />
                   </button>
-                  <p className="immersed-sample">
-                    Scripted preview / sample information
-                  </p>
-                </div>
-                <div className="detail-callout">
-                  <span>THE CONTEXT MAKES THE DIFFERENCE</span>
-                  <span>KNOWLEDGE / MEMORY / NEXT STEP</span>
+                  <p className="immersed-sample">Scripted preview</p>
                 </div>
                 <div className="scene-controls">
                   <button
@@ -241,7 +160,6 @@ export default function ContinuousHome() {
                   </button>
                 </div>
               </section>
-
               <section
                 className="story-chapter chapter-flow"
                 id="flow"
@@ -249,30 +167,19 @@ export default function ContinuousHome() {
               >
                 <div className="chapter-copy">
                   <p className="eyebrow">
-                    <b>02</b> FIND YOUR FLOW
+                    <b>02</b> MOVE FORWARD
                   </p>
                   <h2 id="flow-title">
-                    Four things
+                    One conversation.
                     <br />
-                    that move
-                    <br />
-                    <span>you forward.</span>
+                    <span>Every next step.</span>
                   </h2>
-                  <p>
-                    Find an answer. Shape a response. Explore a time. Choose
-                    what happens next. One connected conversation, grounded in
-                    your business.
-                  </p>
+                  <p>From the first question to a useful outcome.</p>
                   <Link className="text-link" href="/platform">
-                    Explore the technology <ArrowUpRight size={17} />
+                    Inside the platform <ArrowUpRight size={17} />
                   </Link>
                 </div>
-
                 <div className="flow-system">
-                  <div className="flow-system-top">
-                    <span>CHOOSE A DIRECTION</span>
-                    <span>0{flow + 1} / 04</span>
-                  </div>
                   <div className="flow-cards">
                     {FLOWS.map((item, index) => (
                       <button
@@ -285,10 +192,9 @@ export default function ContinuousHome() {
                         aria-pressed={flow === index}
                         aria-controls="workflow-example"
                       >
-                        <item.icon size={24} strokeWidth={1.25} />
+                        <item.icon size={25} strokeWidth={1.25} />
                         <span className="flow-number">0{index + 1}</span>
                         <h3>{item.name}</h3>
-                        <p>{item.copy}</p>
                         <span className="flow-card-line" />
                       </button>
                     ))}
@@ -301,14 +207,12 @@ export default function ContinuousHome() {
                   >
                     <span>{FLOWS[flow].tag}</span>
                     <p className="example-question">“{FLOWS[flow].question}”</p>
-                    <p>{FLOWS[flow].answer}</p>
                     <Link href={`/demo?scenario=${FLOWS[flow].scenario}`}>
-                      Try this conversation <ArrowUpRight size={15} />
+                      Explore this flow <ArrowUpRight size={15} />
                     </Link>
                   </div>
                 </div>
               </section>
-
               <section
                 className="story-chapter chapter-companion"
                 id="companion"
@@ -316,43 +220,34 @@ export default function ContinuousHome() {
               >
                 <div className="chapter-copy">
                   <p className="eyebrow">
-                    <b>03</b> BUILT FOR CONTINUITY
+                    <b>03</b> STAY CONNECTED
                   </p>
                   <h2 id="companion-title">
                     A little context.
                     <br />
-                    <span>
-                      A stronger
-                      <br />
-                      connection.
-                    </span>
+                    <span>A closer connection.</span>
                   </h2>
-                  <p>
-                    The next conversation can start with more understanding.
-                    Bring useful knowledge and permitted preferences together,
-                    with controls for what stays.
-                  </p>
-                  <Link className="outline-pill" href="/contact">
-                    Make it yours <ArrowUpRight size={17} />
+                  <p>Remember what matters. Keep the customer in control.</p>
+                  <Link className="outline-pill" href="/about">
+                    Meet XEVEN <ArrowUpRight size={17} />
                   </Link>
                 </div>
-
                 <div className="companion-details">
                   {[
                     {
                       icon: Layers3,
                       title: "Your knowledge",
-                      copy: "Business information, at the right moment.",
+                      copy: "Answers with a foundation.",
                     },
                     {
                       icon: Fingerprint,
-                      title: "A little continuity",
-                      copy: "Preferences the customer has allowed.",
+                      title: "Their preferences",
+                      copy: "Only what they allow.",
                     },
                     {
                       icon: ShieldCheck,
-                      title: "Memory with controls",
-                      copy: "Choose what stays. Forget what doesn’t.",
+                      title: "Clear controls",
+                      copy: "Remember. Update. Forget.",
                     },
                   ].map((item) => (
                     <div key={item.title}>
@@ -364,15 +259,9 @@ export default function ContinuousHome() {
                     </div>
                   ))}
                 </div>
-                <div className="continuity-emblem">
-                  <SpiderView
-                    mode="idle"
-                    className="home-spider"
-                    active={!intro}
-                  />
-                  <Link href="/about" className="text-link">
-                    Connected by design <ArrowUpRight size={17} />
-                  </Link>
+                <div className="continuity-emblem" aria-hidden="true">
+                  <ConnectionField />
+                  <span>KNOWLEDGE × CONTEXT</span>
                 </div>
               </section>
             </div>
@@ -381,25 +270,18 @@ export default function ContinuousHome() {
               aria-label="Returning to the console"
             >
               <div className="return-copy">
-                <p className="eyebrow">THE CONNECTION CONTINUES</p>
+                <p className="eyebrow">YOUR NEXT CHAPTER</p>
                 <h2>
-                  Back to
+                  Make it
                   <br />
-                  <span>possibility.</span>
+                  <span>yours.</span>
                 </h2>
-                <p>
-                  One intelligence. Every conversation.
-                  <br />
-                  Your next chapter starts here.
-                </p>
               </div>
-              <span className="landing-label">XEVEN / RETURNING TO DOCK</span>
             </section>
           </div>
         </main>
-        <Footer onReplay={replay} cinematic />
+        <Footer cinematic />
       </div>
-      {intro && <SpiderIntro onComplete={finishIntro} />}
       <Dialog open={reader} onOpenChange={setReader}>
         <DialogContent
           className="screen-reader-dialog"
@@ -408,18 +290,12 @@ export default function ContinuousHome() {
             returnFocus.current?.focus();
           }}
         >
-          <p className="eyebrow">THE CONVERSATION / IN FOCUS</p>
-          <DialogTitle>A little more context.</DialogTitle>
-          <DialogDescription>
-            Illustrative conversation. This is a scripted preview of the AI
-            platform.
-          </DialogDescription>
+          <DialogTitle>A better conversation.</DialogTitle>
+          <DialogDescription>Scripted preview of XEVEN.</DialogDescription>
           <div className="reader-conversation">
             <span>YOU</span>
             <p>{shown.question}</p>
-            <span>
-              <XevenMark /> XEVEN
-            </span>
+            <span>XEVEN</span>
             <p>{shown.answer}</p>
             <small>{shown.tag}</small>
           </div>
@@ -427,7 +303,7 @@ export default function ContinuousHome() {
             className="primary-button"
             href={`/demo?scenario=${FLOWS[flow].scenario}`}
           >
-            Open the guided demo <ArrowUpRight size={17} />
+            Try the demo <ArrowUpRight size={17} />
           </Link>
         </DialogContent>
       </Dialog>

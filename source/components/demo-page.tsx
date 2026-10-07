@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { PageShell, useExperience, XevenMark } from "./experience-shell";
+import { PageShell, useExperience } from "./experience-shell";
 import { SCENARIOS, PREVIEW_NOTE, type ScenarioId } from "@/lib/xeven-content";
 import { demoReducer, initialDemo, type DemoIntent } from "@/lib/demo-machine";
 
@@ -91,8 +91,7 @@ export default function DemoPage() {
           </h1>
         </div>
         <p>
-          Explore a conversation with a fictional store. Change the context and
-          see how the sample response changes.
+          Try a sample conversation. Change the context. See the difference.
         </p>
       </section>
       <section className="demo-workspace page-section">
@@ -103,7 +102,6 @@ export default function DemoPage() {
           </div>
           <div className="demo-console-screen">
             <div className="demo-screen-head">
-              <XevenMark />
               <div>
                 <strong>XEVEN</strong>
                 <span>GUIDED SAMPLE</span>

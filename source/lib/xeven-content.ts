@@ -2,7 +2,7 @@
 // Examples are scripted product demonstrations, not live backend responses.
 export const SALES_EMAIL = "hello@xeven.world";
 export const HARDWARE_NOTE =
-  "XEVEN is software for your website. Handheld + spider are concept visuals, not hardware for sale.";
+  "XEVEN is AI software. The console is a visual concept.";
 export const PREVIEW_NOTE =
   "Scripted preview with sample data — no real appointment, no customer data.";
 export const TRIAL = {
@@ -252,36 +252,36 @@ export const FAQ = [
   {
     question: "Is the handheld for sale?",
     answer:
-      "No — the handheld and spider are concept visuals. XEVEN is software for your website.",
+      "The console is a visual concept. XEVEN is AI software for your website.",
   },
   {
     question: "What counts as one conversation or one knowledge item?",
     answer:
-      "For this guide, a conversation is one customer chat session and a knowledge item is one supplied entry, such as an FAQ or policy; exact session boundaries and entry-size limits are confirmed with sales.",
+      "A conversation is one chat session; a knowledge item is one supplied entry, such as a policy. Confirm exact limits with sales.",
   },
   {
     question: "How do I purchase Xeven?",
     answer:
-      "Choose a plan and prepare a purchase enquiry for the Xeven sales team. They can confirm pricing, business requirements, and access. Xeven is offered as a commercial product.",
+      "Choose a plan and contact sales to confirm setup, pricing, and commercial access.",
   },
   {
     question: "What makes Xeven different from a basic chat widget?",
     answer:
-      "Xeven combines business knowledge, explicit customer memories, behavioral signals, and conversation history. Its unified brain draws on six areas of expertise, from support to shopping and lead qualification.",
+      "Business knowledge, allowed memory, and context. One agent across six areas, from support to lead qualification.",
   },
   {
     question: "What does Xeven remember?",
     answer:
-      "Memory can retain allowed customer facts and preferences. Explicit memories stay separate from inferred behavior. Businesses control allowed fields and event retention, while remember and forget commands support customer control.",
+      "Allowed facts and preferences. Explicit memory stays separate from behavior. Businesses set fields and retention; customers can remember or forget.",
   },
   {
     question: "Are Chrono and Echo available on every plan?",
     answer:
-      "Chrono scheduling and Echo English are included in the Growth profile. Scale includes additional voice and multilanguage features. Voice services need appropriate configuration; confirm your requirements with sales.",
+      "Growth includes Chrono and Echo English. Scale adds voice and multilanguage features. Services require configuration.",
   },
   {
     question: "Is the test drive connected to a live AI agent?",
     answer:
-      "The test drive is an interactive preview with sample business information and scripted responses. It demonstrates shopping, support, booking, and lead qualification with sample data. No lead, appointment, or customer record is created.",
+      "It uses scripted responses and fictional data. No appointment, lead, or customer record is created.",
   },
 ];

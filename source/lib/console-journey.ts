@@ -79,10 +79,13 @@ export function consoleFrame(
     ry: 0,
     rz: 0,
   };
+  const openingWidth = phone
+    ? Math.min(w * 0.72, h * 0.43)
+    : Math.min(w * 0.43, h * 0.65);
   const opening: ConsolePose = {
     x: w * (phone ? 0.67 : 0.73),
-    y: h * (phone ? 0.83 : 0.57),
-    width: phone ? Math.min(w * 0.72, h * 0.43) : Math.min(w * 0.43, h * 0.65),
+    y: phone ? Math.max(h * 0.85, 420 + openingWidth * 0.75) : h * 0.57,
+    width: openingWidth,
     rx: 5,
     ry: -14,
     rz: 10,

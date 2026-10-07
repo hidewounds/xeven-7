@@ -1,43 +1,17 @@
 "use client";
 
 import Link from "@/components/transition-link";
-import { HARDWARE_NOTE, SALES_EMAIL } from "@/lib/xeven-content";
+import { SALES_EMAIL } from "@/lib/xeven-content";
 import { PageTransitionProvider } from "./page-transition";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { ArrowUpRight, ArrowUp, Menu, Send } from "lucide-react";
-import type { SVGProps } from "react";
-function InstagramMark(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-function XMark(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.3l-4.9-6.4L5.2 21H2.1l7.3-8.3L2 3h6.4l4.4 5.9L17.8 3zm-1.1 16.1h1.7L7.4 4.8H5.6l11.1 14.3z" />
-    </svg>
-  );
-}
-function YouTubeMark(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
-      <path d="M10.5 9.8v4.4l4-2.2z" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-function LinkedInMark(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M6.9 8.6H3.6V21h3.3V8.6zM5.2 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM12.4 13.4c0-1.1.6-2.3 2.3-2.3 1.6 0 2.2 1.1 2.2 2.6V21h3.3v-7.9c0-3-1.6-4.7-4.3-4.7-1.7 0-2.9.9-3.5 1.9V8.6h-3.3V21h3.3v-7.6z" />
-    </svg>
-  );
-}
+import { ArrowUpRight, Menu, Mail, GitFork } from "lucide-react";
+import { SocialIcon } from "./social-icon";
+import { SOCIAL_PROFILES } from "@/lib/social-links";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { usePathname } from "next/navigation";
+import { SpaceScene } from "./space-scene";
+import OrbIntro from "./orb-intro";
+import { createIntroSession, INTRO_TIMEOUT } from "@/lib/intro-session";
 
 type Experience = { ready: boolean; reduced: false; quality: "full" };
 const ExperienceContext = createContext<Experience>({
@@ -52,16 +26,74 @@ export function ExperienceProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const path = usePathname() || "/";
   const [ready, setReady] = useState(false);
+  const [intro, setIntro] = useState(path === "/");
+  const session = useRef<ReturnType<typeof createIntroSession> | null>(null);
+  const currentPath = useRef(path);
+  const playing = useRef(intro);
+  currentPath.current = path;
+  playing.current = intro;
+  const begin = () => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    setIntro(true);
+  };
+  const finish = () => {
+    session.current?.finish(Date.now());
+    setIntro(false);
+    requestAnimationFrame(() =>
+      document
+        .querySelector<HTMLElement>("#main-content")
+        ?.focus({ preventScroll: true }),
+    );
+  };
+  useEffect(() => {
+    session.current ??= createIntroSession(path, Date.now());
+    if (session.current.enter(path, Date.now())) begin();
+    else if (path !== "/") setIntro(false);
+  }, [path]);
   useEffect(() => {
     document.documentElement.dataset.motion = "full";
     setReady(true);
+    let timer: ReturnType<typeof setTimeout>;
+    let lastEvent = 0;
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(activity, INTRO_TIMEOUT + 20);
+    };
+    function activity() {
+      if (document.hidden) return;
+      const now = Date.now();
+      if (now - lastEvent < 800) return;
+      lastEvent = now;
+      if (
+        !playing.current &&
+        session.current?.activity(currentPath.current, now)
+      )
+        begin();
+      schedule();
+    }
+    schedule();
+    const events = ["pointerdown", "pointermove", "keydown", "scroll"] as const;
+    events.forEach((event) =>
+      window.addEventListener(event, activity, { passive: true }),
+    );
+    document.addEventListener("visibilitychange", activity);
+    return () => {
+      clearTimeout(timer);
+      events.forEach((event) => window.removeEventListener(event, activity));
+      document.removeEventListener("visibilitychange", activity);
+    };
   }, []);
   return (
     <ExperienceContext.Provider
       value={{ ready, reduced: false, quality: "full" }}
     >
-      <PageTransitionProvider>{children}</PageTransitionProvider>
+      <div className={`experience-root ${intro ? "intro-active" : ""}`}>
+        <SpaceScene />
+        <PageTransitionProvider>{children}</PageTransitionProvider>
+        {intro && <OrbIntro onComplete={finish} />}
+      </div>
     </ExperienceContext.Provider>
   );
 }
@@ -70,7 +102,7 @@ export function XevenMark() {
   return (
     <img
       className="spider-mark"
-      src="/xeven/logo-spider.svg"
+      src="/xeven/logo-spider-light.svg"
       width="40"
       height="40"
       alt=""
@@ -102,19 +134,18 @@ export function Header({
   const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    if (!cinematic) return;
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [cinematic]);
+    const update = () => setScrolled(window.scrollY > 40);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
   return (
     <>
       <Link className="skip-link" href="#main-content">
         Skip to content
       </Link>
       <header
-        className={`global-header ${cinematic ? "story-header" : ""} ${cinematic && scrolled ? "scrolled" : ""}`}
+        className={`global-header ${cinematic ? "story-header" : ""} ${scrolled ? "header-scrolled" : ""}`}
       >
         <Link href="/" className="brand" aria-label="Xeven home">
           <Wordmark />
@@ -178,58 +209,7 @@ export function Header({
     </>
   );
 }
-const SOCIALS = [
-  { label: "Instagram", Icon: InstagramMark },
-  { label: "X", Icon: XMark },
-  { label: "YouTube", Icon: YouTubeMark },
-  { label: "LinkedIn", Icon: LinkedInMark },
-];
-function Newsletter() {
-  const [email, setEmail] = useState("");
-  const [note, setNote] = useState("");
-  return (
-    <form
-      className="newsletter-form"
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-          setNote("That email does not parse — try again.");
-          return;
-        }
-        setNote("");
-        window.location.href = `mailto:${SALES_EMAIL}?subject=${encodeURIComponent("XEVEN updates")}&body=${encodeURIComponent(`Please send XEVEN updates to ${email.trim()}.`)}`;
-      }}
-    >
-      <label htmlFor="newsletter-email">Field notes, occasionally.</label>
-      <div>
-        <input
-          id="newsletter-email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@company.com"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
-        <button type="submit" aria-label="Subscribe by email">
-          <Send size={16} />
-        </button>
-      </div>
-      {note ? (
-        <p role="alert">{note}</p>
-      ) : (
-        <p>Opens your mail app — nothing subscribes silently.</p>
-      )}
-    </form>
-  );
-}
-export function Footer({
-  onReplay,
-  cinematic = false,
-}: {
-  onReplay?: () => void;
-  cinematic?: boolean;
-}) {
-  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+export function Footer({ cinematic = false }: { cinematic?: boolean }) {
   return (
     <footer
       id="site-footer"
@@ -237,83 +217,112 @@ export function Footer({
       data-console-footer={cinematic || undefined}
     >
       <div className="footer-stage">
-        <picture>
-          <source
-            media="(max-width: 700px)"
-            srcSet="/xeven/horizon-small.webp"
-          />
-          <img
-            className="footer-horizon"
-            src="/xeven/horizon.webp"
-            alt=""
-            width="1916"
-            height="821"
-            loading="lazy"
-          />
-        </picture>
+        {!cinematic && (
+          <picture>
+            <source
+              media="(max-width: 700px)"
+              srcSet="/xeven/horizon-small.webp"
+            />
+            <img
+              className="footer-horizon"
+              src="/xeven/horizon.webp"
+              width="1916"
+              height="821"
+              alt=""
+              loading="lazy"
+            />
+          </picture>
+        )}
         <div className="footer-content">
           <div className="footer-top">
-            <div>
-              <Link className="brand" href="/" aria-label="Xeven home">
+            <div className="footer-identity">
+              <div className="brand" aria-label="XEVEN">
                 <Wordmark />
-              </Link>
+              </div>
               <p>
-                A little context.
-                <br />A better conversation.
+                Stay in
+                <br />
+                the loop.
               </p>
-              <Link href="/contact" className="outline-pill">
-                Make it yours <ArrowUpRight size={17} />
-              </Link>
             </div>
             <div className="footer-social">
-              <p className="eyebrow">Elsewhere</p>
-              <div className="social-logos">
-                {SOCIALS.map(({ label, Icon }) => (
-                  <span key={label} title={`${label} — coming soon`}>
-                    <Icon />
-                    <span className="sr-only">{label} (coming soon)</span>
-                  </span>
-                ))}
+              <p className="eyebrow">SOCIALS</p>
+              <div className="social-links">
+                {SOCIAL_PROFILES.map((profile) =>
+                  profile.url ? (
+                    <a
+                      key={profile.name}
+                      href={profile.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <SocialIcon name={profile.icon} />
+                      <span>{profile.name}</span>
+                      <ArrowUpRight size={14} />
+                    </a>
+                  ) : (
+                    <span
+                      className="social-pending"
+                      key={profile.name}
+                      aria-label={`${profile.name} — coming soon`}
+                    >
+                      <SocialIcon name={profile.icon} />
+                      <span>{profile.name}</span>
+                      <small>Soon</small>
+                    </span>
+                  ),
+                )}
+                <a
+                  href="https://github.com/hidewounds/xeven-7"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <GitFork size={18} />
+                  <span>GitHub</span>
+                  <ArrowUpRight size={14} />
+                </a>
+                <a href={`mailto:${SALES_EMAIL}`}>
+                  <Mail size={18} />
+                  <span>Email</span>
+                  <ArrowUpRight size={14} />
+                </a>
               </div>
-              <p className="social-note">Profiles open here soon.</p>
             </div>
-            <Newsletter />
-            <div
-              className="footer-signature"
-              aria-hidden={cinematic || undefined}
+            <form
+              className="footer-newsletter"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const email = new FormData(event.currentTarget).get("email");
+                window.location.href = `mailto:${SALES_EMAIL}?subject=${encodeURIComponent("XEVEN newsletter")}&body=${encodeURIComponent(`Please send the XEVEN newsletter to ${email}.`)}`;
+              }}
             >
-              <XevenMark />
-              <span>
-                CONNECTED
-                <br />
-                BY DESIGN.
-              </span>
-            </div>
-          </div>
-          <div className="footer-replay">
-            {onReplay && (
-              <button className="setting-button" onClick={onReplay}>
-                Replay introduction ↗
-              </button>
-            )}
-          </div>
-          <div className="footer-product-note">
-            <p>{HARDWARE_NOTE}</p>
-            <div>
-              <a href={`mailto:${SALES_EMAIL}`}>{SALES_EMAIL}</a>
-              <span>No payment taken here.</span>
-            </div>
+              <label htmlFor={`updates-${cinematic ? "home" : "page"}`}>
+                Newsletter.
+              </label>
+              <div className="footer-email-field">
+                <input
+                  id={`updates-${cinematic ? "home" : "page"}`}
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  placeholder="Your email"
+                  required
+                  maxLength={254}
+                />
+                <button type="submit" aria-label="Request updates by email">
+                  <ArrowUpRight size={20} />
+                </button>
+              </div>
+              <small>Opens an email request.</small>
+            </form>
           </div>
           <div className="footer-bottom">
             <span>© 2026 XEVEN</span>
-            <span>AI PLATFORM · HANDHELD INTERFACE CONCEPT</span>
-            <span>ONE THREAD. MORE POSSIBILITY.</span>
             <button
-              className="setting-button"
               type="button"
-              onClick={toTop}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
-              Back to top <ArrowUp size={14} />
+              Back to top ↑
             </button>
           </div>
         </div>

@@ -67,7 +67,6 @@ export function Handheld({
           )}
         </div>
         <div className="device-brand" aria-hidden="true">
-          <img src="/xeven/logo-spider.svg" alt="" width="160" height="160" />
           <strong>XEVEN</strong>
           <span>CONNECTED BY DESIGN</span>
         </div>

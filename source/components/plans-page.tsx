@@ -1,7 +1,7 @@
 "use client";
 import Link from "@/components/transition-link";
 import { useState } from "react";
-import { ArrowUpRight, Check, CircleHelp } from "lucide-react";
+import { ArrowUpRight, Check } from "lucide-react";
 import { PageShell, Reveal } from "./experience-shell";
 import { PLANS, TRIAL, formatUsd, type Billing } from "@/lib/xeven-content";
 
@@ -17,11 +17,7 @@ export default function PlansPage() {
           <span>On your terms.</span>
         </h1>
         <div className="plans-intro-foot">
-          <p>
-            Choose a starting point for your business.
-            <br />
-            Confirm the configuration and purchase with XEVEN sales.
-          </p>
+          <p>Choose your plan. Arrange access with XEVEN sales.</p>
           <span>COMMERCIAL ACCESS / USD GUIDE</span>
         </div>
       </section>
@@ -53,9 +49,9 @@ export default function PlansPage() {
             </label>
           </fieldset>
           <p>
-            Annual guide: 20% off the subscription.
+            Annual billing: save 20%.
             <br />
-            <span>Full setup credit. $0 net setup.</span>
+            <span>Setup included.</span>
           </p>
         </div>
         <div className="pricing-grid">
@@ -100,21 +96,12 @@ export default function PlansPage() {
                   <p className="setup-price">
                     ${plan.setup} setup, credited on annual
                   </p>
-                  <p className="conversation-rate">
-                    {plan.perConversation} / conversation{" "}
-                    <span>at full included volume on the monthly guide</span>
-                  </p>
                 </>
               ) : (
                 <p className="custom-scope">
-                  From Scale + scope. Extra rules, languages, voice channels —
-                  agreed with sales.
+                  Scale, tailored to your business.
                 </p>
               )}
-              <p className="plan-sales-note">
-                USD guide. Taxes/terms confirmed with sales. No payment taken
-                here.
-              </p>
               <Link
                 className={index === 1 ? "primary-button" : "secondary-button"}
                 href={`/contact?plan=${plan.name}&billing=${billing}`}
@@ -152,22 +139,16 @@ export default function PlansPage() {
           <div>
             <span className="eyebrow">A PLACE TO BEGIN</span>
             <h2>{TRIAL.label}</h2>
-            <p>
-              Explore sample scenarios before discussing your configuration. Ask
-              sales to arrange sandbox access; the on-page demo is available
-              now.
-            </p>
+            <p>Try the demo now. Ask sales for sandbox access.</p>
           </div>
           <Link href="/demo?scenario=shopping" className="outline-pill">
             Explore the sample <ArrowUpRight size={17} />
           </Link>
         </div>
         <p className="pricing-note">
-          The annual setup credit equals the listed setup fee, so net setup is
-          $0. Included conversation limits remain monthly; approximate unit
-          costs use the monthly subscription divided by the full included
-          volume. Final counting rules, taxes, scope, and terms are confirmed
-          with sales.
+          USD guide. Annual billing credits the full setup fee; capacity stays
+          monthly. Final scope, taxes, counting rules, and terms confirmed with
+          sales. No payment taken here.
         </p>
       </section>
       <section className="purchase-steps page-section">
@@ -184,44 +165,24 @@ export default function PlansPage() {
             <span>01</span>
             <div>
               <h3>Find your fit.</h3>
-              <p>
-                Choose the capabilities and capacity that suit your business.
-              </p>
+              <p>Choose your capabilities and capacity.</p>
             </div>
           </li>
           <li>
             <span>02</span>
             <div>
               <h3>Talk to XEVEN.</h3>
-              <p>
-                Prepare your enquiry and confirm requirements, pricing, and
-                terms with sales.
-              </p>
+              <p>Confirm the setup and commercial terms.</p>
             </div>
           </li>
           <li>
             <span>03</span>
             <div>
               <h3>Make it yours.</h3>
-              <p>
-                Arrange commercial access and configure your agent’s knowledge,
-                tone, and connected services.
-              </p>
+              <p>Configure your knowledge, tone, and services.</p>
             </div>
           </li>
         </ol>
-      </section>
-      <section className="plan-help">
-        <CircleHelp size={27} />
-        <div>
-          <h3>Start with a conversation.</h3>
-          <p>
-            Explore the sample experience before choosing your configuration.
-          </p>
-        </div>
-        <Link href="/demo" className="secondary-button">
-          Try the guided demo <ArrowUpRight size={17} />
-        </Link>
       </section>
     </PageShell>
   );

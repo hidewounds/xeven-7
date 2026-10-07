@@ -1,63 +1,70 @@
-# XEVEN — Conversations beyond the screen
+# XEVEN — Particle edition
 
-XEVEN’s existing six-page website now uses a dimensional black-metal spider and a continuous console-screen journey. The original preferred transparent console artwork is retained.
+Six pages for XEVEN, a commercial AI platform. A small reference-based fibrous orb dissolves into particles and opens into the restored space background: nebula, fine orbit lines, stars, and floating mineral fragments. The spider is retained in the brand logo and removed from every console display.
 
-## This revision
+## Experience
 
-- The spider is actual procedural Three.js geometry: 4.601306 × 4.716168 × 0.887 units, eight articulated shoulder pivots, 110 meshes and 6,538 triangles. Its X is a real 0.084-unit recess in the shield. No textures or remote models are needed by the runtime.
-- The transparent logo is derived from the same geometry. Dark metal, a narrow cool rim and engraved highlights make it visible on the existing dark website without a white plaque. Header, About, favicon, console screen and social identity share this design.
-- A silent 5.2-second entrance plays on every fresh homepage mount/reload. The spider descends on silk, settles frontally, catches light across its X, and reveals only **EVEN** beside that X. Skip, Escape and footer Replay remain available.
-- The original console begins on the right. Scrolling enlarges its measured display until it covers the viewport; the next three chapters occupy that screen. Near the footer the console returns, moves into its dock and displays the spider plus XEVEN. The device then stays parked while a panel expands from its exact screen bounds into the footer.
-- Pages exchange through a short layered-window transition. The portable edition uses native file-safe hash navigation for ordinary clicks, preserves plan/scenario queries, and supports browser Back/Forward. Links retain actual HTML destinations for direct entry and new tabs.
-- Motion is always enabled and the website contains no audio or sound controls. The owner’s latest direction supersedes earlier reduced-motion and session-once behavior. Graphics work pauses in hidden tabs/offscreen views and resumes when visible; there is no visitor quality switch.
-- Existing product content, annual plan guides, trial guide, scripted demos and enquiry tools remain in place. Sales confirms final commercial terms.
+- The 6.25-second entrance starts with a compact graphite/plum orb. Its intact curved surface dissolves into 21,000 particles on desktop (10,500 on narrow screens). They spread across the viewport, form a grain-like veil, and clear continuously from the center into Home. There is no four-part breakup or stretch.
+- The entrance plays on a fresh Home document or reload, and after 25 minutes of inactivity. Ordinary page navigation, including returning Home after a reload, does not replay it. Skip and Escape work. No local-storage preference changes the timing.
+- The recolored transparent console uses graphite, silver, icy cyan, and white. Its actual screen opening is masked, so the restored background remains visible through its translucent HTML display.
+- Scroll into the display, explore three concise chapters, then pull back. The console docks beside the footer, shows XEVEN, and expands a footer surface from its registered screen bounds.
+- The footer contains Instagram, X, LinkedIn, GitHub, Email, and a newsletter email request. The three social profiles are clearly marked Soon until owner-confirmed URLs are entered in `lib/social-links.ts`. No social handles are invented and no automatic subscription is claimed.
+- Page contents swipe horizontally over the same environment, with no loading overlay, label, or progress bar. The fixed header gains a translucent surface as you scroll.
+- Angular 2D spider artwork with a transparent X cut-out replaces the metallic mark. Home and About use an open moving signal sculpture instead of doorway geometry. The console chapters use larger type, quieter glass, and a flowing list of workflows.
+- All motion is enabled, and the website is silent. Rendering pauses in hidden tabs. CSS/vector animation remains available when WebGL2 is unavailable.
+- Copy is shorter; secondary pages retain product details, monthly/annual plan guides, four scripted demo scenarios, and enquiry review/copy/download/email tools.
 
 ## Pages
 
-| Route       | Purpose                                                                             | Offline file    |
-| ----------- | ----------------------------------------------------------------------------------- | --------------- |
-| `/`         | Continuous introduction, screen takeover, three chapters, console return and footer | `index.html`    |
-| `/platform` | Knowledge, Memory, Chrono, Echo; expandable details and FAQ                         | `platform.html` |
-| `/about`    | Product narrative and animated dimensional identity                                 | `about.html`    |
-| `/plans`    | Monthly/annual commercial guides and enquiry links                                  | `plans.html`    |
-| `/demo`     | Four clearly labelled local scripted chatbot scenarios                              | `demo.html`     |
-| `/contact`  | Review, copy, download or open an enquiry email draft                               | `contact.html`  |
+| Route       | Purpose                                           | Offline file    |
+| ----------- | ------------------------------------------------- | --------------- |
+| `/`         | Introduction and continuous console journey       | `index.html`    |
+| `/platform` | Knowledge, Memory, Chrono, Echo, controls and FAQ | `platform.html` |
+| `/about`    | The product idea and principles                   | `about.html`    |
+| `/plans`    | Commercial pricing guides and plan selection      | `plans.html`    |
+| `/demo`     | Four local, labelled scripted conversations       | `demo.html`     |
+| `/contact`  | Prepare and export an enquiry                     | `contact.html`  |
 
-The handheld is an interface concept, not physical hardware for sale. Demonstrations use fictional data and scripted responses; they do not contact a live AI service or make bookings. Enquiries are prepared locally and are never silently sent.
+XEVEN is software; the console is a visual concept. Demo conversations use fictional data and do not create appointments or customer records. Email requests open the visitor's email app. Nothing is silently sent.
 
-## Downloaded edition
+## Portable website
 
-Extract the whole ZIP, then open **index.html**. No installation, internet connection, account, API key or server is needed to explore it. Keep the HTML files beside `assets/`. Both fonts and runtime libraries are bundled; imagery is local. `START-HERE.txt` provides instructions. `source/` is the editable project; `brand/` includes transparent SVGs, the GLB model, dimension notes and an identity study; `licenses/` contains notices.
+Extract the complete ZIP and open **index.html**. No server, installation, account, network connection, API key, or build step is needed to view it. All fonts, runtime libraries, geometry, images, styles, and animations are included. Keep the six HTML pages beside `assets/`.
 
-WebGL2-capable browsers render the articulated 3D spider. If graphics initialization fails, the same geometry’s transparent SVG projection remains visible and participates in the entrance. Viewport, GPU capability, browser lighting/font rendering and performance can differ across computers. Identical pixels on every device are not guaranteed. Opening/sending email uses the visitor’s mail app and connectivity. Clipboard restrictions have manual-copy and text-download fallbacks.
+Ordinary navigation uses file-safe hash history and smooth swipes; browser Back/Forward and direct HTML entry work. Plan, billing, and scenario queries remain intact. `source/` contains the editable project; `brand/` contains transparent logo masters; `licenses/` contains dependency notices.
+
+Browser/GPU support, font rendering, viewport sizes, and performance vary across computers. The same source and assets do not guarantee identical pixels everywhere. Email needs a configured mail app and connectivity to send. Local clipboard restrictions have manual-copy and download fallbacks.
 
 ## Development
 
-Use Node.js 22.13+ and the package manager declared in package.json. The viewing edition already contains compiled dependencies.
+Use Node.js 22.13+ and the package manager in `package.json`.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm exec tsc --noEmit --incremental false
 pnpm check:experience
+node scripts/check-particles.mjs
 pnpm dev
 pnpm build
 pnpm offline:export
 pnpm offline:check
 ```
 
-Export defaults to `outputs/xeven-offline/`; an absolute destination may be passed to `node scripts/export-offline.mjs`. Editable source excludes Git data, credentials, environment files, installed dependencies and the original hosted Site identity. A new host needs its own deployment identity.
+The exporter defaults to `outputs/xeven-offline/`. Pass an absolute destination to `node scripts/export-offline.mjs` to choose another folder. Credentials, account access, installed dependencies, Git data, and the original hosting identity are excluded from the portable source.
 
-## Design and motion files
+## Main files
 
-- `lib/spider-model.ts`: single native geometry master, materials, dimensions, anchors and eight shoulder pivots.
-- `components/spider-view.tsx`: transparent renderer, environment lighting, articulation, projected intro anchors and matching SVG fallback.
-- `components/spider-intro.tsx`: entrance timing and accessible skip/focus behavior.
-- `lib/console-journey.ts`: reversible measured console poses, viewport coverage, dock and expanding footer bounds.
-- `components/spatial-world.tsx`: scroll measurements, cached layout and frame updates.
-- `components/handheld.tsx`: retained artwork, registered HTML display and controls.
-- `components/page-transition.tsx`, `components/transition-link.tsx`: shared page handoff.
-- `offline/`: file-safe routing and shared-component entry.
-- `scripts/export-spider.mjs`, `scripts/render-spider-vectors.mjs`: geometry validation/GLB export and matching vector projections. Run them in that order. PNG regeneration is optional and requires sharp; SVG generation does not.
-- `scripts/check-offline.mjs`: file URL dependency and behavior checks using DOM emulation, not visual browser testing.
+- `lib/orb-model.ts`: intact curved surface, image-sampled particles, dispersion and continuous aperture.
+- `components/orb-intro.tsx`: shared animation clock, renderer, textured fallback, skip and completion.
+- `lib/intro-session.ts`: fresh-document and inactivity timing.
+- `components/connection-field.tsx`: open signal sculpture used in Home and About.
+- `lib/social-links.ts`: official profile configuration with honest pending states.
+- `components/space-scene.tsx`: restored nebula, orbit lines, stars, fragments, and pointer parallax.
+- `assets/orb-surface.webp`: inline texture that also works in a local file document.
+- `lib/console-journey.ts`: reversible poses, display coverage and dock geometry.
+- `components/spatial-world.tsx`: measured scroll choreography.
+- `components/experience-shell.tsx`: intro lifetime, persistent environment, header and footer.
+- `components/page-transition.tsx`: app-style swipes without a loading interface.
+- `offline/`: file-safe routing using the same components.
 
-The earlier procedural console study and old choreography are retained as source history and are not rendered or fetched. See `docs/assets.md`, `docs/improvement-brief.md`, `docs/spider-identity.md` and `docs/verification.md` for provenance, current directions, model details and verification limits.
+The retained 3D spider geometry and projection scripts are historical studies only. Current logo masters are flat SVGs in `public/xeven/`. Earlier reference/design files in `docs/` are historical; this README and `docs/rebuild-notes.md` describe the current edition. Verification limits are recorded in `docs/verification.md`.

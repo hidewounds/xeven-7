@@ -5,10 +5,7 @@ import "./globals.css";
 const origin = "https://xeven-spatial-studio.guddaaa.chatgpt.site";
 export const metadata: Metadata = {
   metadataBase: new URL(origin),
-  title: {
-    default: "XEVEN",
-    template: "XEVEN",
-  },
+  title: { default: "XEVEN", template: "XEVEN" },
   description:
     "An AI agent that connects your business knowledge, customer context, and next steps. Explore XEVEN’s spatial interface, guided demo, and commercial plans.",
   robots: { index: false, follow: false },
@@ -23,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "XEVEN",
-    title: "XEVEN — Conversations beyond the screen",
+    title: "XEVEN",
     description:
       "Your knowledge. A new connection. Explore the XEVEN AI platform.",
     images: [
@@ -31,13 +28,13 @@ export const metadata: Metadata = {
         url: "/xeven/social-preview.png",
         width: 1200,
         height: 630,
-        alt: "XEVEN spider identity — Conversations beyond the screen",
+        alt: "XEVEN — Beyond the ordinary",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "XEVEN — Conversations beyond the screen",
+    title: "XEVEN",
     description: "Your knowledge. A new connection.",
     images: ["/xeven/social-preview.png"],
   },

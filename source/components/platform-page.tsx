@@ -28,14 +28,13 @@ const MODULES = [
     eyebrow: "THE FOUNDATION",
     title: "Answers from your world.",
     description:
-      "Give XEVEN the information that makes your business yours: products, policies, FAQs, and guidance. Relevant business knowledge helps shape the response.",
+      "Your products, policies, and guidance. Ready for the right question.",
     features: [
       "Business-specific information",
       "Relevant knowledge retrieval",
       "A configurable agent personality",
     ],
-    limit:
-      "Knowledge capacity depends on the selected plan. The information below is a sample store policy.",
+    limit: "50–500 knowledge items by plan. Sample policy shown.",
     screen: [
       "INFORMATION SUPPLIED",
       "Unworn items · exchanges within 30 days",
@@ -53,14 +52,13 @@ const MODULES = [
     eyebrow: "THE CONTINUITY",
     title: "A useful detail, remembered.",
     description:
-      "Keep allowed customer facts separate from inferred behavior. The next conversation can pick up with a preference the customer has chosen to share.",
+      "Remember allowed preferences. Keep explicit facts separate from behavior.",
     features: [
       "Explicit customer preferences",
       "Behavior signals kept separate",
       "Remember and forget controls",
     ],
-    limit:
-      "Configure allowed memory fields and retention for your business. The demo uses fictional preferences.",
+    limit: "You control allowed fields and retention.",
     screen: [
       "PREFERENCE SHARED",
       "Alex · size 9 · prefers black sneakers",
@@ -78,14 +76,13 @@ const MODULES = [
     eyebrow: "THE NEXT MOMENT",
     title: "Make time for the next step.",
     description:
-      "Bring business hours, availability, buffers, and booking rules into the conversation. Ask for a time and the information needed before confirmation.",
+      "Turn availability into a next step, with your hours and booking rules.",
     features: [
       "Schedule-based availability",
       "Slot holds and bookings",
       "Business-specific timing rules",
     ],
-    limit:
-      "Included in Growth and Scale profiles. Setup is required; this website does not check a live calendar.",
+    limit: "Growth and Scale. Calendar setup required.",
     screen: [
       "SAMPLE AVAILABILITY",
       "Friday · 14:00 or 15:30 UTC",
@@ -103,14 +100,13 @@ const MODULES = [
     eyebrow: "THE HUMAN FREQUENCY",
     title: "Another way to connect.",
     description:
-      "Extend the conversation through configured speech services: transcribe voice, synthesize a response, and capture useful notes and action items.",
+      "Transcribe, respond, and capture useful notes through configured voice services.",
     features: [
       "Speech transcription",
       "Synthesized voice responses",
       "Conversation notes and next steps",
     ],
-    limit:
-      "Voice language and channel support depend on the plan and configured services. No microphone is used in this preview.",
+    limit: "Languages and channels depend on the plan. This preview is silent.",
     screen: [
       "VOICE INPUT",
       "Transcribe the customer’s conversation",
@@ -122,30 +118,12 @@ const MODULES = [
   },
 ];
 const EXPERTISE = [
-  [
-    "Customer support",
-    "Bring the relevant policy into a support conversation, then ask for missing information before suggesting the next step.",
-  ],
-  [
-    "Sales",
-    "Explain the business’s offering and guide an interested customer toward a relevant commercial next step.",
-  ],
-  [
-    "Shopping assistance",
-    "Connect product information with customer preferences to make it easier to explore suitable options.",
-  ],
-  [
-    "Product advice",
-    "Answer product questions using the information the business provides, rather than inventing unavailable specifications.",
-  ],
-  [
-    "Lead qualification",
-    "Ask useful questions about the customer’s needs to help the business understand the enquiry.",
-  ],
-  [
-    "General assistance",
-    "Maintain a coherent conversation while drawing on the agent’s configured knowledge and instructions.",
-  ],
+  ["Customer support", "Answer from your policies. Ask for missing details."],
+  ["Sales", "Connect interest to a useful next step."],
+  ["Shopping assistance", "Find products that fit shared preferences."],
+  ["Product advice", "Clear answers from supplied product information."],
+  ["Lead qualification", "Ask the questions that shape a better brief."],
+  ["General assistance", "Keep the conversation moving with your knowledge."],
 ];
 export default function PlatformPage() {
   const [module, setModule] = useState(0),
@@ -160,10 +138,7 @@ export default function PlatformPage() {
             <br />
             <span>More context.</span>
           </h1>
-          <p>
-            Knowledge, permitted memory, and relevant signals come together in a
-            configurable AI agent for your business.
-          </p>
+          <p>Your knowledge. Permitted memory. One connected agent.</p>
           <Link className="primary-button" href="/demo">
             Explore a conversation <ArrowUpRight size={17} />
           </Link>
@@ -201,9 +176,7 @@ export default function PlatformPage() {
               </div>
             </div>
           ))}
-          <p className="diagram-caption">
-            CONCEPTUAL SYSTEM VIEW / NOT A LIVE TRACE
-          </p>
+          <p className="diagram-caption">HOW IT CONNECTS</p>
         </div>
       </section>
       <section className="module-section page-section">
@@ -216,10 +189,7 @@ export default function PlatformPage() {
               <span>understanding.</span>
             </h2>
           </Reveal>
-          <p>
-            Inspect the information each capability uses, the experience it
-            supports, and what needs configuring.
-          </p>
+          <p>Four capabilities. Configured around you.</p>
         </div>
         <div className="module-layout">
           <div
@@ -274,9 +244,7 @@ export default function PlatformPage() {
                   <p>{selected.screen[index + 1]}</p>
                 </div>
               ))}
-              <div className="terminal-bottom">
-                ILLUSTRATIVE EXAMPLE / CONFIGURATION REQUIRED
-              </div>
+              <div className="terminal-bottom">SAMPLE / SETUP REQUIRED</div>
             </div>
           </div>
         </div>
@@ -291,10 +259,7 @@ export default function PlatformPage() {
               <span>A choice retained.</span>
             </h2>
           </div>
-          <p>
-            A configuration guide for business memory. Confirm your allowed
-            fields, handling rules, and data terms before setup.
-          </p>
+          <p>Set the fields, retention, and handling rules at setup.</p>
         </div>
         <div className="retention-table-wrap">
           <table className="retention-table">
@@ -315,10 +280,7 @@ export default function PlatformPage() {
               <tr>
                 <th scope="row">Behavior signal</th>
                 <td>Session only</td>
-                <td>
-                  Separate from explicit facts; no automatic promotion to a
-                  remembered preference.
-                </td>
+                <td>Kept separate from remembered facts.</td>
               </tr>
               <tr>
                 <th scope="row">Data processing terms</th>
@@ -336,21 +298,9 @@ export default function PlatformPage() {
           </table>
         </div>
         <p className="retention-footnote">
-          The offline preview holds sample state only while its page is open.
-          Its memory switch demonstrates the choice; it does not store customer
-          records.
+          The preview uses temporary sample state. No customer records are
+          stored.
         </p>
-        <div className="sample-policy-box">
-          <span>ILLUSTRATIVE BUSINESS DATA</span>
-          <p>
-            <strong>Sample policy:</strong> unworn 30-day exchange.
-            <br />
-            <strong>Sample schedule:</strong> Fri 14:00 / 15:30 UTC.
-          </p>
-          <Link href="/demo?scenario=support">
-            Explore the sample <ArrowUpRight size={16} />
-          </Link>
-        </div>
       </section>
       <section className="expertise-section page-section">
         <Reveal>

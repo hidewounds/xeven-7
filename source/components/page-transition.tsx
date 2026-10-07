@@ -19,7 +19,6 @@ export function PageTransitionProvider({
   const router = useRouter();
   const path = usePathname();
   const [phase, setPhase] = useState("idle");
-  const [destination, setDestination] = useState("");
   const previous = useRef(path);
   const busy = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,11 +28,6 @@ export function PageTransitionProvider({
     (href: string) => {
       if (busy.current) return;
       busy.current = true;
-      setDestination(
-        (
-          href.split(/[?#]/)[0].split("/").filter(Boolean).pop() || "Product"
-        ).replace(/\.html$/, ""),
-      );
       frame.current?.style.setProperty(
         "--switch-origin",
         `${window.scrollY + window.innerHeight * 0.5}px`,
@@ -45,7 +39,7 @@ export function PageTransitionProvider({
           setPhase("idle");
           busy.current = false;
         }, 2200);
-      }, 280);
+      }, 180);
     },
     [router],
   );
@@ -63,11 +57,11 @@ export function PageTransitionProvider({
     timer.current = setTimeout(() => {
       setPhase("idle");
       busy.current = false;
-      if (!document.querySelector(".spider-intro"))
+      if (!document.querySelector(".orb-entrance"))
         document
           .querySelector<HTMLElement>("#main-content")
           ?.focus({ preventScroll: true });
-    }, 700);
+    }, 460);
   }, [path]);
   useEffect(
     () => () => {
@@ -78,12 +72,6 @@ export function PageTransitionProvider({
   );
   return (
     <TransitionContext.Provider value={navigate}>
-      <div className={`app-switch ${phase}`} aria-hidden="true">
-        <i />
-        <i />
-        <span>XEVEN / {destination}</span>
-        <b />
-      </div>
       <div ref={frame} className={`app-page-frame page-${phase}`} key={path}>
         {children}
       </div>

@@ -16,6 +16,7 @@ try {
     "demo-machine",
     "enquiry",
     "console-journey",
+    "intro-session",
   ]) {
     const source = await readFile(resolve("lib", `${name}.ts`), "utf8");
     await writeFile(
@@ -32,6 +33,7 @@ try {
   const { initialDemo, demoReducer } = require("./demo-machine.js");
   const { enquiryBody, enquiryMailto } = require("./enquiry.js");
   const { consoleFrame, DISPLAY } = require("./console-journey.js");
+  const { createIntroSession, INTRO_TIMEOUT } = require("./intro-session.js");
   const { PLANS, TRIAL } = require("./xeven-content.js");
   const check = (name, run) => {
     run();
@@ -240,6 +242,44 @@ try {
           assert.ok(frame.pose.width > 0);
         }
         assert.equal(DISPLAY.width, 0.716);
+      }
+    },
+  );
+  check(
+    "The orb runs only on a fresh Home document or after inactivity",
+    () => {
+      const visit = createIntroSession("/", 0);
+      assert.equal(visit.enter("/", 0), true);
+      visit.finish(6400);
+      assert.equal(visit.enter("/platform", 7000), false);
+      assert.equal(visit.enter("/", 8000), false);
+      assert.equal(visit.activity("/", 10000), false);
+      assert.equal(visit.activity("/", 10000 + INTRO_TIMEOUT), true);
+      visit.finish(2000000);
+      assert.equal(visit.enter("/", 2000010), false);
+      const secondary = createIntroSession("/plans", 0);
+      assert.equal(secondary.enter("/plans", 0), false);
+      assert.equal(secondary.enter("/", 100), false);
+      assert.equal(createIntroSession("/", 0).enter("/", 0), true);
+    },
+  );
+  check(
+    "The opening console clears mobile hero copy, and motion stays reversible",
+    () => {
+      for (const [w, h] of [
+        [320, 568],
+        [360, 640],
+        [390, 844],
+        [430, 932],
+      ]) {
+        const m = {
+          heroEnd: Math.max(930, h * 1.28),
+          returnStart: h * 5,
+          footerStart: h * 6.7,
+        };
+        const f = consoleFrame(0, w, h, m);
+        assert.ok(f.pose.y - f.pose.width * 0.75 >= 420 - 1e-6);
+        assert.deepEqual(consoleFrame(0, w, h, m), f);
       }
     },
   );

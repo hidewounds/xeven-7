@@ -1,9 +1,9 @@
 {
-  "project": "XEVEN \u2014 dimensional spider and console portal",
-  "date": "2026-10-06",
-  "source_commit": "0ac36db9991299fa5210188c1425ae9da72f3dd1",
-  "baseline_commit": "b214ac1eaa511a284d2ca3300da90e182bc27c03",
-  "entry": "index.html",
+  "edition": "XEVEN \u2014 Particle edition",
+  "source_commit": "315b0ee2b71d922cde5b7cfb26c1e22211f5e60e",
+  "previous_edition_commit": "86b6d1ef731bf50a8acc0137f4a2a24f2e83298b",
+  "created_utc": "2026-10-07T00:25:20.199361+00:00",
+  "site_url": "https://xeven-spatial-studio.guddaaa.chatgpt.site",
   "pages": [
     "index.html",
     "platform.html",
@@ -12,19 +12,23 @@
     "demo.html",
     "contact.html"
   ],
-  "viewing_requires_server": false,
-  "viewing_requires_network": false,
-  "motion": "always on; no audio",
-  "intro": "5.2 seconds on every fresh homepage mount/reload; Skip/Escape/Replay available",
-  "validation": {
+  "changes": [
+    "Compact retouched orb dissolves into particles and reveals Home continuously",
+    "Original flat spider silhouette with negative-space X",
+    "Doorway geometry and architectural scene removed",
+    "Console chapters refined with open workflow rows, lighter glass and scroll motion",
+    "Instagram, X and LinkedIn included with pending profile states"
+  ],
+  "checks": {
     "typescript": "passed",
     "production_build": "passed",
-    "behavior_checks": 10,
-    "offline_dom_checks": 16,
-    "geometry_and_glb": "passed",
-    "real_browser_gpu_visual_qa": "unavailable"
+    "behavior_checks": 12,
+    "offline_integration_checks": 17,
+    "particle_checks": 3,
+    "zip_integrity": "CRC and SHA-256 inventory verified"
   },
-  "spider_model": "brand/xeven-spider.glb",
-  "source": "source/",
-  "notes": "WebGL2 renders the model. A matching transparent vector fallback appears if graphics cannot initialize. Browser/GPU/viewport differences are possible."
+  "verification_limit": "No supported live browser/GPU visual QA was available. DOM and geometry checks do not prove final appearance or device performance.",
+  "socials": "Instagram, X and LinkedIn remain Soon until official URLs are entered in source/lib/social-links.ts. GitHub and Email remain connected.",
+  "newsletter": "Opens an email request; no subscription backend is connected.",
+  "local_viewing": "Extract all files and open index.html. All viewing assets are included. Browser/GPU/font differences may affect appearance."
 }

@@ -1,53 +1,52 @@
-# XEVEN — dimensional identity and console portal
+# XEVEN — Particle edition
 
-## Changes in this revision
+The original space background is restored: nebula, orbit lines, stars, floating mineral fragments, and the distant footer horizon. It persists through page swipes and remains visible behind the translucent console display. The spider is retained as the site logo; it is absent from the console, immersed chat, and demo screen.
 
-1. Built the spider in native 3D before deriving its logo: eight jointed legs, faceted black metal, a pointed shield and an actual recessed X. The transparent GLB and SVG masters share one geometry source. No white background or backing plate is used on the website.
-2. Integrated the model into the silk-descent entrance, the homepage continuity scene and the About identity study. The entrance reveals EVEN from the back X, lasts 5.2 seconds and plays on every homepage mount/reload. Skip, Escape and Replay remain.
-3. Preserved the original console artwork and registered its screen to measured image coordinates. The screen covers the viewport during the middle chapters. The console returns before the footer, slides into a fixed dock showing XEVEN and the spider, then expands a footer surface from its screen without moving the device.
-4. Added layered desktop-window page transitions on hosted and offline routes. Offline ordinary navigation stays in one file using native fragment history; links still name physical HTML files for direct entry/new tabs. Plan, billing and scenario data are preserved.
-5. Removed sound, motion on/off and quality controls. Full motion is fixed, superseding previous reduced-motion/session preference behavior. Hidden/offscreen graphics suspend work and resume when visible.
-6. Retained the existing monthly/annual plan guides, module information, four scripted demos and enquiry review/copy/download/email-draft tools. No pricing, payment, live chat or sending service was added by this visual revision.
-7. No package dependencies were added or changed.
+## Motion sequence
 
-## Open the downloaded website
+1. 0–1.25 seconds: a compact, intact fibrous orb breathes and turns gently. The image box never exceeds 216 CSS pixels, with the alpha silhouette smaller still.
+2. 1.25–2.8 seconds: its surface dissolves into image-sampled particles. There are no core sectors, quadrant fractures, tendons, or four-way stretches.
+3. 1.5–4.05 seconds: particles move outward on curved paths and occupy all regions of the viewport. A dark grain veil creates full coverage.
+4. 4.18–6.12 seconds: the particle field and veil clear together through a soft irregular aperture, revealing the actual Home content. Completion is at 6.25 seconds.
 
-Extract the complete ZIP and open `index.html`. Keep the six HTML pages beside `assets/`. All viewing libraries, fonts, imagery and animations are bundled. No server, installation, network access, API key or account is required for viewing. `brand/` contains reusable SVG masters, the standalone spider GLB and dimension notes; `source/` contains the editable project.
+The intro is an art-directed hybrid: a retouched transparent image on a subtly curved surface, image-sampled point geometry, and a grain-based reveal. It is not a physical simulation. Desktop uses 21,000 points; narrow screens use 10,500. A textured image and 420 SVG particles provide a non-WebGL fallback. The inline data-URL texture works from local files. Context loss, sampling failure, or shader/render errors leave the fallback active.
 
-WebGL2 enables the real-time spider. Unsupported or failed graphics use a matching transparent vector projection. Browser/GPU/font rendering and viewport differences remain possible. Email uses a configured mail application, and sending needs connectivity. Clipboard permissions may be limited for local files; manual copy and text download remain available.
+One clock owns the image, particles, reveal, text, and completion. Hidden tabs pause it. Skip and Escape work. The persistent document session plays the entrance only on fresh Home loads/reloads or after 25 minutes of inactivity; page navigation does not replay it. Home content stays hidden until the reveal begins.
 
-## Rebuild the editable source
+The background remains the restored nebula, orbit lines, stars, and minerals. The architectural scene component and doorway illustrations have been removed. `components/connection-field.tsx` replaces them with an airy animated point sculpture in Home and About; its rendering pauses outside the viewport and in hidden tabs. A vector fallback remains available.
 
-Use Node.js 22.13+ and the exact package-manager version in `package.json`. From `source/`:
+The transparent console, registered screen mask, scroll zoom, return, dock, and footer expansion are preserved. Its display remains translucent. The three inside-screen chapters now use larger editorial type, lighter glass, open workflow rows, and bounded scroll offsets instead of dense card arrangements. Sections remain normal document flow, including at mobile widths. The six existing page roles, prices, demo flows and enquiry tools remain intact.
+
+## Flat spider identity
+
+The current mark is a custom symmetrical 2D silhouette: eight tapering angular legs around a long central body with a transparent X cut-out. It takes the requested superhero-emblem direction while using original XEVEN geometry. There is no background plate. `logo-spider.svg` is black; `logo-spider-light.svg` is the light version used on the dark site. `logo-lockup.svg`, favicon, and social card are updated. Historical 3D spider studies are not runtime scenes or the current mark.
+
+## Socials and newsletter
+
+The footer presents Instagram, X, LinkedIn, GitHub, Email, and the newsletter request. No page-navigation links are added. Official social profile URLs were not supplied; `lib/social-links.ts` stores null values and displays a truthful Soon state. Replace each null with the owner-confirmed profile URL to activate the matching link. Do not point visitors to guessed accounts or generic platform homepages. Email and the newsletter open an email request; there is no subscription backend.
+
+## Reference direction
+
+Reviewed https://alche.studio/ and https://alchemy.studio/ on 7 October 2026. The adaptation uses chapter pacing, broad visual space, concise editorial type, and continuity between visual states. No reference site's artwork or source implementation is copied. Browser/GPU visual testing of this Site was not available in the supported environment.
+
+## Open the download
+
+Extract the ZIP and open `index.html`. Keep all six HTML files beside `assets/`. All viewing dependencies are local; no server, installation, network access, or account is needed. The renderer, texture, geometry and both fonts are bundled. Browser/GPU/font differences can affect pixels and performance. Sending email and opening social profiles still need connectivity.
+
+## Rebuild
+
+From `source/`, with Node.js 22.13+ and the package-manager version in package.json:
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm exec tsc --noEmit --incremental false
 node scripts/check-experience.mjs
-node scripts/export-offline.mjs /absolute/path/to/new-output
-node scripts/check-offline.mjs /absolute/path/to/new-output
+node scripts/check-particles.mjs
+node scripts/export-offline.mjs /absolute/path/to/output
+node scripts/check-offline.mjs /absolute/path/to/output
 pnpm build
 ```
 
-To regenerate the spider model and vector projections:
+The exporter normalizes Windows paths, copies the restored background and new orb assets, retains transparent logo masters and dependency notices, and creates SHA-256 hashes. Editable source excludes credentials, installed dependencies, account access, and the original Site identity. The viewer already bundles its runtime libraries.
 
-```sh
-node scripts/export-spider.mjs
-node scripts/render-spider-vectors.mjs
-```
-
-These write to `outputs/spider-assets/`. The first validates the cavity and GLB round trip. The second projects the same meshes into front, three-quarter and small-size SVGs. Optional PNG projection exports use sharp if installed; it is not needed to view or build the website. Consult `docs/spider-identity.md` before changing the X anchor or dimensions.
-
-The offline exporter copies the source, brand assets and dependency/font notices, then writes SHA-256 hashes for the viewer. It excludes installed dependencies, Git data, credentials, environment files and the original Site identity. Source dependencies are installed separately for editing; the viewer already bundles its runtime code.
-
-## Maintain
-
-- Product content, prices and scenarios: `lib/xeven-content.ts`.
-- Scripted demo state: `lib/demo-machine.ts`.
-- Enquiry exports: `lib/enquiry.ts` and `components/contact-page.tsx`.
-- Spider geometry/anchors: `lib/spider-model.ts`; renderer/articulation: `components/spider-view.tsx`.
-- Intro timing: `components/spider-intro.tsx` and intro styles in `app/globals.css`.
-- Console journey: `lib/console-journey.ts` and `components/spatial-world.tsx`.
-- Page handoffs: `components/page-transition.tsx`, with file-safe routing under `offline/`.
-
-See `docs/verification.md` for automated evidence and the real-browser/GPU verification limit. The archived procedural console is not loaded by the current website.
+Pricing, capacity, trial, scripted demo behavior, and enquiry export data are unchanged. Earlier briefs are historical; this file and README.md describe the current implementation.
