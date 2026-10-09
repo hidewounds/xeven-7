@@ -64,6 +64,16 @@ export default function RootLayout({
           </div>
         </noscript>
         <ExperienceProvider>{children}</ExperienceProvider>
+        <script
+          src="https://xeven-ai-hidewounds-9658.vercel.app/widget/xeven-tracker.js"
+          data-public-key="xeven_pk_pub_2d74e3ed98639ffd4972f702ec338e93"
+          defer
+        />
+        <script
+          src="https://xeven-ai-hidewounds-9658.vercel.app/widget/xeven-widget.js"
+          data-public-key="xeven_pk_pub_2d74e3ed98639ffd4972f702ec338e93"
+          defer
+        />
       </body>
     </html>
   );
